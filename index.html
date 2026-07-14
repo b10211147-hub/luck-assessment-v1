@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>運勢改善健檢｜第一版</title>
+  <meta name="description" content="65題運勢改善健檢，包含四軸類型、八大面向、一致性與適用性檢核。" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <section id="landing" class="panel hero">
+      <p class="eyebrow">第一版・完全免費離線專案</p>
+      <h1>運勢改善健檢</h1>
+      <p class="lead">透過 65 道題目，盤點你近期的運勢模式、主要卡點與優先改善方向。</p>
+      <div class="notice">
+        <strong>作答提醒</strong>
+        <p>請依最近三至六個月的真實狀況作答。測驗僅作為傾向盤點，不等於命運定論，也不直接指定科儀。</p>
+      </div>
+      <div class="form-grid compact">
+        <label>姓名或暱稱<input id="nameInput" type="text" placeholder="例如：小安" /></label>
+        <label>LINE 名稱<input id="lineInput" type="text" placeholder="可留空" /></label>
+        <label class="full">目前最想改善的問題<textarea id="concernInput" rows="3" placeholder="例如：工作停滯、感情反覆、財運不穩"></textarea></label>
+      </div>
+      <button id="startBtn" class="primary">開始測驗</button>
+    </section>
+
+    <section id="quiz" class="panel hidden">
+      <div class="topbar">
+        <div>
+          <p id="sectionLabel" class="eyebrow"></p>
+          <h2 id="questionCounter"></h2>
+        </div>
+        <button id="saveBtn" class="ghost">儲存進度</button>
+      </div>
+      <div class="progress-wrap"><div id="progressBar" class="progress-bar"></div></div>
+      <article id="questionCard" class="question-card"></article>
+      <div class="actions">
+        <button id="prevBtn" class="secondary">上一題</button>
+        <button id="nextBtn" class="primary">下一題</button>
+      </div>
+    </section>
+
+    <section id="result" class="panel hidden">
+      <div class="result-head">
+        <div>
+          <p class="eyebrow">你的初步結果</p>
+          <h2 id="typeCode"></h2>
+          <p id="typeName" class="lead"></p>
+        </div>
+        <button id="restartBtn" class="ghost">重新測驗</button>
+      </div>
+
+      <div id="summaryCards" class="summary-grid"></div>
+
+      <section class="result-section">
+        <h3>四軸傾向</h3>
+        <div id="axisResults" class="axis-list"></div>
+      </section>
+
+      <section class="result-section">
+        <h3>八大面向</h3>
+        <div id="domainResults" class="domain-list"></div>
+      </section>
+
+      <section class="result-section">
+        <h3>優先改善方向</h3>
+        <div id="recommendations" class="recommendation-box"></div>
+      </section>
+
+      <section class="result-section">
+        <h3>檢核提醒</h3>
+        <div id="checks" class="check-list"></div>
+      </section>
+
+      <div class="actions wrap">
+        <button id="downloadJsonBtn" class="secondary">下載完整結果 JSON</button>
+        <button id="downloadCsvBtn" class="secondary">下載答案 CSV</button>
+        <button id="printBtn" class="primary">列印／另存 PDF</button>
+      </div>
+
+      <p class="disclaimer">本測驗不屬於醫療診斷、心理衡鑑或命運定論。涉及醫療、心理、法律、債務或人身安全時，應優先尋求相關專業協助。</p>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
