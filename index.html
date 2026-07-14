@@ -10,7 +10,7 @@
 <body>
   <main class="app-shell">
     <section id="landing" class="panel hero">
-      <p class="eyebrow">第一版・完全免費離線專案</p>
+      <p class="eyebrow">奉母宮x神明仲介所</p>
       <h1>運勢改善健檢</h1>
       <p class="lead">透過 65 道題目，盤點你近期的運勢模式、主要卡點與優先改善方向。</p>
       <div class="notice">
@@ -51,35 +51,29 @@
         <button id="restartBtn" class="ghost">重新測驗</button>
       </div>
 
-      <div id="summaryCards" class="summary-grid"></div>
-
-      <section class="result-section">
-        <h3>四軸傾向</h3>
-        <div id="axisResults" class="axis-list"></div>
+      <section class="result-section public-result">
+        <h3>類型描述</h3>
+        <div id="typeDescription" class="result-copy"></div>
       </section>
 
-      <section class="result-section">
-        <h3>八大面向</h3>
-        <div id="domainResults" class="domain-list"></div>
+      <section class="result-section public-result">
+        <h3>目前面臨的困境</h3>
+        <div id="challengeSummary" class="result-copy"></div>
       </section>
 
-      <section class="result-section">
-        <h3>優先改善方向</h3>
-        <div id="recommendations" class="recommendation-box"></div>
+      <section class="result-section public-result">
+        <h3>大概可以怎麼改善</h3>
+        <div id="improvementSummary" class="result-copy"></div>
       </section>
 
-      <section class="result-section">
-        <h3>檢核提醒</h3>
-        <div id="checks" class="check-list"></div>
+      <section id="submitResultPanel" class="result-section submit-result hidden">
+        <h3>送出結果</h3>
+        <label class="consent-row"><input id="submitConsent" type="checkbox" />我同意將本次作答結果送交奉母宮x神明仲介所保存與後續評估。</label>
+        <button id="submitResultBtn" class="primary">送出結果</button>
+        <p id="submitStatus" class="submit-status"></p>
       </section>
 
-      <div class="actions wrap">
-        <button id="downloadJsonBtn" class="secondary">下載完整結果 JSON</button>
-        <button id="downloadCsvBtn" class="secondary">下載答案 CSV</button>
-        <button id="printBtn" class="primary">列印／另存 PDF</button>
-      </div>
-
-      <p class="disclaimer">本測驗不屬於醫療診斷、心理衡鑑或命運定論。涉及醫療、心理、法律、債務或人身安全時，應優先尋求相關專業協助。</p>
+      <p class="disclaimer">本測驗僅作為近期狀態與運勢傾向盤點，不屬於命運定論。</p>
     </section>
   </main>
 
