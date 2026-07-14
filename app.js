@@ -98,6 +98,25 @@ const domainMeta = {
  inner:{name:'心性、情緒與解結',directions:'安心定志、解結、開智慧、增定力或斷舊迎新'},
  ancestor:{name:'祖先、祭祀與宗教責任',directions:'僅建議進一步請示確認；不可由問卷直接判定祖先或靈性問題'}
 };
+const ritualRecommendations={
+ overall:{item:'補運轉運祈福',reason:'整體運勢與補運分數偏高，適合先做整體補運與方向校準。'},
+ wealth:{item:'補財庫／開財路招財',reason:'財運、收入、留財或客源是目前較明顯的卡點。'},
+ career:{item:'事業開路／補事業運',reason:'工作停滯、升遷轉職或未來方向需要被打開。'},
+ people:{item:'補貴人／化小人化口舌',reason:'人際合作、口舌誤解或貴人助力需要整理。'},
+ love:{item:'感情和合／招正緣',reason:'感情、桃花、舊情或關係承諾牽動較大。'},
+ home:{item:'安宅淨宅／家運祈安',reason:'家庭互動、住宅或工作空間狀態可能影響運勢。'},
+ inner:{item:'解結安心／開智慧',reason:'情緒內耗、焦慮或反覆糾結需要先穩住。'},
+ ancestor:{item:'祭祀責任請示確認',reason:'僅建議先請示釐清，不由問卷直接判定祖先或靈性問題。'}
+};
+const axisRitualRecommendations={
+ R:{item:'補貴人開路',reason:'偏觀察承接，適合補啟動點與外在助力。'},
+ E:{item:'化解外在阻礙／開路',reason:'卡點偏向外在條件、合作關係或環境牽制。'},
+ I:{item:'解結安心／開智慧',reason:'卡點偏向內耗、焦慮、信心或過去經驗牽制。'},
+ L:{item:'關係和合／解結',reason:'焦點偏向感情、人際、家庭或重要關係。'},
+ W:{item:'財業補運',reason:'焦點偏向工作、收入、財務或未來發展。'},
+ B:{item:'祭改消災解厄',reason:'近期狀態較波動，適合先做清理與穩定。'},
+ S:{item:'補運開路／轉運祈福',reason:'整體呈現長期停滯，適合先求啟動與方向打開。'}
+};
 const letterNames={A:'主動推進',R:'觀察承接',I:'內在牽制',E:'外在阻力',W:'財業重心',L:'關係重心',B:'波動失衡',S:'長期停滯',X:'平衡／情境'};
 const axisPublicCopy={
  AR:{
@@ -194,6 +213,7 @@ function buildResult(){
  const safety={}; safetyQuestions.forEach(([id,key])=>safety[key]=Number(answers[id]));
  const result={generatedAt:new Date().toISOString(),profile,answers,code,typeName:code.split('').map(x=>letterNames[x]).join('・'),axes,domains,ranked,consistency,safety};
  result.customerSummary=buildCustomerSummary(result);
+ result.recommendedRituals=buildRecommendedRituals(result);
  result.internalNotes=buildInternalNotes(result);
  return result;
 }
@@ -257,6 +277,27 @@ function buildInternalNotes(r){
  if(r.safety.professional>=4)checkItems.push('可能涉及醫療、心理、法律、債務或人身安全：應優先尋求相關專業協助。');
  if(r.safety.readiness>=4)checkItems.push('受測者願意配合實際行動，較適合進入後續完整評估。');
  return checkItems;
+}
+function buildRecommendedRituals(r){
+ const items=[];
+ const add=(item,reason)=>{
+  if(!item||items.some(line=>line.startsWith(`${item}：`)||line===item)) return;
+  items.push(reason?`${item}：${reason}`:item);
+ };
+ if(r.safety.professional>=4){
+  add('人工確認優先', '問卷顯示可能涉及醫療、心理、法律、債務或人身安全議題，建議先人工關懷確認，再決定是否安排科儀。');
+ }
+ const topDomains=customerTopDomains(r).filter(([,score])=>score>=7);
+ topDomains.forEach(([key])=>{
+  const rec=ritualRecommendations[key];
+  if(rec) add(rec.item,rec.reason);
+ });
+ [r.axes.BS?.letter,r.axes.IE?.letter,r.axes.WL?.letter,r.axes.AR?.letter].forEach(letter=>{
+  const rec=axisRitualRecommendations[letter];
+  if(rec) add(rec.item,rec.reason);
+ });
+ if(!items.length) add('補運方向人工評估', '目前沒有單一面向特別突出，建議由老師依個案狀況確認補運方向。');
+ return items.slice(0,4);
 }
 function paragraphsHtml(lines){return lines.map(line=>`<p>${escapeHtml(line)}</p>`).join('');}
 function escapeHtml(text){return String(text).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));}

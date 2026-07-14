@@ -12,8 +12,9 @@
 6. 所有宗教與科儀結果只能表達為「建議進一步評估」，不得直接斷定靈性、祖先或因果問題。
 7. 客人結果頁只顯示主要類型、目前困境與初步改善建議。
 8. 八大面向排名、優先改善順位與檢核提醒屬內部資料，不直接顯示給客人。
-9. 不提供客人下載 JSON、CSV 或另存 PDF 的按鈕，除非後續明確改回。
-10. Google Sheet 收件網址只填在 `app.js` 的 `GOOGLE_SCRIPT_URL`，不要放 API key 或機密資訊。
+9. 推薦科儀項目只寫入 Google Sheet 作為內部初步參考，不直接顯示給客人，也不得保證效果。
+10. 不提供客人下載 JSON、CSV 或另存 PDF 的按鈕，除非後續明確改回。
+11. Google Sheet 收件網址只填在 `app.js` 的 `GOOGLE_SCRIPT_URL`，不要放 API key 或機密資訊。
 
 優先檢查：
 
@@ -23,6 +24,7 @@
 - 八大面向是否各為 3～15。
 - 結果四碼是否依 8～22、23～25、26～40 正確判定。
 - 內部資料是否仍保留於 `buildResult()`，方便未來串接收件。
+- 推薦科儀項目是否保留於 `buildResult().recommendedRituals`，並只寫入 Google Sheet。
 - 若 `GOOGLE_SCRIPT_URL` 已設定，結果頁送出按鈕是否可將完整結果送到 Google Sheet。
 - 手機版是否容易操作。
 
