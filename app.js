@@ -131,7 +131,7 @@ const domainPublicCopy={
  inner:{challenge:'情緒、焦慮、反覆糾結或內在不安可能正在放大其他問題。',improvement:'先把睡眠、飲食、情緒出口和日常節奏穩住，重要決定暫時不要在高壓時做。'},
  ancestor:{challenge:'你可能對家族、祭祀、承諾或宗教責任有未釐清的在意。這只代表值得進一步確認，不代表問卷能直接判定祖先或靈性問題。',improvement:'先整理已知的祭祀、承諾、家族事件與自己的疑問；若仍在意，再以進一步評估或請示確認為主。'}
 };
-const GOOGLE_SCRIPT_URL='';
+const GOOGLE_SCRIPT_URL='https://script.google.com/macros/s/AKfycbxsmu2g4nOeESIrGT6JEh5B8qSKqXBMhXuomFkfTf6T1Ir9FclBixmfL8DBDirwJxM6vQ/exec';
 
 let current=0;
 let lastResult=null;
