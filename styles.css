@@ -93,7 +93,7 @@ input, textarea { width: 100%; border: 1px solid var(--line); border-radius: 12p
 .omen-body { display: grid; gap: 20px; }
 .omen-copy-block h4 { margin: 0 0 7px; color: var(--accent); font-size: .95rem; }
 .omen-copy-block p { margin: 0; line-height: 1.9; }
-.omen-verse p { font-family: "DFKai-SB", "BiauKai", "KaiTi", serif; font-size: 1.22rem; line-height: 2; }
+.omen-verse p, .omen-song p { font-family: "DFKai-SB", "BiauKai", "KaiTi", serif; font-size: 1.22rem; line-height: 2; }
 .omen-guidance { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 0; }
 .omen-guidance div { padding-left: 12px; border-left: 3px solid var(--line); }
 .omen-guidance dt { color: var(--accent); font-weight: 700; }

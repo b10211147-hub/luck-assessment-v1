@@ -161,13 +161,13 @@ const domainPublicCopy={
 };
 const omenProfiles={
  RELS:{
-  title:'七煞困關象',
-  fortune:'凶中有轉',
-  verse:['七線交纏門未開','水停石阻舊緣來','若能解結先移步','一線晨光引路回'],
-  explanation:'近期外在阻力與關係牽制互相交疊，容易等待過久、事情停滯。先解除最直接的牽連，局勢才會開始鬆動。',
-  suitable:'理清界線、先完成一件能推進的事',
-  avoid:'反覆等待、同時處理多方關係',
-  direction:'先解結，再評估開路與補貴人方向；實際項目仍需人工確認。'
+  title:'緣煞閉關象',
+  verse:['外煞臨關','緣繩未斷','靜水無波','一隙見光'],
+  song:['緣線重重石作關','客塵未散步行難','先將一結從頭解','門外晨光引路還'],
+  explanation:'此時不宜多線並進。先鬆動一處牽制、守住自身界線，原本閉塞的局勢才會逐步顯出轉機。',
+  suitable:'守界、解結、次第而行',
+  avoid:'多線並進、久候不決',
+  direction:'先以解結、開路與補貴人為象意方向；實際項目仍由老師確認。'
  }
 };
 const GOOGLE_SCRIPT_URL='https://script.google.com/macros/s/AKfycbxsmu2g4nOeESIrGT6JEh5B8qSKqXBMhXuomFkfTf6T1Ir9FclBixmfL8DBDirwJxM6vQ/exec';
@@ -329,7 +329,14 @@ function showResult(){
 }
 function buildOmenResult(r){
  const omen=omenProfiles[r.code];
- return omen?{code:r.code,...omen}:null;
+ const score=r.ranked[0]?.[1]||3;
+ return omen?{code:r.code,...omen,fortune:omenFortune(score)}:null;
+}
+function omenFortune(score){
+ if(score<=6)return'平順';
+ if(score<=9)return'平中有阻';
+ if(score<=12)return'慎行可轉';
+ return'凶中求轉';
 }
 function renderOmenResult(omen){
  const section=$('omenResult');
@@ -339,6 +346,7 @@ function renderOmenResult(omen){
  $('omenTitle').textContent=omen.title;
  $('omenFortune').textContent=omen.fortune;
  $('omenVerse').innerHTML=omen.verse.map(line=>escapeHtml(line)).join('<br>');
+ $('omenSong').innerHTML=omen.song.map(line=>escapeHtml(line)).join('<br>');
  $('omenExplanation').textContent=omen.explanation;
  $('omenSuitable').textContent=omen.suitable;
  $('omenAvoid').textContent=omen.avoid;
@@ -355,7 +363,7 @@ function showOmenPreview(code){
  $('typeCode').textContent=`${code} 型`;
  $('typeName').textContent=code.split('').map(letter=>letterNames[letter]).join('・');
  $('restartBtn').textContent='返回測驗';
- renderOmenResult({code,...omen});
+ renderOmenResult({code,...omen,fortune:omenFortune(11)});
  window.scrollTo({top:0,behavior:'smooth'});
 }
 function buildCustomerSummary(r){
