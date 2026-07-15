@@ -81,6 +81,20 @@
         <button id="restartBtn" class="ghost">重新選擇</button>
       </div>
 
+      <div id="omenPreviewControls" class="omen-preview-controls hidden">
+        <label>查看其他象意
+          <select id="omenPreviewSelect"></select>
+        </label>
+        <label>吉凶層級
+          <select id="omenFortunePreviewSelect">
+            <option value="5">平順</option>
+            <option value="8">平中有阻</option>
+            <option value="11">慎行可轉</option>
+            <option value="14">凶中求轉</option>
+          </select>
+        </label>
+      </div>
+
       <section id="omenResult" class="omen-result hidden" aria-labelledby="omenTitle">
         <div class="omen-heading">
           <div>
@@ -91,12 +105,16 @@
         </div>
 
         <div class="omen-layout">
-          <div class="omen-symbol" aria-hidden="true">
+          <div id="omenSymbol" class="omen-symbol" aria-hidden="true">
             <i class="omen-ray"></i><i class="omen-ray"></i><i class="omen-ray"></i><i class="omen-ray"></i>
             <i class="omen-ray"></i><i class="omen-ray"></i><i class="omen-ray"></i>
             <div class="omen-sun"></div>
+            <div class="omen-focus"></div>
+            <div class="omen-knot"></div>
             <div class="omen-gate"></div>
             <div class="omen-path"></div>
+            <div class="omen-water"><i></i><i></i><i></i></div>
+            <div class="omen-figure"></div>
           </div>
 
           <div class="omen-body">

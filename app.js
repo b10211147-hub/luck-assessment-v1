@@ -159,15 +159,42 @@ const domainPublicCopy={
  inner:{challenge:'情緒、焦慮、反覆糾結或內在不安可能正在放大其他問題。',improvement:'先把睡眠、飲食、情緒出口和日常節奏穩住，重要決定暫時不要在高壓時做。'},
  ancestor:{challenge:'你可能對家族、祭祀、承諾或宗教責任有未釐清的在意。這只代表值得進一步確認，不代表問卷能直接判定祖先或靈性問題。',improvement:'先整理已知的祭祀、承諾、家族事件與自己的疑問；若仍在意，再以進一步評估或請示確認為主。'}
 };
-const omenProfiles={
+const omenAxisText={
+ AR:{
+  A:{title:'啟',verse:'一門先啟',song:'定得一門向曉行',explanation:'象中見人先於勢，事情已有可推動之處，但宜先定一條主路。',suitable:'定向、啟步',avoid:'躁進、四處開線',direction:'啟路定向'},
+  R:{title:'',verse:'一隙見光',song:'門外晨光引路還',explanation:'象中見門多於路，暫緩不是停滯，先看清牽制再行。',suitable:'觀勢、守界',avoid:'久候不決、責任全攬',direction:'守界明路'},
+  X:{title:'衡',verse:'中門微啟',song:'進退相參守中行',explanation:'象中進退相參，宜取中位，不急著全進或全退。',suitable:'盤點、取中',avoid:'反覆擺盪、勉強表態',direction:'調衡定序'}
+ },
+ IE:{
+  I:{title:'結',verse:'內結藏心',song:'心結未開影自纏',explanation:'阻力較像結在心念與未決之事，先解內結，外局才容易鬆動。',suitable:'解結、安念',avoid:'悶藏、反覆內耗',direction:'解結安心'},
+  E:{title:'煞',verse:'外煞臨關',song:'客塵未散步行難',explanation:'阻力較像來自外緣與環境牽引，宜先守界、減少雜訊。',suitable:'清界、減擾',avoid:'受人牽引、雜訊過多',direction:'化阻開路'},
+  X:{title:'交',verse:'內外交牽',song:'內外相牽兩未安',explanation:'內外兩端互相牽動，先分清何者可控，局勢會較明朗。',suitable:'分辨內外、逐項處理',avoid:'混為一談、同時應付',direction:'內外調和'}
+ },
+ WL:{
+  W:{title:'祿',verse:'祿途待引',song:'祿路浮沉待水開',explanation:'此象以祿路與實務秩序為重，先整理資源與次序。',suitable:'理帳、整資源',avoid:'冒進求快、忽略實務',direction:'補祿整財'},
+  L:{title:'緣',verse:'緣繩未斷',song:'緣線重重石作關',explanation:'此象以人緣與關係牽繫為重，宜辨清舊結與新緣。',suitable:'辨緣、清舊結',avoid:'曖昧拖延、情緒代答',direction:'和合解結'},
+  X:{title:'兩儀',verse:'祿緣並行',song:'祿緣雙路各相連',explanation:'祿緣並見，工作與關係互相影響，不宜只處理其中一端。',suitable:'兼顧事與人、排先後',avoid:'顧此失彼、兩頭耗損',direction:'祿緣調和'}
+ },
+ BS:{
+  B:{title:'動潮',verse:'潮勢反覆',song:'潮來潮去勢難安',explanation:'氣勢有起伏，先穩節奏，避免因一時反應而重複改變。',suitable:'穩步、留緩衝',avoid:'追高殺低、頻繁改變',direction:'穩運解厄'},
+  S:{title:'閉關',verse:'靜水無波',song:'靜水沉沉門久關',explanation:'局面表面平靜但門未全開，適合從一處小缺口逐步疏通。',suitable:'小步疏通、守成',avoid:'僵守不動、等待自解',direction:'開路轉運'},
+  X:{title:'守中',verse:'動靜未分',song:'動靜之間一線寬',explanation:'動靜未分，先守中觀察，再選擇下一步。',suitable:'守中、觀察節點',avoid:'急著定論、左右搖擺',direction:'守中補運'}
+ }
+};
+const omenDomainLead={
+ overall:'整體氣勢宜先定序。',
+ wealth:'財路宜先理清流向。',
+ career:'祿業宜先辨明門路。',
+ people:'人和宜先定界。',
+ love:'情緣宜先解舊結。',
+ home:'宅中宜先安序。',
+ inner:'心炁宜先安定。',
+ ancestor:'承念之事宜先查明。'
+};
+const specialOmenText={
  RELS:{
-  title:'緣煞閉關象',
   verse:['外煞臨關','緣繩未斷','靜水無波','一隙見光'],
-  song:['緣線重重石作關','客塵未散步行難','先將一結從頭解','門外晨光引路還'],
-  explanation:'此時不宜多線並進。先鬆動一處牽制、守住自身界線，原本閉塞的局勢才會逐步顯出轉機。',
-  suitable:'守界、解結、次第而行',
-  avoid:'多線並進、久候不決',
-  direction:'先以解結、開路與補貴人為象意方向；實際項目仍由老師確認。'
+  song:['緣線重重石作關','客塵未散步行難','先將一結從頭解','門外晨光引路還']
  }
 };
 const GOOGLE_SCRIPT_URL='https://script.google.com/macros/s/AKfycbxsmu2g4nOeESIrGT6JEh5B8qSKqXBMhXuomFkfTf6T1Ir9FclBixmfL8DBDirwJxM6vQ/exec';
@@ -216,8 +243,10 @@ $('restartBtn').onclick=()=>{
 };
 if($('submitResultBtn')) $('submitResultBtn').onclick=submitResult;
 
-const previewCode=new URLSearchParams(location.search).get('preview');
-if(previewCode)showOmenPreview(previewCode.toUpperCase());
+const previewParams=new URLSearchParams(location.search);
+const previewCode=previewParams.get('preview');
+const previewScore=[5,8,11,14].includes(Number(previewParams.get('fortune')))?Number(previewParams.get('fortune')):11;
+if(previewCode)showOmenPreview(previewCode.toUpperCase(),previewScore);
 
 function questionsForMode(modeKey){
  const ids=new Set(quizModes[modeKey].questionIds);
@@ -328,9 +357,36 @@ function showResult(){
  window.scrollTo({top:0,behavior:'smooth'});
 }
 function buildOmenResult(r){
- const omen=omenProfiles[r.code];
+ const topDomain=r.ranked[0]?.[0]||'overall';
+ const omen=buildOmenProfile(r.code,topDomain);
  const score=r.ranked[0]?.[1]||3;
  return omen?{code:r.code,...omen,fortune:omenFortune(score)}:null;
+}
+function buildOmenProfile(code,domain='overall'){
+ if(!isOmenCode(code))return null;
+ const [arCode,ieCode,wlCode,bsCode]=code;
+ const ar=omenAxisText.AR[arCode];
+ const ie=omenAxisText.IE[ieCode];
+ const wl=omenAxisText.WL[wlCode];
+ const bs=omenAxisText.BS[bsCode];
+ const special=specialOmenText[code]||{};
+ return {
+  title:`${ar.title}${wl.title}${ie.title}${bs.title}象`,
+  verse:special.verse||[ie.verse,wl.verse,bs.verse,ar.verse],
+  song:special.song||[wl.song,ie.song,bs.song,ar.song],
+  explanation:`${omenDomainLead[domain]||omenDomainLead.overall}${ar.explanation}${ie.explanation}${wl.explanation}${bs.explanation}`,
+  suitable:[ar.suitable,ie.suitable,wl.suitable,bs.suitable].join('；'),
+  avoid:[ar.avoid,ie.avoid,wl.avoid,bs.avoid].join('；'),
+  direction:`${uniqueOmenTerms([ar.direction,ie.direction,wl.direction,bs.direction]).join('、')}；實際項目仍由老師確認。`,
+  visualClasses:[`omen-ar-${arCode.toLowerCase()}`,`omen-ie-${ieCode.toLowerCase()}`,`omen-wl-${wlCode.toLowerCase()}`,`omen-bs-${bsCode.toLowerCase()}`]
+ };
+}
+function isOmenCode(code){return /^[ARX][IEX][WLX][BSX]$/.test(code||'');}
+function uniqueOmenTerms(terms){return [...new Set(terms.filter(Boolean))];}
+function allOmenCodes(){
+ const codes=[];
+ ['A','R','X'].forEach(ar=>['I','E','X'].forEach(ie=>['W','L','X'].forEach(wl=>['B','S','X'].forEach(bs=>codes.push(`${ar}${ie}${wl}${bs}`)))));
+ return codes;
 }
 function omenFortune(score){
  if(score<=6)return'平順';
@@ -351,9 +407,11 @@ function renderOmenResult(omen){
  $('omenSuitable').textContent=omen.suitable;
  $('omenAvoid').textContent=omen.avoid;
  $('omenDirection').textContent=omen.direction;
+ const symbol=$('omenSymbol');
+ if(symbol)symbol.className=`omen-symbol ${omen.visualClasses.join(' ')}`;
 }
-function showOmenPreview(code){
- const omen=omenProfiles[code];
+function showOmenPreview(code,score=11){
+ const omen=buildOmenProfile(code,previewDomainForCode(code));
  if(!omen)return;
  document.body.classList.add('preview-mode');
  $('landing').classList.add('hidden');
@@ -363,8 +421,41 @@ function showOmenPreview(code){
  $('typeCode').textContent=`${code} 型`;
  $('typeName').textContent=code.split('').map(letter=>letterNames[letter]).join('・');
  $('restartBtn').textContent='返回測驗';
- renderOmenResult({code,...omen,fortune:omenFortune(11)});
+ setupOmenPreviewControls(code,score);
+ renderOmenResult({code,...omen,fortune:omenFortune(score)});
  window.scrollTo({top:0,behavior:'smooth'});
+}
+function previewDomainForCode(code){
+ if(code?.[2]==='W')return'career';
+ if(code?.[2]==='L')return'love';
+ return'overall';
+}
+function setupOmenPreviewControls(code,score){
+ const controls=$('omenPreviewControls');
+ const codeSelect=$('omenPreviewSelect');
+ const fortuneSelect=$('omenFortunePreviewSelect');
+ if(!controls||!codeSelect||!fortuneSelect)return;
+ controls.classList.remove('hidden');
+ if(!codeSelect.options.length){
+  allOmenCodes().forEach(omenCode=>{
+   const option=document.createElement('option');
+   const profile=buildOmenProfile(omenCode,previewDomainForCode(omenCode));
+   option.value=omenCode;
+   option.textContent=`${omenCode}・${profile.title}`;
+   codeSelect.appendChild(option);
+  });
+  codeSelect.onchange=()=>updateOmenPreview(codeSelect.value,Number(fortuneSelect.value));
+  fortuneSelect.onchange=()=>updateOmenPreview(codeSelect.value,Number(fortuneSelect.value));
+ }
+ codeSelect.value=code;
+ fortuneSelect.value=String(score);
+}
+function updateOmenPreview(code,score){
+ const url=new URL(location.href);
+ url.searchParams.set('preview',code);
+ url.searchParams.set('fortune',String(score));
+ history.replaceState({},'',url);
+ showOmenPreview(code,score);
 }
 function buildCustomerSummary(r){
  const top=customerTopDomains(r);

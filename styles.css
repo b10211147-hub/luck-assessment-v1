@@ -13,7 +13,7 @@
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: radial-gradient(circle at top, #fffaf0, var(--bg)); color: var(--ink); }
-button, input, textarea { font: inherit; }
+button, input, textarea, select { font: inherit; }
 button { cursor: pointer; }
 button:disabled { cursor: not-allowed; opacity: .55; }
 .app-shell { width: min(920px, calc(100% - 28px)); margin: 32px auto; }
@@ -40,6 +40,7 @@ button:disabled { cursor: not-allowed; opacity: .55; }
 .form-grid .full { grid-column: 1 / -1; }
 label { display: grid; gap: 8px; font-weight: 700; }
 input, textarea { width: 100%; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; background: #fff; color: var(--ink); }
+select { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; background: #fff; color: var(--ink); }
 .primary, .secondary, .ghost { border-radius: 999px; padding: 12px 20px; border: 1px solid transparent; font-weight: 700; }
 .primary { background: var(--accent); color: white; }
 .secondary { background: white; color: var(--accent); border-color: var(--accent); }
@@ -67,6 +68,7 @@ input, textarea { width: 100%; border: 1px solid var(--line); border-radius: 12p
 .result-section { margin-top: 30px; }
 .preview-mode #result > .public-result,
 .preview-mode #submitResultPanel { display: none !important; }
+.omen-preview-controls { display: grid; grid-template-columns: minmax(0, 2fr) minmax(170px, 1fr); gap: 14px; margin-top: 24px; padding: 16px; border: 1px solid var(--line); border-radius: 8px; background: #f7f0e5; }
 .omen-result { margin-top: 30px; padding: 26px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .omen-heading { display: flex; align-items: end; justify-content: space-between; gap: 18px; margin-bottom: 22px; }
 .omen-heading h3 { margin: 4px 0 0; font-family: "DFKai-SB", "BiauKai", "KaiTi", serif; font-size: clamp(28px, 5vw, 42px); letter-spacing: 0; }
@@ -90,6 +92,27 @@ input, textarea { width: 100%; border: 1px solid var(--line); border-radius: 12p
 .omen-gate::before { content: ""; position: absolute; top: -18px; left: -20%; width: 140%; height: 7px; background: var(--ink); }
 .omen-gate::after { content: ""; position: absolute; inset: 16px 18px 0; border: 2px solid rgba(45,42,38,.64); border-bottom: 0; }
 .omen-path { position: absolute; z-index: 2; bottom: -3%; left: 39%; width: 22%; height: 43%; border-left: 2px solid var(--ink); border-right: 2px solid var(--ink); transform: perspective(190px) rotateX(24deg); }
+.omen-focus { position: absolute; z-index: 5; top: 34%; left: 50%; width: 48px; height: 48px; display: grid; place-items: center; border: 2px solid var(--accent); border-radius: 50%; background: rgba(238,226,205,.9); color: var(--accent); font-family: "DFKai-SB", "BiauKai", "KaiTi", serif; font-size: 1.35rem; transform: translate(-50%,-50%); }
+.omen-wl-w .omen-focus::before { content: "祿"; }
+.omen-wl-l .omen-focus::before { content: "緣"; }
+.omen-wl-x .omen-focus::before { content: "衡"; }
+.omen-knot { display: none; position: absolute; z-index: 5; top: 50%; left: 50%; width: 34px; height: 34px; border: 2px solid var(--accent); border-radius: 50% 44% 54% 46%; transform: translate(-50%,-50%) rotate(36deg); }
+.omen-knot::before { content: ""; position: absolute; inset: 6px -9px; border: 2px solid var(--accent); border-radius: 50%; transform: rotate(52deg); }
+.omen-ie-i .omen-ray { opacity: 0; }
+.omen-ie-i .omen-knot { display: block; }
+.omen-ie-x .omen-ray { opacity: .34; }
+.omen-ie-x .omen-knot { display: block; opacity: .7; }
+.omen-water { position: absolute; z-index: 4; right: 13%; bottom: 12%; width: 30%; display: grid; gap: 6px; opacity: .35; }
+.omen-water i { display: block; height: 2px; background: var(--ink); transform: skewX(-28deg); }
+.omen-bs-b .omen-water { opacity: .9; transform: rotate(-5deg); }
+.omen-bs-b .omen-gate { transform: translateX(7px) rotate(2deg); }
+.omen-bs-x .omen-water { opacity: .6; }
+.omen-bs-x .omen-gate { left: 28%; width: 44%; }
+.omen-figure { position: absolute; z-index: 6; bottom: 11%; left: 23%; width: 12px; height: 54px; border-radius: 7px 7px 2px 2px; background: var(--ink); transform-origin: center bottom; }
+.omen-figure::before { content: ""; position: absolute; top: -15px; left: -2px; width: 16px; height: 16px; border-radius: 50%; background: var(--ink); }
+.omen-ar-a .omen-figure { left: 35%; transform: rotate(5deg); }
+.omen-ar-r .omen-figure { left: 20%; transform: rotate(-2deg); }
+.omen-ar-x .omen-figure { left: 27%; transform: rotate(0); }
 .omen-body { display: grid; gap: 20px; }
 .omen-copy-block h4 { margin: 0 0 7px; color: var(--accent); font-size: .95rem; }
 .omen-copy-block p { margin: 0; line-height: 1.9; }
@@ -120,6 +143,7 @@ input, textarea { width: 100%; border: 1px solid var(--line); border-radius: 12p
   .app-shell { width: min(100% - 16px, 920px); margin: 8px auto; }
   .panel { border-radius: 16px; padding: 20px; }
   .form-grid, .summary-grid { grid-template-columns: 1fr; }
+  .omen-preview-controls { grid-template-columns: 1fr; }
   .mode-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .omen-layout { grid-template-columns: 1fr; }
   .omen-symbol { width: min(100%, 300px); margin-inline: auto; }
