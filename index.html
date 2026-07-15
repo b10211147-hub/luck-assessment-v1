@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>運勢改善健檢｜第一版</title>
-  <meta name="description" content="65題運勢改善健檢，包含四軸類型、八大面向、一致性與適用性檢核。" />
+  <title>運勢改善健檢｜奉母宮x神明仲介所</title>
+  <meta name="description" content="提供感情、事業、財運、家運短版與完整版本的運勢改善健檢。" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -12,17 +12,44 @@
     <section id="landing" class="panel hero">
       <p class="eyebrow">奉母宮x神明仲介所</p>
       <h1>運勢改善健檢</h1>
-      <p class="lead">透過 65 道題目，盤點你近期的運勢模式、主要卡點與優先改善方向。</p>
+      <p id="landingLead" class="lead">先選擇這次最想了解的主題，再開始作答。</p>
+
+      <fieldset class="mode-picker">
+        <legend>想了解哪個面向？</legend>
+        <div class="mode-options">
+          <label class="mode-option">
+            <input type="radio" name="quizMode" value="love" />
+            <span><strong>感情</strong><small>感情、人際、內在｜17 題</small></span>
+          </label>
+          <label class="mode-option">
+            <input type="radio" name="quizMode" value="career" />
+            <span><strong>事業</strong><small>事業、財運、人際｜17 題</small></span>
+          </label>
+          <label class="mode-option">
+            <input type="radio" name="quizMode" value="wealth" />
+            <span><strong>財運</strong><small>財運、事業、整體｜17 題</small></span>
+          </label>
+          <label class="mode-option">
+            <input type="radio" name="quizMode" value="home" />
+            <span><strong>家運</strong><small>家運、人際、內在｜17 題</small></span>
+          </label>
+          <label class="mode-option">
+            <input type="radio" name="quizMode" value="full" />
+            <span><strong>完整版</strong><small>八大面向完整盤點｜65 題</small></span>
+          </label>
+        </div>
+      </fieldset>
+
       <div class="notice">
         <strong>作答提醒</strong>
-        <p>請依最近三至六個月的真實狀況作答。測驗僅作為傾向盤點，不等於命運定論，也不直接指定科儀。</p>
+        <p id="modeNotice">請先選擇一個測驗主題。作答時請依最近三至六個月的真實狀況回答。</p>
       </div>
       <div class="form-grid compact">
         <label>姓名或暱稱<input id="nameInput" type="text" placeholder="例如：小安" /></label>
         <label>LINE 名稱<input id="lineInput" type="text" placeholder="可留空" /></label>
         <label class="full">目前最想改善的問題<textarea id="concernInput" rows="3" placeholder="例如：工作停滯、感情反覆、財運不穩"></textarea></label>
       </div>
-      <button id="startBtn" class="primary">開始測驗</button>
+      <button id="startBtn" class="primary" disabled>選擇主題後開始</button>
     </section>
 
     <section id="quiz" class="panel hidden">
@@ -31,7 +58,10 @@
           <p id="sectionLabel" class="eyebrow"></p>
           <h2 id="questionCounter"></h2>
         </div>
-        <button id="saveBtn" class="ghost">儲存進度</button>
+        <div class="topbar-actions">
+          <button id="changeModeBtn" class="ghost">更換主題</button>
+          <button id="saveBtn" class="ghost">儲存進度</button>
+        </div>
       </div>
       <div class="progress-wrap"><div id="progressBar" class="progress-bar"></div></div>
       <article id="questionCard" class="question-card"></article>
@@ -44,11 +74,11 @@
     <section id="result" class="panel hidden">
       <div class="result-head">
         <div>
-          <p class="eyebrow">你的初步結果</p>
+          <p id="resultEyebrow" class="eyebrow">你的初步結果</p>
           <h2 id="typeCode"></h2>
           <p id="typeName" class="lead"></p>
         </div>
-        <button id="restartBtn" class="ghost">重新測驗</button>
+        <button id="restartBtn" class="ghost">重新選擇</button>
       </div>
 
       <section class="result-section public-result">

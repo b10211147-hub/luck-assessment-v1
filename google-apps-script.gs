@@ -2,6 +2,8 @@ const SHEET_NAME = '測驗結果';
 const HEADERS = [
   '送出時間',
   '測驗產生時間',
+  '測驗版本',
+  '題數',
   '姓名或暱稱',
   'LINE 名稱',
   '目前最想改善的問題',
@@ -80,12 +82,15 @@ function ensureHeader_(sheet) {
 }
 
 function buildRow_(payload, result) {
+  const assessment = result.assessment || {};
   const profile = result.profile || {};
   const summary = result.customerSummary || {};
 
   return [
     payload.submittedAt || new Date().toISOString(),
     result.generatedAt || '',
+    assessment.label || '完整版',
+    assessment.questionCount || '',
     profile.name || '',
     profile.line || '',
     profile.concern || '',
