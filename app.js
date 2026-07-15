@@ -207,8 +207,17 @@ $('nextBtn').onclick=()=>{
  if(!answers[q.id]) return alert('請先選擇 1～5 分。');
  if(current<activeQuestions.length-1){current++;renderQuestion();} else {save();showResult();}
 };
-$('restartBtn').onclick=()=>showLanding('result');
+$('restartBtn').onclick=()=>{
+ if(document.body.classList.contains('preview-mode')){
+  location.href=location.pathname;
+  return;
+ }
+ showLanding('result');
+};
 if($('submitResultBtn')) $('submitResultBtn').onclick=submitResult;
+
+const previewCode=new URLSearchParams(location.search).get('preview');
+if(previewCode)showOmenPreview(previewCode.toUpperCase());
 
 function questionsForMode(modeKey){
  const ids=new Set(quizModes[modeKey].questionIds);
@@ -334,6 +343,20 @@ function renderOmenResult(omen){
  $('omenSuitable').textContent=omen.suitable;
  $('omenAvoid').textContent=omen.avoid;
  $('omenDirection').textContent=omen.direction;
+}
+function showOmenPreview(code){
+ const omen=omenProfiles[code];
+ if(!omen)return;
+ document.body.classList.add('preview-mode');
+ $('landing').classList.add('hidden');
+ $('quiz').classList.add('hidden');
+ $('result').classList.remove('hidden');
+ $('resultEyebrow').textContent='象意卡樣稿';
+ $('typeCode').textContent=`${code} 型`;
+ $('typeName').textContent=code.split('').map(letter=>letterNames[letter]).join('・');
+ $('restartBtn').textContent='返回測驗';
+ renderOmenResult({code,...omen});
+ window.scrollTo({top:0,behavior:'smooth'});
 }
 function buildCustomerSummary(r){
  const top=customerTopDomains(r);
