@@ -81,6 +81,42 @@
         <button id="restartBtn" class="ghost">重新選擇</button>
       </div>
 
+      <section id="omenResult" class="omen-result hidden" aria-labelledby="omenTitle">
+        <div class="omen-heading">
+          <div>
+            <p id="omenCode" class="omen-kicker"></p>
+            <h3 id="omenTitle"></h3>
+          </div>
+          <div class="omen-fortune"><span>吉凶</span><strong id="omenFortune"></strong></div>
+        </div>
+
+        <div class="omen-layout">
+          <div class="omen-symbol" aria-hidden="true">
+            <i class="omen-ray"></i><i class="omen-ray"></i><i class="omen-ray"></i><i class="omen-ray"></i>
+            <i class="omen-ray"></i><i class="omen-ray"></i><i class="omen-ray"></i>
+            <div class="omen-sun"></div>
+            <div class="omen-gate"></div>
+            <div class="omen-path"></div>
+          </div>
+
+          <div class="omen-body">
+            <div class="omen-copy-block omen-verse">
+              <h4>讖曰</h4>
+              <p id="omenVerse"></p>
+            </div>
+            <div class="omen-copy-block">
+              <h4>解曰</h4>
+              <p id="omenExplanation"></p>
+            </div>
+            <dl class="omen-guidance">
+              <div><dt>宜</dt><dd id="omenSuitable"></dd></div>
+              <div><dt>忌</dt><dd id="omenAvoid"></dd></div>
+              <div><dt>補運方向</dt><dd id="omenDirection"></dd></div>
+            </dl>
+          </div>
+        </div>
+      </section>
+
       <section class="result-section public-result">
         <h3>類型描述</h3>
         <div id="typeDescription" class="result-copy"></div>

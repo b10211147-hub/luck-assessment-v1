@@ -159,6 +159,17 @@ const domainPublicCopy={
  inner:{challenge:'情緒、焦慮、反覆糾結或內在不安可能正在放大其他問題。',improvement:'先把睡眠、飲食、情緒出口和日常節奏穩住，重要決定暫時不要在高壓時做。'},
  ancestor:{challenge:'你可能對家族、祭祀、承諾或宗教責任有未釐清的在意。這只代表值得進一步確認，不代表問卷能直接判定祖先或靈性問題。',improvement:'先整理已知的祭祀、承諾、家族事件與自己的疑問；若仍在意，再以進一步評估或請示確認為主。'}
 };
+const omenProfiles={
+ RELS:{
+  title:'七煞困關象',
+  fortune:'凶中有轉',
+  verse:['七線交纏門未開','水停石阻舊緣來','若能解結先移步','一線晨光引路回'],
+  explanation:'近期外在阻力與關係牽制互相交疊，容易等待過久、事情停滯。先解除最直接的牽連，局勢才會開始鬆動。',
+  suitable:'理清界線、先完成一件能推進的事',
+  avoid:'反覆等待、同時處理多方關係',
+  direction:'先解結，再評估開路與補貴人方向；實際項目仍需人工確認。'
+ }
+};
 const GOOGLE_SCRIPT_URL='https://script.google.com/macros/s/AKfycbxsmu2g4nOeESIrGT6JEh5B8qSKqXBMhXuomFkfTf6T1Ir9FclBixmfL8DBDirwJxM6vQ/exec';
 
 let current=0;
@@ -278,6 +289,7 @@ function buildResult(){
  const resultAnswers={}; activeQuestions.forEach(q=>resultAnswers[q.id]=Number(answers[q.id]));
  const assessment={key:selectedMode,label:mode.label,questionCount:activeQuestions.length,isShort:selectedMode!=='full'};
  const result={generatedAt:new Date().toISOString(),assessment,profile,answers:resultAnswers,code,typeName:code.split('').map(x=>letterNames[x]).join('・'),axes,domains,ranked,consistency,safety};
+ result.omen=buildOmenResult(result);
  result.customerSummary=buildCustomerSummary(result);
  result.recommendedRituals=buildRecommendedRituals(result);
  result.internalNotes=buildInternalNotes(result);
@@ -302,8 +314,26 @@ function showResult(){
  $('typeDescription').innerHTML=paragraphsHtml(r.customerSummary.typeDescription);
  $('challengeSummary').innerHTML=paragraphsHtml(r.customerSummary.challenges);
  $('improvementSummary').innerHTML=paragraphsHtml(r.customerSummary.improvements);
+ renderOmenResult(r.omen);
  prepareResultSubmission();
  window.scrollTo({top:0,behavior:'smooth'});
+}
+function buildOmenResult(r){
+ const omen=omenProfiles[r.code];
+ return omen?{code:r.code,...omen}:null;
+}
+function renderOmenResult(omen){
+ const section=$('omenResult');
+ section.classList.toggle('hidden',!omen);
+ if(!omen)return;
+ $('omenCode').textContent=`${omen.code} 象意`;
+ $('omenTitle').textContent=omen.title;
+ $('omenFortune').textContent=omen.fortune;
+ $('omenVerse').innerHTML=omen.verse.map(line=>escapeHtml(line)).join('<br>');
+ $('omenExplanation').textContent=omen.explanation;
+ $('omenSuitable').textContent=omen.suitable;
+ $('omenAvoid').textContent=omen.avoid;
+ $('omenDirection').textContent=omen.direction;
 }
 function buildCustomerSummary(r){
  const top=customerTopDomains(r);

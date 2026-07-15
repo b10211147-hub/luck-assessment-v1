@@ -65,6 +65,37 @@ input, textarea { width: 100%; border: 1px solid var(--line); border-radius: 12p
 .summary-card { border: 1px solid var(--line); border-radius: 16px; padding: 16px; background: white; }
 .summary-card strong { display: block; font-size: 1.35rem; margin-top: 6px; }
 .result-section { margin-top: 30px; }
+.omen-result { margin-top: 30px; padding: 26px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.omen-heading { display: flex; align-items: end; justify-content: space-between; gap: 18px; margin-bottom: 22px; }
+.omen-heading h3 { margin: 4px 0 0; font-family: "DFKai-SB", "BiauKai", "KaiTi", serif; font-size: clamp(28px, 5vw, 42px); letter-spacing: 0; }
+.omen-kicker { margin: 0; color: var(--muted); font-weight: 700; }
+.omen-fortune { flex: 0 0 auto; text-align: right; }
+.omen-fortune span { display: block; color: var(--muted); font-size: .84rem; }
+.omen-fortune strong { display: block; margin-top: 4px; color: var(--accent); font-size: 1.25rem; }
+.omen-layout { display: grid; grid-template-columns: minmax(220px, .72fr) minmax(0, 1.28fr); gap: 28px; align-items: start; }
+.omen-symbol { position: relative; width: 100%; aspect-ratio: 4 / 5; overflow: hidden; border: 1px solid #cbb99f; border-radius: 8px; background: #eee2cd; }
+.omen-symbol::after { content: ""; position: absolute; inset: 10px; border: 1px solid rgba(45,42,38,.24); pointer-events: none; }
+.omen-ray { position: absolute; z-index: 4; top: -12%; left: 50%; width: 1px; height: 66%; background: #9a302f; transform-origin: center bottom; opacity: .78; }
+.omen-ray:nth-child(1) { transform: translateX(-50%) rotate(-48deg); }
+.omen-ray:nth-child(2) { transform: translateX(-50%) rotate(-32deg); }
+.omen-ray:nth-child(3) { transform: translateX(-50%) rotate(-16deg); }
+.omen-ray:nth-child(4) { transform: translateX(-50%) rotate(0); }
+.omen-ray:nth-child(5) { transform: translateX(-50%) rotate(16deg); }
+.omen-ray:nth-child(6) { transform: translateX(-50%) rotate(32deg); }
+.omen-ray:nth-child(7) { transform: translateX(-50%) rotate(48deg); }
+.omen-sun { position: absolute; z-index: 1; top: 43%; left: 50%; width: 54px; aspect-ratio: 1; border-radius: 50%; background: #a84b40; transform: translate(-50%,-50%); }
+.omen-gate { position: absolute; z-index: 3; top: 25%; left: 25%; width: 50%; height: 45%; border: 10px solid var(--ink); border-bottom: 0; }
+.omen-gate::before { content: ""; position: absolute; top: -18px; left: -20%; width: 140%; height: 7px; background: var(--ink); }
+.omen-gate::after { content: ""; position: absolute; inset: 16px 18px 0; border: 2px solid rgba(45,42,38,.64); border-bottom: 0; }
+.omen-path { position: absolute; z-index: 2; bottom: -3%; left: 39%; width: 22%; height: 43%; border-left: 2px solid var(--ink); border-right: 2px solid var(--ink); transform: perspective(190px) rotateX(24deg); }
+.omen-body { display: grid; gap: 20px; }
+.omen-copy-block h4 { margin: 0 0 7px; color: var(--accent); font-size: .95rem; }
+.omen-copy-block p { margin: 0; line-height: 1.9; }
+.omen-verse p { font-family: "DFKai-SB", "BiauKai", "KaiTi", serif; font-size: 1.22rem; line-height: 2; }
+.omen-guidance { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 0; }
+.omen-guidance div { padding-left: 12px; border-left: 3px solid var(--line); }
+.omen-guidance dt { color: var(--accent); font-weight: 700; }
+.omen-guidance dd { margin: 6px 0 0; color: var(--ink); line-height: 1.65; }
 .public-result h3 { margin-bottom: 12px; }
 .result-copy { display: grid; gap: 12px; line-height: 1.85; }
 .result-copy p { margin: 0; padding: 14px 16px; border-left: 4px solid var(--accent); background: #fff; border-radius: 10px; }
@@ -88,6 +119,9 @@ input, textarea { width: 100%; border: 1px solid var(--line); border-radius: 12p
   .panel { border-radius: 16px; padding: 20px; }
   .form-grid, .summary-grid { grid-template-columns: 1fr; }
   .mode-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .omen-layout { grid-template-columns: 1fr; }
+  .omen-symbol { width: min(100%, 300px); margin-inline: auto; }
+  .omen-guidance { grid-template-columns: 1fr; }
   .statement-pair { grid-template-columns: 1fr; }
   .vs { text-align: center; }
   .axis-row, .domain-row { grid-template-columns: 1fr; gap: 8px; }
