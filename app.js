@@ -1,571 +1,73 @@
-const pairQuestions = [
-[1,'AR','遇到事情卡住時，我通常會主動尋找突破的方法。','遇到事情卡住時，我通常會先等待情勢變得更明朗。'],
-[2,'IE','即使外在條件沒有明顯問題，我也容易因為想太多而停下來。','即使我已經準備好，外在的人事物仍常讓事情無法推進。'],
-[3,'WL','工作或收入不穩定時，我很難真正放鬆。','感情或人際不穩定時，我很難真正放鬆。'],
-[4,'BS','我的狀況經常一下變好、一下又出現問題。','我的狀況長時間沒有明顯變化或進展。'],
-[5,'AR','當一段關係不明確時，我傾向主動確認對方的想法。','當一段關係不明確時，我傾向觀察對方接下來的行動。'],
-[6,'IE','過去的失敗或受傷經驗，會影響我現在的判斷。','別人的態度、要求或限制，會影響我現在的選擇。'],
-[7,'WL','現階段，我最想改善的是工作、事業或財務狀況。','現階段，我最想改善的是感情、人際或家庭關係。'],
-[8,'BS','我並不是沒有機會，而是很難把好的狀態維持下去。','我已經等待很久，卻始終等不到真正的機會。'],
-[9,'AR','即使沒有十足把握，我也願意先嘗試再調整。','我通常要確認風險較低後，才願意開始行動。'],
-[10,'IE','我最常需要克服的是自己的焦慮與不確定感。','我最常需要克服的是環境與他人帶來的阻力。'],
-[11,'WL','得到實際成果與收入，最能帶給我安全感。','得到理解、陪伴與支持，最能帶給我安全感。'],
-[12,'BS','我的問題通常來自生活各方面互相影響、難以平衡。','我的問題通常來自某件事一直卡住、無法繼續前進。'],
-[13,'AR','面對不滿意的現況，我通常會很快做出改變。','面對不滿意的現況，我通常會再忍耐或觀察一段時間。'],
-[14,'IE','事情不順時，我常懷疑是不是自己不夠好。','事情不順時，我常覺得是條件、時機或合作對象不配合。'],
-[15,'WL','當事業順利時，我會覺得其他事情也比較容易處理。','當關係順利時，我會覺得其他事情也比較容易處理。'],
-[16,'BS','我常在充滿動力與非常疲累之間反覆擺盪。','我常覺得無論怎麼努力，都像停留在同一個位置。'],
-[17,'AR','機會出現時，我比較擔心自己沒有及時把握。','機會出現時，我比較擔心自己判斷得太快。'],
-[18,'IE','我的情緒狀態，會明顯影響工作與人際表現。','工作與人際環境，會明顯影響我的情緒狀態。'],
-[19,'WL','我比較害怕失去收入、機會或未來的發展空間。','我比較害怕失去重要的人或一段珍惜的關係。'],
-[20,'BS','事情偶爾會有進展，但不久後又回到原來的狀態。','事情很少真正開始，總是延遲、等待或不了了之。'],
-[21,'AR','我常因為行動太快，事後才發現有些細節沒有想清楚。','我常因為考慮太久，事後才發現機會已經錯過。'],
-[22,'IE','我知道該怎麼做，卻常因為擔心後果而無法開始。','我知道該怎麼做，卻常因為現實條件不足而無法開始。'],
-[23,'WL','我容易為工作表現、金錢或未來發展感到焦慮。','我容易為對方的態度、關係變化或人際互動感到焦慮。'],
-[24,'BS','我目前最需要的是穩定現況，避免反覆失衡。','我目前最需要的是打破停滯，讓事情重新啟動。'],
-[25,'AR','當別人遲遲沒有回應時，我會主動詢問或處理。','當別人遲遲沒有回應時，我會選擇先不打擾。'],
-[26,'IE','很多問題即使換了環境，仍可能在我身上重複發生。','很多問題只要換一個環境或合作對象，就可能明顯改善。'],
-[27,'WL','我希望別人肯定我的能力與成果。','我希望別人理解我的感受與真心。'],
-[28,'BS','我的運勢感受比較像忽高忽低、難以掌握。','我的運勢感受比較像被堵住，長時間沒有流動。'],
-[29,'AR','我相信事情需要靠自己的行動去推動。','我相信合適的時機到了，事情自然會有所變化。'],
-[30,'IE','我目前最需要處理的是內在的穩定與信心。','我目前最需要處理的是外在的人際與環境問題。'],
-[31,'WL','目前若只能改善一件事，我會優先選擇財業發展。','目前若只能改善一件事，我會優先選擇感情與人際關係。'],
-[32,'BS','即使有好事發生，我也擔心無法持續。','比起無法持續，我更擔心好事根本不會開始。']
-];
+const $ = (selector) => document.querySelector(selector);
+const API_BASE = "https://fengmugong-registration-api.b10211147.chatgpt.site";
+const apiUrl = (path) => `${API_BASE}${path}`;
+const state = { activities: [], selected: null, lineIdToken: "", liffReady: false };
+const views = ["activitiesView", "formView", "successView", "ordersView"];
 
-const singleQuestions = [
-[33,'overall','我最近常覺得整體運勢偏低，不只一件事不順，而是生活中多個面向同時出現問題。'],
-[34,'overall','即使沒有發生明顯的大事，我仍常感到精神疲憊、提不起勁，或對未來缺乏方向。'],
-[35,'overall','我的狀況曾經短暫好轉，但很快又回到原來的不順狀態。'],
-[36,'wealth','我目前的收入來源、賺錢機會或客源明顯不足，很難找到新的財源。'],
-[37,'wealth','即使有收入，我仍常因突發支出、錯誤判斷或各種原因而留不住錢。'],
-[38,'wealth','我在金錢、投資、收款或合作帳務方面，經常出現延遲、落空或反覆變動。'],
-[39,'career','我在工作或事業上付出不少，但成果、升遷或收入沒有相對應的提升。'],
-[40,'career','我目前對轉職、創業、擴編或未來事業方向感到猶豫，很難做出明確決定。'],
-[41,'career','我明明具備能力，卻經常缺少被看見、被重用或獲得關鍵機會的可能。'],
-[42,'people','我常遇到不守信用、不願配合，或容易造成麻煩的合作對象。'],
-[43,'people','我在工作、家庭或朋友圈中，容易被誤解、議論、排擠或搶走成果。'],
-[44,'people','我身邊並不是完全沒有人，但真正願意幫助、提攜或給我關鍵機會的人很少。'],
-[45,'love','我目前缺乏穩定或合適的桃花，即使認識新對象，也很難真正發展。'],
-[46,'love','我容易遇到態度不明、無法承諾、已有複雜關係，或不適合長期發展的對象。'],
-[47,'love','我仍受到前任、舊情、曖昧關係或過去的感情經驗影響，難以真正重新開始。'],
-[48,'home','家中成員近期容易爭吵、情緒不穩，或彼此之間的溝通明顯變差。'],
-[49,'home','搬家、裝修、換工作地點或更換營業場所後，我的生活或工作狀態出現明顯變化。'],
-[50,'home','家中、店面或工作空間長期雜亂、陰暗、沉悶，讓人不容易放鬆或久待。'],
-[51,'inner','我常反覆糾結同一件事情，即使知道繼續想也沒有幫助，仍很難放下。'],
-[52,'inner','我的焦慮、憤怒、恐懼或不安全感，已經明顯影響我的工作、睡眠或人際互動。'],
-[53,'inner','我常因衝動、後悔、自責或過度猜測，而讓原本可以處理的事情變得更複雜。'],
-[54,'ancestor','家中祭祀、祖先牌位、還願或宗教承諾，存在長期中斷、未完成或不知道如何處理的情況。'],
-[55,'ancestor','家族中曾反覆出現相似的感情、財務、事業或家庭課題，讓我感到需要進一步了解。'],
-[56,'ancestor','我近期常夢見已故親人、祖先或特定宗教意象，並因此感到在意、不安或想進一步確認。']
-];
+function money(value) { return `NT$${Number(value).toLocaleString("zh-TW")}`; }
+function showToast(message) { const toast = $("#toast"); toast.textContent = message; toast.classList.add("is-visible"); setTimeout(() => toast.classList.remove("is-visible"), 2400); }
+function showView(id) { views.forEach((view) => $("#" + view).classList.toggle("is-hidden", view !== id)); window.scrollTo({ top: 300, behavior: "smooth" }); }
+function setTab(name) { document.querySelectorAll(".tab").forEach((tab) => tab.classList.toggle("is-active", tab.dataset.view === name)); }
 
-const checkQuestions = [
-[57,'AR','遇到不確定的狀況時，我通常會先採取行動，再依結果進行調整。','遇到不確定的狀況時，我通常會繼續觀察，等掌握更多資訊後再決定。'],
-[58,'IE','即使沒有人阻止我，我也可能因為擔心或缺乏信心而停下來。','即使我內心已經準備好，也常因為他人或現實條件而無法前進。'],
-[59,'WL','最近最牽動我情緒的，大多與工作、收入或未來發展有關。','最近最牽動我情緒的，大多與感情、人際或家庭關係有關。'],
-[60,'BS','最近的生活並非完全沒有好轉，只是好與壞經常反覆出現。','最近的生活比較像是停在原地，很少出現真正的突破。']
-];
+function renderActivities() {
+  $("#activityList").innerHTML = state.activities.map((item) => `
+    <article class="activity-card">
+      <div class="activity-card__top"><h3>${item.title}</h3></div>
+      <div class="activity-card__body"><p>${item.description}</p><div class="meta"><div><small>報名費用</small><strong>隨喜</strong></div><span class="registered">已報名 ${item.registered} 名</span></div><button class="primary-btn" data-register="${item.id}">立即報名</button></div>
+    </article>`).join("");
+}
 
-const safetyQuestions = [
-[61,'expectation','我期待透過一次祈福或科儀，就能立即改變所有問題，而不需要調整自己的行動與選擇。'],
-[62,'repeat','當事情沒有立刻好轉時，我容易想要同時進行多種祈福、科儀或尋找不同老師反覆處理。'],
-[63,'control','我希望透過科儀，讓特定的人依照我的期待回頭、改變想法或做出決定。'],
-[64,'professional','我目前遇到的問題可能涉及醫療、心理、法律、債務或人身安全，需要其他專業協助。'],
-[65,'readiness','我願意將科儀視為輔助方式，並配合實際行動、溝通、財務規劃或生活調整。']
-];
+function openRegistration(id) {
+  state.selected = state.activities.find((item) => item.id === id);
+  const item = state.selected;
+  $("#selectedActivity").innerHTML = `<small>祈福活動</small><h3>${item.title}</h3>`;
+  $("select[name=people]").innerHTML = Array.from({ length: 10 }, (_, i) => `<option value="${i + 1}">${i + 1} 人</option>`).join("");
+  updateTotal(); showView("formView");
+}
 
-const questions = [
- ...pairQuestions.map(([id,dimension,first,second])=>({id,type:'pair',dimension,first,second})),
- ...singleQuestions.map(([id,domain,text])=>({id,type:'single',domain,text})),
- ...checkQuestions.map(([id,dimension,first,second])=>({id,type:'pair-check',dimension,first,second})),
- ...safetyQuestions.map(([id,key,text])=>({id,type:'single-safety',key,text}))
-];
+function updateTotal() { $("#totalPrice").textContent = "隨喜"; }
 
-const shortCoreQuestionIds=[1,2,3,4,5,6,7,8];
-const quizModes={
- love:{label:'感情版',shortLabel:'感情',domains:['love','people','inner'],questionIds:[...shortCoreQuestionIds,45,46,47,42,43,44,51,52,53],description:'從感情、人際與內在狀態，盤點近期的關係模式與主要卡點。'},
- career:{label:'事業版',shortLabel:'事業',domains:['career','wealth','people'],questionIds:[...shortCoreQuestionIds,39,40,41,36,37,38,42,43,44],description:'從事業、財運與人際合作，盤點近期的工作模式與主要卡點。'},
- wealth:{label:'財運版',shortLabel:'財運',domains:['wealth','career','overall'],questionIds:[...shortCoreQuestionIds,36,37,38,39,40,41,33,34,35],description:'從財運、事業與整體狀態，盤點近期的金錢流動與主要卡點。'},
- home:{label:'家運版',shortLabel:'家運',domains:['home','people','inner'],questionIds:[...shortCoreQuestionIds,48,49,50,42,43,44,51,52,53],description:'從家運、人際與內在狀態，盤點近期的家庭互動與主要卡點。'},
- full:{label:'完整版',shortLabel:'完整',domains:['overall','wealth','career','people','love','home','inner','ancestor'],questionIds:questions.map(q=>q.id),description:'透過 65 道題目，完整盤點近期的運勢模式、八大面向與優先改善方向。'}
-};
+async function submitRegistration(event) {
+  event.preventDefault();
+  const button = event.submitter; button.disabled = true; button.textContent = "資料送出中…";
+  try {
+    const body = Object.fromEntries(new FormData(event.currentTarget)); body.activityId = state.selected.id; body.lineIdToken = state.lineIdToken;
+    const response = await fetch(apiUrl("/api/orders"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const order = await response.json(); if (!response.ok) throw new Error(order.error);
+    const notice = order.lineNotificationSent ? "專屬編號已傳送至你的 LINE" : "請先截圖保存專屬編號；正式 LINE 通知尚未連線";
+    $("#orderSummary").innerHTML = `<div class="summary"><div><span>專屬報名編號</span><b>${order.id}</b></div><div><span>祈福活動</span><b>${order.activityTitle}</b></div><div><span>祈福人數</span><b>${order.people} 人</b></div><div><span>報名費用</span><strong>隨喜</strong></div><div><span>LINE 通知</span><b>${notice}</b></div></div>`;
+    event.currentTarget.reset(); showView("successView");
+  } catch (error) { showToast(error.message || "報名失敗，請稍後再試"); }
+  finally { button.disabled = false; button.textContent = "確認送出報名"; }
+}
 
-const axisMeta = {
- AR:{first:'A',second:'R',firstName:'主動推進',secondName:'觀察承接'},
- IE:{first:'I',second:'E',firstName:'內在牽制',secondName:'外在阻力'},
- WL:{first:'W',second:'L',firstName:'財業重心',secondName:'關係重心'},
- BS:{first:'B',second:'S',firstName:'波動失衡',secondName:'長期停滯'}
-};
-const domainMeta = {
- overall:{name:'整體運勢與補運',directions:'補運、祭改、消災解厄或轉運祈福'},
- wealth:{name:'財運與財庫',directions:'開財路、招財、補財庫、守財、止漏財或化破財'},
- career:{name:'事業與工作',directions:'事業開路、補事業運、求職／升遷祈福、開智慧或補文昌'},
- people:{name:'貴人、人際與小人',directions:'補貴人、旺人緣、化小人、化口舌或人際和合'},
- love:{name:'桃花、感情與婚姻',directions:'招正緣、開桃花路、斬爛桃花、解結、斷舊迎新或去留請示'},
- home:{name:'家庭、家運與住宅',directions:'家庭和合、安宅、淨宅、旺家運或場所祈安'},
- inner:{name:'心性、情緒與解結',directions:'安心定志、解結、開智慧、增定力或斷舊迎新'},
- ancestor:{name:'祖先、祭祀與宗教責任',directions:'僅建議進一步請示確認；不可由問卷直接判定祖先或靈性問題'}
-};
-const ritualRecommendations={
- overall:{item:'補運轉運祈福',reason:'整體運勢與補運分數偏高，適合先做整體補運與方向校準。'},
- wealth:{item:'補財庫／開財路招財',reason:'財運、收入、留財或客源是目前較明顯的卡點。'},
- career:{item:'事業開路／補事業運',reason:'工作停滯、升遷轉職或未來方向需要被打開。'},
- people:{item:'補貴人／化小人化口舌',reason:'人際合作、口舌誤解或貴人助力需要整理。'},
- love:{item:'感情和合／招正緣',reason:'感情、桃花、舊情或關係承諾牽動較大。'},
- home:{item:'安宅淨宅／家運祈安',reason:'家庭互動、住宅或工作空間狀態可能影響運勢。'},
- inner:{item:'解結安心／開智慧',reason:'情緒內耗、焦慮或反覆糾結需要先穩住。'},
- ancestor:{item:'祭祀責任請示確認',reason:'僅建議先請示釐清，不由問卷直接判定祖先或靈性問題。'}
-};
-const axisRitualRecommendations={
- R:{item:'補貴人開路',reason:'偏觀察承接，適合補啟動點與外在助力。'},
- E:{item:'化解外在阻礙／開路',reason:'卡點偏向外在條件、合作關係或環境牽制。'},
- I:{item:'解結安心／開智慧',reason:'卡點偏向內耗、焦慮、信心或過去經驗牽制。'},
- L:{item:'關係和合／解結',reason:'焦點偏向感情、人際、家庭或重要關係。'},
- W:{item:'財業補運',reason:'焦點偏向工作、收入、財務或未來發展。'},
- B:{item:'祭改消災解厄',reason:'近期狀態較波動，適合先做清理與穩定。'},
- S:{item:'補運開路／轉運祈福',reason:'整體呈現長期停滯，適合先求啟動與方向打開。'}
-};
-const letterNames={A:'主動推進',R:'觀察承接',I:'內在牽制',E:'外在阻力',W:'財業重心',L:'關係重心',B:'波動失衡',S:'長期停滯',X:'平衡／情境'};
-const axisPublicCopy={
- AR:{
-  A:{trait:'遇到卡住時，你比較傾向主動推進、先做出改變，再從結果中修正方向。',challenge:'你容易把問題扛在自己身上，急著突破時也可能忽略節奏與風險。',improvement:'先把最想改變的事拆成小步驟，不需要一次解決全部，先完成一個可以落地的行動。'},
-  R:{trait:'遇到卡住時，你比較傾向觀察、等待時機成熟，再決定下一步。',challenge:'你可能已經看得很清楚，卻因為想再確認而錯過可行的起點。',improvement:'為自己設定一個決定期限，時間到了就先選一個低風險方向開始試。'},
-  X:{trait:'你在主動與觀察之間會依情境切換，並不是單純衝動或保守。',challenge:'你可能同時想前進又想保留彈性，因此容易卡在判斷與等待之間。',improvement:'先分清楚哪些事需要立即處理，哪些事可以再觀察，避免所有問題都混在一起。'}
- },
- IE:{
-  I:{trait:'你近期的不順感比較容易和內在壓力、焦慮、信心或過去經驗有關。',challenge:'你可能知道該怎麼做，卻被擔心、內耗或反覆思考拖住。',improvement:'先穩住睡眠、情緒與日常節奏，再處理重要決定，會比硬撐更有效。'},
-  E:{trait:'你近期的不順感比較容易受到外在人事物、環境條件或合作關係影響。',challenge:'你可能不是沒有能力，而是被條件、對象或時機牽制。',improvement:'先盤點真正卡住你的外在因素，能溝通的溝通，不能改變的就調整策略或換路線。'},
-  X:{trait:'你的卡點同時可能來自內在狀態與外在環境，需要分層看待。',challenge:'你可能一邊懷疑自己，一邊又被現實條件限制，容易越想越複雜。',improvement:'先把「我可以調整的」和「需要外界配合的」分開處理，會比較不容易耗住。'}
- },
- WL:{
-  W:{trait:'你目前的安全感與焦點，比較容易落在工作、收入、財務或未來發展。',challenge:'財業壓力可能會牽動你的情緒，讓其他生活面向也跟著緊繃。',improvement:'先整理收入、支出、工作目標與下一個可執行機會，讓財業問題有具體抓手。'},
-  L:{trait:'你目前的安全感與焦點，比較容易落在感情、人際、家庭或重要關係。',challenge:'關係中的不確定感容易消耗你，甚至影響工作與日常判斷。',improvement:'先釐清你真正需要的是陪伴、承諾、界線還是溝通，再決定下一步。'},
-  X:{trait:'你目前在財業與關係之間都會被牽動，兩邊都不是完全無關。',challenge:'你可能很難只處理單一問題，因為工作、金錢、關係會彼此影響。',improvement:'先選一個最急的現實問題處理，讓生活穩下來後，再處理第二層問題。'}
- },
- BS:{
-  B:{trait:'你近期的運勢感受比較像忽好忽壞，有進展但不容易穩定。',challenge:'你可能不是沒有機會，而是好狀態難以延續，容易反覆回到原點。',improvement:'先找出反覆失衡的觸發點，建立固定作息、財務界線或溝通規則，讓好狀態留得住。'},
-  S:{trait:'你近期的運勢感受比較像長期停住，事情不容易真正開始或推進。',challenge:'你可能等待很久，卻缺少啟動點、貴人或清楚方向。',improvement:'先不要追求一次翻盤，找一件能打破停滯的小事開始，讓能量重新流動。'},
-  X:{trait:'你目前不像單純波動或單純停滯，比較像不同事情各有不同節奏。',challenge:'你可能無法用一個原因解釋所有狀況，因此容易覺得混亂。',improvement:'先把問題分門別類，釐清哪一件是在反覆、哪一件是真的停住。'}
- }
-};
-const domainPublicCopy={
- overall:{challenge:'近期比較像整體方向感、精神狀態或事情推進感一起偏低。',improvement:'先讓生活節奏穩下來，整理近期最重要的三件事，再以補運方向做進一步評估。'},
- wealth:{challenge:'金錢流動、收入機會、客源或留財感可能是目前比較明顯的壓力。',improvement:'先整理收支、回款、投資與合作帳務，避免情緒化決策，再進一步評估財運與財庫相關方向。'},
- career:{challenge:'工作、事業、升遷、轉職或未來方向可能讓你覺得付出和成果不成比例。',improvement:'先列出目前最大的工作卡點，是機會不足、方向不明還是被看見程度不足，再安排下一步調整。'},
- people:{challenge:'人際、合作、貴人、小人或口舌誤解可能正在消耗你的能量。',improvement:'先建立界線，重要合作留下文字紀錄，減少不必要的解釋與消耗，再評估人際與貴人方向。'},
- love:{challenge:'感情、桃花、曖昧、舊情或關係承諾可能是目前比較牽動你的部分。',improvement:'先釐清自己要的是穩定關係、重新開始、切斷舊牽連還是改善溝通，再評估感情方向。'},
- home:{challenge:'家庭互動、家運、住宅或工作空間狀態可能對你造成影響。',improvement:'先整理居住與工作空間，改善雜亂、陰暗或溝通不順的地方，再視情況進一步評估家運與場所狀態。'},
- inner:{challenge:'情緒、焦慮、反覆糾結或內在不安可能正在放大其他問題。',improvement:'先把睡眠、飲食、情緒出口和日常節奏穩住，重要決定暫時不要在高壓時做。'},
- ancestor:{challenge:'你可能對家族、祭祀、承諾或宗教責任有未釐清的在意。這只代表值得進一步確認，不代表問卷能直接判定祖先或靈性問題。',improvement:'先整理已知的祭祀、承諾、家族事件與自己的疑問；若仍在意，再以進一步評估或請示確認為主。'}
-};
-const omenAxisText={
- AR:{
-  A:{title:'啟',verse:'一門先啟',song:'定得一門向曉行',explanation:'象中見人先於勢，事情已有可推動之處，但宜先定一條主路。',suitable:'定向、啟步',avoid:'躁進、四處開線',direction:'啟路定向'},
-  R:{title:'',verse:'一隙見光',song:'門外晨光引路還',explanation:'象中見門多於路，暫緩不是停滯，先看清牽制再行。',suitable:'觀勢、守界',avoid:'久候不決、責任全攬',direction:'守界明路'},
-  X:{title:'衡',verse:'中門微啟',song:'進退相參守中行',explanation:'象中進退相參，宜取中位，不急著全進或全退。',suitable:'盤點、取中',avoid:'反覆擺盪、勉強表態',direction:'調衡定序'}
- },
- IE:{
-  I:{title:'結',verse:'內結藏心',song:'心結未開影自纏',explanation:'阻力較像結在心念與未決之事，先解內結，外局才容易鬆動。',suitable:'解結、安念',avoid:'悶藏、反覆內耗',direction:'解結安心'},
-  E:{title:'煞',verse:'外煞臨關',song:'客塵未散步行難',explanation:'阻力較像來自外緣與環境牽引，宜先守界、減少雜訊。',suitable:'清界、減擾',avoid:'受人牽引、雜訊過多',direction:'化阻開路'},
-  X:{title:'交',verse:'內外交牽',song:'內外相牽兩未安',explanation:'內外兩端互相牽動，先分清何者可控，局勢會較明朗。',suitable:'分辨內外、逐項處理',avoid:'混為一談、同時應付',direction:'內外調和'}
- },
- WL:{
-  W:{title:'祿',verse:'祿途待引',song:'祿路浮沉待水開',explanation:'此象以祿路與實務秩序為重，先整理資源與次序。',suitable:'理帳、整資源',avoid:'冒進求快、忽略實務',direction:'補祿整財'},
-  L:{title:'緣',verse:'緣繩未斷',song:'緣線重重石作關',explanation:'此象以人緣與關係牽繫為重，宜辨清舊結與新緣。',suitable:'辨緣、清舊結',avoid:'曖昧拖延、情緒代答',direction:'和合解結'},
-  X:{title:'兩儀',verse:'祿緣並行',song:'祿緣雙路各相連',explanation:'祿緣並見，工作與關係互相影響，不宜只處理其中一端。',suitable:'兼顧事與人、排先後',avoid:'顧此失彼、兩頭耗損',direction:'祿緣調和'}
- },
- BS:{
-  B:{title:'動潮',verse:'潮勢反覆',song:'潮來潮去勢難安',explanation:'氣勢有起伏，先穩節奏，避免因一時反應而重複改變。',suitable:'穩步、留緩衝',avoid:'追高殺低、頻繁改變',direction:'穩運解厄'},
-  S:{title:'閉關',verse:'靜水無波',song:'靜水沉沉門久關',explanation:'局面表面平靜但門未全開，適合從一處小缺口逐步疏通。',suitable:'小步疏通、守成',avoid:'僵守不動、等待自解',direction:'開路轉運'},
-  X:{title:'守中',verse:'動靜未分',song:'動靜之間一線寬',explanation:'動靜未分，先守中觀察，再選擇下一步。',suitable:'守中、觀察節點',avoid:'急著定論、左右搖擺',direction:'守中補運'}
- }
-};
-const omenDomainLead={
- overall:'整體氣勢宜先定序。',
- wealth:'財路宜先理清流向。',
- career:'祿業宜先辨明門路。',
- people:'人和宜先定界。',
- love:'情緣宜先解舊結。',
- home:'宅中宜先安序。',
- inner:'心炁宜先安定。',
- ancestor:'承念之事宜先查明。'
-};
-const specialOmenText={
- RELS:{
-  verse:['外煞臨關','緣繩未斷','靜水無波','一隙見光'],
-  song:['緣線重重石作關','客塵未散步行難','先將一結從頭解','門外晨光引路還']
- }
-};
-const GOOGLE_SCRIPT_URL='https://script.google.com/macros/s/AKfycbxsmu2g4nOeESIrGT6JEh5B8qSKqXBMhXuomFkfTf6T1Ir9FclBixmfL8DBDirwJxM6vQ/exec';
+function renderOrders(orders) {
+  $("#orderList").innerHTML = orders.length ? orders.map((order) => `<article class="order-card"><header class="order-card__head"><small>✓ 祈福報名</small><h3>${order.activityTitle}</h3></header><dl><div><dt>專屬報名編號</dt><dd>${order.id}</dd></div><div><dt>報名人</dt><dd>${order.name}</dd></div><div><dt>祈福人數</dt><dd>${order.people} 人</dd></div><div><dt>報名費用</dt><dd><span class="badge">隨喜</span></dd></div></dl></article>`).join("") : `<div class="empty">查無此專屬報名編號，請確認後再試</div>`;
+}
 
-let current=0;
-let lastResult=null;
-let submittingResult=false;
-let selectedMode=quizModes[localStorage.getItem('luckAssessmentMode')]?localStorage.getItem('luckAssessmentMode'):'';
-let activeQuestions=selectedMode?questionsForMode(selectedMode):[];
-let answers=selectedMode?loadAnswers(selectedMode):{};
-let profile=JSON.parse(localStorage.getItem('luckAssessmentProfile')||'{}');
+async function lookupOrders(event) { event.preventDefault(); const id = new FormData(event.currentTarget).get("id"); const response = await fetch(apiUrl(`/api/orders?id=${encodeURIComponent(id)}`)); renderOrders(await response.json()); }
 
-const $=id=>document.getElementById(id);
-$('nameInput').value=profile.name||'';
-$('lineInput').value=profile.line||'';
-$('concernInput').value=profile.concern||'';
+document.addEventListener("click", (event) => { const register = event.target.closest("[data-register]"); if (register) openRegistration(register.dataset.register); });
+document.querySelectorAll(".tab").forEach((tab) => tab.addEventListener("click", () => { setTab(tab.dataset.view); showView(tab.dataset.view === "orders" ? "ordersView" : "activitiesView"); }));
+$("#backBtn").addEventListener("click", () => showView("activitiesView"));
+$("#newOrderBtn").addEventListener("click", () => { setTab("activities"); showView("activitiesView"); });
+$("select[name=people]").addEventListener("change", updateTotal);
+$("#registrationForm").addEventListener("submit", submitRegistration);
+$("#lookupForm").addEventListener("submit", lookupOrders);
 
-document.querySelectorAll('input[name="quizMode"]').forEach(input=>{
- input.checked=input.value===selectedMode;
- input.onchange=()=>selectMode(input.value);
-});
-if(selectedMode) updateModeSelection();
+fetch(apiUrl("/api/activities")).then((response) => response.json()).then((items) => { state.activities = items; renderActivities(); }).catch(() => showToast("活動資料載入失敗"));
 
-$('startBtn').onclick=()=>{
- if(!selectedMode) return alert('請先選擇想測驗的主題。');
- profile={name:$('nameInput').value.trim(),line:$('lineInput').value.trim(),concern:$('concernInput').value.trim()};
- localStorage.setItem('luckAssessmentProfile',JSON.stringify(profile));
- current=activeQuestions.findIndex(q=>!answers[q.id]);
- if(current<0) current=0;
- $('landing').classList.add('hidden'); $('quiz').classList.remove('hidden'); renderQuestion();
-};
-$('saveBtn').onclick=()=>{save(); alert('進度已儲存在此瀏覽器。');};
-$('changeModeBtn').onclick=()=>{save();showLanding('quiz');};
-$('prevBtn').onclick=()=>{if(current>0){current--;renderQuestion();}};
-$('nextBtn').onclick=()=>{
- const q=activeQuestions[current];
- if(!answers[q.id]) return alert('請先選擇 1～5 分。');
- if(current<activeQuestions.length-1){current++;renderQuestion();} else {save();showResult();}
-};
-$('restartBtn').onclick=()=>{
- if(document.body.classList.contains('preview-mode')){
-  location.href=location.pathname;
-  return;
- }
- showLanding('result');
-};
-if($('submitResultBtn')) $('submitResultBtn').onclick=submitResult;
+async function initLineIdentity() {
+  try {
+    const config = await fetch(apiUrl("/api/config")).then((response) => response.json());
+    if (!config.liffId || !window.liff) return;
+    await liff.init({ liffId: config.liffId });
+    if (!liff.isLoggedIn()) { liff.login({ redirectUri: window.location.href }); return; }
+    state.lineIdToken = liff.getIDToken() || "";
+    state.liffReady = Boolean(state.lineIdToken);
+  } catch (error) {
+    console.warn("LINE identity is not available", error);
+  }
+}
 
-const previewParams=new URLSearchParams(location.search);
-const previewCode=previewParams.get('preview');
-const previewScore=[5,8,11,14].includes(Number(previewParams.get('fortune')))?Number(previewParams.get('fortune')):11;
-if(previewCode)showOmenPreview(previewCode.toUpperCase(),previewScore);
-
-function questionsForMode(modeKey){
- const ids=new Set(quizModes[modeKey].questionIds);
- return quizModes[modeKey].questionIds.map(id=>questions.find(q=>q.id===id)).filter(q=>q&&ids.has(q.id));
-}
-function answerStorageKey(modeKey){return `luckAssessmentAnswers:${modeKey}`;}
-function loadAnswers(modeKey){
- try{
-  const saved=localStorage.getItem(answerStorageKey(modeKey));
-  if(saved) return JSON.parse(saved);
-  if(modeKey==='full') return JSON.parse(localStorage.getItem('luckAssessmentAnswers')||'{}');
- }catch(err){/* Ignore invalid local progress and start fresh. */}
- return {};
-}
-function selectMode(modeKey){
- if(!quizModes[modeKey]) return;
- save();
- selectedMode=modeKey;
- activeQuestions=questionsForMode(modeKey);
- answers=loadAnswers(modeKey);
- current=0;
- lastResult=null;
- localStorage.setItem('luckAssessmentMode',modeKey);
- updateModeSelection();
-}
-function updateModeSelection(){
- const mode=quizModes[selectedMode];
- $('landingLead').textContent=mode.description;
- $('modeNotice').textContent=`${mode.label}共 ${mode.questionIds.length} 題。請依最近三至六個月的真實狀況作答；結果屬於近期傾向盤點。`;
- $('startBtn').disabled=false;
- $('startBtn').textContent=`開始${mode.label}`;
-}
-function showLanding(fromSection){
- if(fromSection&&$(fromSection)) $(fromSection).classList.add('hidden');
- $('landing').classList.remove('hidden');
- window.scrollTo({top:0,behavior:'smooth'});
-}
-function save(){if(selectedMode)localStorage.setItem(answerStorageKey(selectedMode),JSON.stringify(answers));}
-function renderQuestion(){
- const q=activeQuestions[current];
- const total=activeQuestions.length;
- $('questionCounter').textContent=`第 ${current+1} 題／${total}`;
- $('sectionLabel').textContent=`奉母宮x神明仲介所｜${quizModes[selectedMode].label}`;
- $('progressBar').style.width=`${((current+1)/total)*100}%`;
- $('prevBtn').disabled=current===0;
- $('nextBtn').textContent=current===total-1?'完成並查看結果':'下一題';
- const selected=Number(answers[q.id]||0);
- if(q.type.startsWith('pair')){
-  $('questionCard').innerHTML=`<div class="statement-pair"><div class="statement">${q.first}</div><div class="vs">或</div><div class="statement">${q.second}</div></div>${scaleHtml(selected)}<div class="scale-caption"><span>1＝靠近先出現敘述</span><span>5＝靠近後出現敘述</span></div>`;
- }else{
-  $('questionCard').innerHTML=`<h3>${q.text}</h3>${scaleHtml(selected)}<div class="scale-caption"><span>1＝完全不符合</span><span>5＝非常符合</span></div>`;
- }
- document.querySelectorAll('input[name="score"]').forEach(el=>el.onchange=e=>{answers[q.id]=Number(e.target.value);save();});
- window.scrollTo({top:0,behavior:'smooth'});
-}
-function scaleHtml(selected){return `<div class="scale">${[1,2,3,4,5].map(v=>`<label><input type="radio" name="score" value="${v}" ${selected===v?'checked':''}><span>${v}</span></label>`).join('')}</div>`;}
-
-function buildResult(){
- const mode=quizModes[selectedMode];
- const activeIds=new Set(activeQuestions.map(q=>q.id));
- const axisAnswers={AR:[],IE:[],WL:[],BS:[]};
- pairQuestions.forEach(([id,dim])=>{if(activeIds.has(id))axisAnswers[dim].push(Number(answers[id]));});
- const axes={}; let code='';
- Object.entries(axisAnswers).forEach(([dim,values])=>{
-  const m=axisMeta[dim];
-  const score=values.reduce((sum,value)=>sum+value,0);
-  const average=values.length?score/values.length:3;
-  const secondPct=Math.max(0,Math.min(100,Math.round(((average-1)/4)*100)));
-  const firstPct=100-secondPct;
-  const letter=average<=2.75?m.first:average>=3.25?m.second:'X';
-  axes[dim]={score,average:Number(average.toFixed(2)),itemCount:values.length,letter,firstPct,secondPct,strength:strengthFromPct(secondPct)}; code+=letter;
- });
- const domains={}; mode.domains.forEach(key=>domains[key]=0);
- singleQuestions.forEach(([id,domain])=>{if(activeIds.has(id)&&domain in domains)domains[domain]+=Number(answers[id]);});
- const ranked=Object.entries(domains).sort((a,b)=>b[1]-a[1]);
- const consistency={}; checkQuestions.forEach(([id,dim])=>{if(activeIds.has(id))consistency[dim]=consistencyStatus(axes[dim],Number(answers[id]));});
- const safety={}; safetyQuestions.forEach(([id,key])=>{if(activeIds.has(id))safety[key]=Number(answers[id]);});
- const resultAnswers={}; activeQuestions.forEach(q=>resultAnswers[q.id]=Number(answers[q.id]));
- const assessment={key:selectedMode,label:mode.label,questionCount:activeQuestions.length,isShort:selectedMode!=='full'};
- const result={generatedAt:new Date().toISOString(),assessment,profile,answers:resultAnswers,code,typeName:code.split('').map(x=>letterNames[x]).join('・'),axes,domains,ranked,consistency,safety};
- result.omen=buildOmenResult(result);
- result.customerSummary=buildCustomerSummary(result);
- result.recommendedRituals=buildRecommendedRituals(result);
- result.internalNotes=buildInternalNotes(result);
- return result;
-}
-function strengthFromPct(secondPct){const distance=Math.abs(secondPct-50);if(distance>=28)return'高度傾向';if(distance>=16)return'明顯傾向';if(distance>=6)return'輕度傾向';return'平衡／情境型';}
-function consistencyStatus(axis,check){
- if(axis.letter==='X') return check===3?'一致：平衡':'需留意：主測驗平衡但檢核有偏向';
- const first=axis.letter===axisMetaFromLetter(axis.letter).first;
- if(check===3)return'輕度差異：可能依情境改變';
- const checkFirst=check<=2;
- return checkFirst===first?'一致性良好':'明顯差異：建議人工確認';
-}
-function axisMetaFromLetter(letter){return Object.values(axisMeta).find(m=>m.first===letter||m.second===letter);}
-function domainLevel(score){return score<=6?'目前不明顯':score<=9?'輕度關注':score<=12?'建議進一步評估':'優先評估面向';}
-
-function showResult(){
- const r=buildResult(); $('quiz').classList.add('hidden'); $('result').classList.remove('hidden');
- lastResult=r;
- $('resultEyebrow').textContent=r.assessment.isShort?`你的${r.assessment.label}初步結果`:'你的完整結果';
- $('typeCode').textContent=`${r.code} 型`; $('typeName').textContent=r.typeName;
- $('typeDescription').innerHTML=paragraphsHtml(r.customerSummary.typeDescription);
- $('challengeSummary').innerHTML=paragraphsHtml(r.customerSummary.challenges);
- $('improvementSummary').innerHTML=paragraphsHtml(r.customerSummary.improvements);
- renderOmenResult(r.omen);
- prepareResultSubmission();
- window.scrollTo({top:0,behavior:'smooth'});
-}
-function buildOmenResult(r){
- const topDomain=r.ranked[0]?.[0]||'overall';
- const omen=buildOmenProfile(r.code,topDomain);
- const score=r.ranked[0]?.[1]||3;
- return omen?{code:r.code,...omen,fortune:omenFortune(score)}:null;
-}
-function buildOmenProfile(code,domain='overall'){
- if(!isOmenCode(code))return null;
- const [arCode,ieCode,wlCode,bsCode]=code;
- const ar=omenAxisText.AR[arCode];
- const ie=omenAxisText.IE[ieCode];
- const wl=omenAxisText.WL[wlCode];
- const bs=omenAxisText.BS[bsCode];
- const special=specialOmenText[code]||{};
- return {
-  title:`${ar.title}${wl.title}${ie.title}${bs.title}象`,
-  verse:special.verse||[ie.verse,wl.verse,bs.verse,ar.verse],
-  song:special.song||[wl.song,ie.song,bs.song,ar.song],
-  explanation:`${omenDomainLead[domain]||omenDomainLead.overall}${ar.explanation}${ie.explanation}${wl.explanation}${bs.explanation}`,
-  suitable:[ar.suitable,ie.suitable,wl.suitable,bs.suitable].join('；'),
-  avoid:[ar.avoid,ie.avoid,wl.avoid,bs.avoid].join('；'),
-  direction:`${uniqueOmenTerms([ar.direction,ie.direction,wl.direction,bs.direction]).join('、')}；實際項目仍由老師確認。`,
-  visualClasses:[`omen-ar-${arCode.toLowerCase()}`,`omen-ie-${ieCode.toLowerCase()}`,`omen-wl-${wlCode.toLowerCase()}`,`omen-bs-${bsCode.toLowerCase()}`]
- };
-}
-function isOmenCode(code){return /^[ARX][IEX][WLX][BSX]$/.test(code||'');}
-function uniqueOmenTerms(terms){return [...new Set(terms.filter(Boolean))];}
-function allOmenCodes(){
- const codes=[];
- ['A','R','X'].forEach(ar=>['I','E','X'].forEach(ie=>['W','L','X'].forEach(wl=>['B','S','X'].forEach(bs=>codes.push(`${ar}${ie}${wl}${bs}`)))));
- return codes;
-}
-function omenFortune(score){
- if(score<=6)return'平順';
- if(score<=9)return'平中有阻';
- if(score<=12)return'慎行可轉';
- return'凶中求轉';
-}
-function renderOmenResult(omen){
- const section=$('omenResult');
- section.classList.toggle('hidden',!omen);
- if(!omen)return;
- $('omenCode').textContent=`${omen.code} 象意`;
- $('omenTitle').textContent=omen.title;
- $('omenFortune').textContent=omen.fortune;
- $('omenVerse').innerHTML=omen.verse.map(line=>escapeHtml(line)).join('<br>');
- $('omenSong').innerHTML=omen.song.map(line=>escapeHtml(line)).join('<br>');
- $('omenExplanation').textContent=omen.explanation;
- $('omenSuitable').textContent=omen.suitable;
- $('omenAvoid').textContent=omen.avoid;
- $('omenDirection').textContent=omen.direction;
- const symbol=$('omenSymbol');
- if(symbol)symbol.className=`omen-symbol ${omen.visualClasses.join(' ')}`;
-}
-function showOmenPreview(code,score=11){
- const omen=buildOmenProfile(code,previewDomainForCode(code));
- if(!omen)return;
- document.body.classList.add('preview-mode');
- $('landing').classList.add('hidden');
- $('quiz').classList.add('hidden');
- $('result').classList.remove('hidden');
- $('resultEyebrow').textContent='象意卡樣稿';
- $('typeCode').textContent=`${code} 型`;
- $('typeName').textContent=code.split('').map(letter=>letterNames[letter]).join('・');
- $('restartBtn').textContent='返回測驗';
- setupOmenPreviewControls(code,score);
- renderOmenResult({code,...omen,fortune:omenFortune(score)});
- window.scrollTo({top:0,behavior:'smooth'});
-}
-function previewDomainForCode(code){
- if(code?.[2]==='W')return'career';
- if(code?.[2]==='L')return'love';
- return'overall';
-}
-function setupOmenPreviewControls(code,score){
- const controls=$('omenPreviewControls');
- const codeSelect=$('omenPreviewSelect');
- const fortuneSelect=$('omenFortunePreviewSelect');
- if(!controls||!codeSelect||!fortuneSelect)return;
- controls.classList.remove('hidden');
- if(!codeSelect.options.length){
-  allOmenCodes().forEach(omenCode=>{
-   const option=document.createElement('option');
-   const profile=buildOmenProfile(omenCode,previewDomainForCode(omenCode));
-   option.value=omenCode;
-   option.textContent=`${omenCode}・${profile.title}`;
-   codeSelect.appendChild(option);
-  });
-  codeSelect.onchange=()=>updateOmenPreview(codeSelect.value,Number(fortuneSelect.value));
-  fortuneSelect.onchange=()=>updateOmenPreview(codeSelect.value,Number(fortuneSelect.value));
- }
- codeSelect.value=code;
- fortuneSelect.value=String(score);
-}
-function updateOmenPreview(code,score){
- const url=new URL(location.href);
- url.searchParams.set('preview',code);
- url.searchParams.set('fortune',String(score));
- history.replaceState({},'',url);
- showOmenPreview(code,score);
-}
-function buildCustomerSummary(r){
- const top=customerTopDomains(r);
- return {
-  typeDescription:[
-   `你在這次${r.assessment.label}的主要類型是 ${r.code} 型，整體呈現「${r.typeName}」的狀態。`,
-   ...Object.entries(r.axes).map(([dim,a])=>axisPublicCopy[dim][a.letter].trait),
-   r.assessment.isShort?'這是依主題短版題目整理的初步輪廓，反映你最近三到六個月的狀態。':'這不是固定性格或命運定論，而是你最近三到六個月的狀態輪廓。'
-  ],
-  challenges:buildChallengeSummary(r,top),
-  improvements:buildImprovementSummary(r,top)
- };
-}
-function customerTopDomains(r){
- const noticeable=r.ranked.filter(([,score])=>score>=7);
- return (noticeable.length?noticeable:r.ranked.slice(0,2)).slice(0,3);
-}
-function buildChallengeSummary(r,top){
- const lines=Object.entries(r.axes).map(([dim,a])=>axisPublicCopy[dim][a.letter].challenge);
- if(top[0]&&top[0][1]<=6){
-  lines.push('目前沒有單一困擾呈現特別強烈的警訊，比較適合先做生活節奏與方向盤點。');
- }else{
-  top.forEach(([key])=>lines.push(domainPublicCopy[key].challenge));
- }
- return lines;
-}
-function buildImprovementSummary(r,top){
- const lines=Object.entries(r.axes).map(([dim,a])=>axisPublicCopy[dim][a.letter].improvement);
- top.forEach(([key])=>lines.push(domainPublicCopy[key].improvement));
- return uniqueLines(lines);
-}
-function buildInternalNotes(r){
- const checkItems=[];
- if(r.assessment.isShort)checkItems.push(`${r.assessment.label}共 ${r.assessment.questionCount} 題：主要類型為短版初步結果，適合搭配客人描述人工確認。`);
- Object.entries(r.consistency).forEach(([dim,text])=>checkItems.push(`${dim} 軸：${text}`));
- if(r.safety.expectation>=4)checkItems.push('對科儀的期待偏高：建議先說明科儀不能取代個人行動與現實調整。');
- if(r.safety.repeat>=4)checkItems.push('可能有重複處理傾向：應先盤點近期已做過的項目，避免短期重複。');
- if(r.safety.control>=4)checkItems.push('涉及希望改變特定他人：服務應以釐清關係、自身調整與尊重他人意願為原則。');
- if(r.safety.professional>=4)checkItems.push('可能涉及醫療、心理、法律、債務或人身安全：應優先尋求相關專業協助。');
- if(r.safety.readiness>=4)checkItems.push('受測者願意配合實際行動，較適合進入後續完整評估。');
- return checkItems;
-}
-function buildRecommendedRituals(r){
- const items=[];
- const add=(item,reason)=>{
-  if(!item||items.some(line=>line.startsWith(`${item}：`)||line===item)) return;
-  items.push(reason?`${item}：${reason}`:item);
- };
- if(r.safety.professional>=4){
-  add('人工確認優先', '問卷顯示可能涉及醫療、心理、法律、債務或人身安全議題，建議先人工關懷確認，再決定是否安排科儀。');
- }
- const topDomains=customerTopDomains(r).filter(([,score])=>score>=7);
- topDomains.forEach(([key])=>{
-  const rec=ritualRecommendations[key];
-  if(rec) add(rec.item,rec.reason);
- });
- [r.axes.BS?.letter,r.axes.IE?.letter,r.axes.WL?.letter,r.axes.AR?.letter].forEach(letter=>{
-  const rec=axisRitualRecommendations[letter];
-  if(rec) add(rec.item,rec.reason);
- });
- if(!items.length) add('補運方向人工評估', '目前沒有單一面向特別突出，建議由老師依個案狀況確認補運方向。');
- return items.slice(0,4);
-}
-function paragraphsHtml(lines){return lines.map(line=>`<p>${escapeHtml(line)}</p>`).join('');}
-function escapeHtml(text){return String(text).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));}
-function uniqueLines(lines){return [...new Set(lines)];}
-function prepareResultSubmission(){
- const panel=$('submitResultPanel');
- if(!panel) return;
- panel.classList.toggle('hidden',!GOOGLE_SCRIPT_URL);
- if($('submitConsent')) $('submitConsent').checked=false;
- setSubmitStatus('');
- if($('submitResultBtn')) $('submitResultBtn').disabled=false;
-}
-async function submitResult(){
- if(!GOOGLE_SCRIPT_URL||submittingResult) return;
- if(!$('submitConsent').checked){setSubmitStatus('請先勾選同意送出本次結果。','warn');return;}
- submittingResult=true;
- $('submitResultBtn').disabled=true;
- setSubmitStatus('送出中...');
- try{
-  const result=lastResult||buildResult();
-  const payload=buildSubmissionPayload(result);
-  await fetch(GOOGLE_SCRIPT_URL,{
-   method:'POST',
-   mode:'no-cors',
-   headers:{'Content-Type':'text/plain;charset=utf-8'},
-   body:JSON.stringify(payload)
-  });
-  localStorage.setItem('luckAssessmentLastSubmittedAt',payload.submittedAt);
-  setSubmitStatus('已送出，謝謝。','ok');
- }catch(err){
-  setSubmitStatus('送出失敗，請稍後再試。','warn');
-  $('submitResultBtn').disabled=false;
- }finally{
-  submittingResult=false;
- }
-}
-function buildSubmissionPayload(result){
- return {
-  source:'luck-assessment-v1',
-  submittedAt:new Date().toISOString(),
-  pageUrl:location.href,
-  userAgent:navigator.userAgent,
-  result
- };
-}
-function setSubmitStatus(message,state=''){
- const status=$('submitStatus');
- if(!status) return;
- status.textContent=message;
- status.className=`submit-status ${state}`.trim();
-}
+initLineIdentity();

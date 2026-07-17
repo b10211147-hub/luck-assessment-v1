@@ -1,170 +1,71 @@
 <!doctype html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>運勢改善健檢｜奉母宮x神明仲介所</title>
-  <meta name="description" content="提供感情、事業、財運、家運短版與完整版本的運勢改善健檢。" />
-  <link rel="stylesheet" href="styles.css?v=81-omens" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#8f1d2c">
+  <title>奉母宮｜線上祈福報名</title>
+  <meta name="description" content="奉母宮線上祈福活動報名與進度查詢">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main class="app-shell">
-    <section id="landing" class="panel hero">
-      <p class="eyebrow">奉母宮x神明仲介所</p>
-      <h1>運勢改善健檢</h1>
-      <p id="landingLead" class="lead">先選擇這次最想了解的主題，再開始作答。</p>
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="brand" href="#top"><span class="brand__mark">奉</span><div><b>奉母宮</b><small>線上祈福服務</small></div></a>
+      <span class="header-note">一站式線上報名</span>
+    </div>
+  </header>
+  <header id="top" class="hero">
+    <div class="hero__shade"></div>
+    <div class="hero__copy">
+      <p class="eyebrow">心誠則靈・福澤綿長</p>
+      <h1>線上祈福<br><span>安心完成報名</span></h1>
+      <p>選擇法會、填寫祈福資料，即可取得專屬報名編號。</p>
+    </div>
+  </header>
 
-      <fieldset class="mode-picker">
-        <legend>想了解哪個面向？</legend>
-        <div class="mode-options">
-          <label class="mode-option">
-            <input type="radio" name="quizMode" value="love" />
-            <span><strong>感情</strong><small>感情、人際、內在</small></span>
-          </label>
-          <label class="mode-option">
-            <input type="radio" name="quizMode" value="career" />
-            <span><strong>事業</strong><small>事業、財運、人際</small></span>
-          </label>
-          <label class="mode-option">
-            <input type="radio" name="quizMode" value="wealth" />
-            <span><strong>財運</strong><small>財運、事業、整體</small></span>
-          </label>
-          <label class="mode-option">
-            <input type="radio" name="quizMode" value="home" />
-            <span><strong>家運</strong><small>家運、人際、內在</small></span>
-          </label>
-          <label class="mode-option">
-            <input type="radio" name="quizMode" value="full" />
-            <span><strong>完整版</strong><small>八大面向完整盤點</small></span>
-          </label>
-        </div>
-      </fieldset>
+  <main>
+    <nav id="events" class="tabs" aria-label="主要功能">
+      <button class="tab is-active" data-view="activities">活動報名</button>
+      <button class="tab" data-view="orders">我的報名</button>
+    </nav>
 
-      <div class="notice">
-        <strong>作答提醒</strong>
-        <p id="modeNotice">請先選擇一個測驗主題。作答時請依最近三至六個月的真實狀況回答。</p>
-      </div>
-      <div class="form-grid compact">
-        <label>姓名或暱稱<input id="nameInput" type="text" placeholder="例如：小安" /></label>
-        <label>LINE 名稱<input id="lineInput" type="text" placeholder="可留空" /></label>
-        <label class="full">目前最想改善的問題<textarea id="concernInput" rows="3" placeholder="例如：工作停滯、感情反覆、財運不穩"></textarea></label>
-      </div>
-      <button id="startBtn" class="primary" disabled>選擇主題後開始</button>
+    <section id="activitiesView" class="view">
+      <div class="section-heading"><div><span>近期法會</span><h2>選擇祈福活動</h2></div><p>左右滑動查看更多</p></div>
+      <div id="activityList" class="activity-list" aria-live="polite"></div>
     </section>
 
-    <section id="quiz" class="panel hidden">
-      <div class="topbar">
-        <div>
-          <p id="sectionLabel" class="eyebrow"></p>
-          <h2 id="questionCounter"></h2>
-        </div>
-        <div class="topbar-actions">
-          <button id="changeModeBtn" class="ghost">更換主題</button>
-          <button id="saveBtn" class="ghost">儲存進度</button>
-        </div>
-      </div>
-      <div class="progress-wrap"><div id="progressBar" class="progress-bar"></div></div>
-      <article id="questionCard" class="question-card"></article>
-      <div class="actions">
-        <button id="prevBtn" class="secondary">上一題</button>
-        <button id="nextBtn" class="primary">下一題</button>
-      </div>
+    <section id="formView" class="view is-hidden">
+      <button id="backBtn" class="back-btn">← 返回活動</button>
+      <div id="selectedActivity" class="selected-activity"></div>
+      <form id="registrationForm" class="form-card">
+        <div class="step-title"><span>01</span><div><small>報名資料</small><h2>填寫祈福資料</h2></div></div>
+        <label>報名人姓名<span>*</span><input name="name" autocomplete="name" required placeholder="請輸入真實姓名"></label>
+        <label>生日（國曆）<span>*</span><input name="birthday" type="date" autocomplete="bday" required></label>
+        <label>居住地址（最常待的地方）<span>*</span><input name="address" autocomplete="street-address" required placeholder="請填寫平時最常居住的完整地址"></label>
+        <label>祈福人數<span>*</span><select name="people" required></select></label>
+        <label>祈福姓名<textarea name="prayerNames" rows="3" placeholder="多人請以頓號分隔，例如：王大明、王小美"></textarea></label>
+        <label>備註<textarea name="note" rows="3" placeholder="其他需要協助的事項"></textarea></label>
+        <div class="consent"><input id="consent" type="checkbox" required><label for="consent">我確認資料正確，並同意為本次報名用途使用。</label></div>
+        <div class="total"><span>報名費用</span><strong id="totalPrice">隨喜</strong></div>
+        <button class="primary-btn" type="submit">確認送出報名</button>
+      </form>
     </section>
 
-    <section id="result" class="panel hidden">
-      <div class="result-head">
-        <div>
-          <p id="resultEyebrow" class="eyebrow">你的初步結果</p>
-          <h2 id="typeCode"></h2>
-          <p id="typeName" class="lead"></p>
-        </div>
-        <button id="restartBtn" class="ghost">重新選擇</button>
-      </div>
-
-      <div id="omenPreviewControls" class="omen-preview-controls hidden">
-        <label>查看其他象意
-          <select id="omenPreviewSelect"></select>
-        </label>
-        <label>吉凶層級
-          <select id="omenFortunePreviewSelect">
-            <option value="5">平順</option>
-            <option value="8">平中有阻</option>
-            <option value="11">慎行可轉</option>
-            <option value="14">凶中求轉</option>
-          </select>
-        </label>
-      </div>
-
-      <section id="omenResult" class="omen-result hidden" aria-labelledby="omenTitle">
-        <div class="omen-heading">
-          <div>
-            <p id="omenCode" class="omen-kicker"></p>
-            <h3 id="omenTitle"></h3>
-          </div>
-          <div class="omen-fortune"><span>吉凶</span><strong id="omenFortune"></strong></div>
-        </div>
-
-        <div class="omen-layout">
-          <div id="omenSymbol" class="omen-symbol" aria-hidden="true">
-            <i class="omen-ray"></i><i class="omen-ray"></i><i class="omen-ray"></i><i class="omen-ray"></i>
-            <i class="omen-ray"></i><i class="omen-ray"></i><i class="omen-ray"></i>
-            <div class="omen-sun"></div>
-            <div class="omen-focus"></div>
-            <div class="omen-knot"></div>
-            <div class="omen-gate"></div>
-            <div class="omen-path"></div>
-            <div class="omen-water"><i></i><i></i><i></i></div>
-            <div class="omen-figure"></div>
-          </div>
-
-          <div class="omen-body">
-            <div class="omen-copy-block omen-verse">
-              <h4>讖曰</h4>
-              <p id="omenVerse"></p>
-            </div>
-            <div class="omen-copy-block omen-song">
-              <h4>頌曰</h4>
-              <p id="omenSong"></p>
-            </div>
-            <div class="omen-copy-block">
-              <h4>解象</h4>
-              <p id="omenExplanation"></p>
-            </div>
-            <dl class="omen-guidance">
-              <div><dt>宜</dt><dd id="omenSuitable"></dd></div>
-              <div><dt>忌</dt><dd id="omenAvoid"></dd></div>
-              <div><dt>補運方向</dt><dd id="omenDirection"></dd></div>
-            </dl>
-          </div>
-        </div>
-      </section>
-
-      <section class="result-section public-result">
-        <h3>類型描述</h3>
-        <div id="typeDescription" class="result-copy"></div>
-      </section>
-
-      <section class="result-section public-result">
-        <h3>目前面臨的困境</h3>
-        <div id="challengeSummary" class="result-copy"></div>
-      </section>
-
-      <section class="result-section public-result">
-        <h3>大概可以怎麼改善</h3>
-        <div id="improvementSummary" class="result-copy"></div>
-      </section>
-
-      <section id="submitResultPanel" class="result-section submit-result hidden">
-        <h3>送出結果</h3>
-        <label class="consent-row"><input id="submitConsent" type="checkbox" />我同意將本次作答結果送交奉母宮x神明仲介所保存與後續評估。</label>
-        <button id="submitResultBtn" class="primary">送出結果</button>
-        <p id="submitStatus" class="submit-status"></p>
-      </section>
-
-      <p class="disclaimer">本測驗僅作為近期狀態與運勢傾向盤點，不屬於命運定論。</p>
+    <section id="successView" class="view is-hidden">
+      <div class="success-card"><div class="success-icon">✓</div><p>報名資料已送出</p><h2>祈福報名成功</h2><div id="orderSummary"></div><button id="newOrderBtn" class="primary-btn">返回活動列表</button></div>
     </section>
+
+    <section id="ordersView" class="view is-hidden">
+      <div class="section-heading"><div><span>進度查詢</span><h2>查詢我的報名</h2></div></div>
+      <form id="lookupForm" class="lookup-card"><label>專屬報名編號<input name="id" autocomplete="off" required placeholder="例如 FM202607161234"></label><button class="primary-btn">查詢報名紀錄</button></form>
+      <div id="orderList" class="order-list"></div>
+    </section>
+
   </main>
-
-  <script src="app.js?v=81-omens"></script>
+  <footer><b>奉母宮</b><span>一站式線上祈福報名</span></footer>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
