@@ -41,7 +41,7 @@
       <form id="registrationForm" class="form-card">
         <div class="step-title"><span>01</span><div><small>報名資料</small><h2>填寫祈福資料</h2></div></div>
         <label>報名人姓名<span>*</span><input name="name" autocomplete="name" required placeholder="請輸入真實姓名"></label>
-        <label>生日（國曆）<span>*</span><input name="birthday" type="date" autocomplete="bday" required></label>
+        <label>生日（國曆）<span>*</span><input name="birthday" type="text" inputmode="numeric" autocomplete="bday" placeholder="yyyy/mm/dd" pattern="\d{4}/\d{2}/\d{2}" maxlength="10" title="請依 yyyy/mm/dd 格式輸入，例如 1990/01/02" required></label>
         <label>居住地址（最常待的地方）<span>*</span><input name="address" autocomplete="street-address" required placeholder="請填寫平時最常居住的完整地址"></label>
         <label>祈福人數<span>*</span><select name="people" required></select></label>
         <label>祈福姓名<textarea name="prayerNames" rows="3" placeholder="多人請以頓號分隔，例如：王大明、王小美"></textarea></label>
