@@ -6,3 +6,4 @@
 footer{display:flex;flex-direction:column;gap:5px;padding:38px 20px;background:#5a171e;color:#fff;text-align:center}footer b{font-family:serif;font-size:23px;letter-spacing:.15em}footer span{color:#e5c98f}footer small{margin-top:10px;color:rgba(255,255,255,.6)}
 @media(min-width:700px){.hero{min-height:500px;padding:110px 24px}.hero__copy{padding-left:10px}}
 .registered{align-self:end;color:var(--wine);font-size:13px;font-weight:800}
+.consent a,.faq-group a{color:var(--wine);font-weight:800}.faq-group a{text-underline-offset:3px}
