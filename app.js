@@ -20,7 +20,7 @@ function renderActivities() {
 function openRegistration(id) {
   state.selected = state.activities.find((item) => item.id === id);
   const item = state.selected;
-  $("#selectedActivity").innerHTML = `<small>祈福活動</small><h3>${item.title}</h3>`;
+  $("#selectedActivity").innerHTML = `<small>祈福活動</small><h3>${item.title}</h3><p class="selected-activity__details">${item.details || item.description}</p>`;
   $("select[name=people]").innerHTML = Array.from({ length: 10 }, (_, i) => `<option value="${i + 1}">${i + 1} 人</option>`).join("");
   updateTotal(); showView("formView");
 }
