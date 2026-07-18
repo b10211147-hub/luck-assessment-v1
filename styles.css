@@ -8,3 +8,4 @@ footer{display:flex;flex-direction:column;gap:5px;padding:38px 20px;background:#
 .registered{align-self:end;color:var(--wine);font-size:13px;font-weight:800}.activity-card__body>p{white-space:pre-line}
 .consent a,.faq-group a{color:var(--wine);font-weight:800}.faq-group a{text-underline-offset:3px}
 .selected-activity__details{margin-top:16px!important;padding-top:16px;border-top:1px solid var(--line);white-space:pre-line;color:#554b45!important;line-height:1.85!important}
+.read-more{display:inline-block;margin-top:8px;padding:0;border:0;background:transparent;color:var(--wine);font:inherit;font-size:13px;font-weight:800;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
