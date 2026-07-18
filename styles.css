@@ -9,3 +9,4 @@ footer{display:flex;flex-direction:column;gap:5px;padding:38px 20px;background:#
 .consent a,.faq-group a{color:var(--wine);font-weight:800}.faq-group a{text-underline-offset:3px}
 .selected-activity__details{margin-top:16px!important;padding-top:16px;border-top:1px solid var(--line);white-space:pre-line;color:#554b45!important;line-height:1.85!important}
 .read-more{display:inline-block;margin-top:8px;padding:0;border:0;background:transparent;color:var(--wine);font:inherit;font-size:13px;font-weight:800;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+#formView .selected-activity h3{font-size:22px}#formView .selected-activity__details{font-size:15px}#formView .step-title h2{font-size:23px}#formView .form-card>label{font-size:15px}#formView input,#formView select,#formView textarea{font-size:16px}#formView .consent label{font-size:13px}#formView .total{font-size:16px}#formView .primary-btn{font-size:17px}
