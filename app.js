@@ -26,14 +26,17 @@ function configureRegistrationFields(isEnterprise) {
   const name = $('[name="name"]');
   const birthday = $('[name="birthday"]');
   const address = $('[name="address"]');
-  setFieldText("name", isEnterprise ? "公司行號名" : "報名人姓名");
+  const prayerNames = $('[name="prayerNames"]');
+  setFieldText("name", "報名人姓名");
   setFieldText("birthday", isEnterprise ? "創立日期（民國）" : "生日（民國）");
   setFieldText("address", isEnterprise ? "公司地址（營業地址）" : "居住地址（最常待的地方）");
   setFieldText("people", isEnterprise ? "公司人數" : "祈福人數");
-  name.placeholder = isEnterprise ? "請輸入公司或商號名稱" : "請輸入真實姓名";
+  setFieldText("prayerNames", isEnterprise ? "祈福公司行號名" : "祈福姓名");
+  name.placeholder = "請輸入真實姓名";
   birthday.placeholder = isEnterprise ? "例如 0840228" : "例如 0840228";
   birthday.title = isEnterprise ? "請輸入 7 位民國創立日期，例如 0840228" : "請輸入 7 位民國生日，例如 0840228";
   address.placeholder = isEnterprise ? "請填寫公司實際營業地址" : "請填寫平時最常居住的完整地址";
+  prayerNames.placeholder = isEnterprise ? "請輸入祈福的公司或商號名稱" : "多人請以頓號分隔，例如：王大明、王小美";
 }
 
 function openRegistration(id) {
@@ -54,7 +57,7 @@ async function submitRegistration(event) {
     const invalidField = form.querySelector(":invalid");
     const isEnterprise = state.selected?.id === "enterprise-2026";
     const messages = isEnterprise ? {
-      name: "請輸入公司行號名",
+      name: "請輸入報名人姓名",
       birthday: "創立日期請輸入 7 位民國日期，例如 0840228",
       address: "請輸入公司營業地址",
       people: "請選擇公司人數",
