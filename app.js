@@ -31,7 +31,7 @@ async function submitRegistration(event) {
   event.preventDefault();
   const button = event.submitter; button.disabled = true; button.textContent = "資料送出中…";
   try {
-    const body = Object.fromEntries(new FormData(event.currentTarget)); body.birthday = body.birthday.replaceAll("/", "-"); body.activityId = state.selected.id; body.lineIdToken = state.lineIdToken;
+    const body = Object.fromEntries(new FormData(event.currentTarget)); body.activityId = state.selected.id; body.lineIdToken = state.lineIdToken;
     const response = await fetch(apiUrl("/api/orders"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
     const order = await response.json(); if (!response.ok) throw new Error(order.error);
     const notice = order.lineNotificationSent ? "專屬編號已傳送至你的 LINE" : "請先截圖保存專屬編號；正式 LINE 通知尚未連線";
