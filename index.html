@@ -38,7 +38,7 @@
     <section id="formView" class="view is-hidden">
       <button id="backBtn" class="back-btn">← 返回活動</button>
       <div id="selectedActivity" class="selected-activity"></div>
-      <form id="registrationForm" class="form-card">
+      <form id="registrationForm" class="form-card" novalidate>
         <div class="step-title"><span>01</span><div><small>報名資料</small><h2>填寫祈福資料</h2></div></div>
         <label>報名人姓名<span>*</span><input name="name" autocomplete="name" required placeholder="請輸入真實姓名"></label>
         <label>生日（民國）<span>*</span><input name="birthday" type="text" inputmode="numeric" autocomplete="bday" placeholder="例如 0840228" pattern="[0-9]{7}" maxlength="7" title="請輸入 7 位民國生日，例如 0840228" required></label>

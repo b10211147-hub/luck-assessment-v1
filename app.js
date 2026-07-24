@@ -29,7 +29,20 @@ function updateTotal() { $("#totalPrice").textContent = "隨喜"; }
 
 async function submitRegistration(event) {
   event.preventDefault();
-  const button = event.submitter; button.disabled = true; button.textContent = "資料送出中…";
+  const form = event.currentTarget;
+  if (!form.checkValidity()) {
+    const invalidField = form.querySelector(":invalid");
+    const messages = {
+      name: "請輸入報名人姓名",
+      birthday: "生日請輸入 7 位民國日期，例如 0840228",
+      address: "請輸入居住地址",
+      people: "請選擇祈福人數",
+    };
+    showToast(invalidField?.id === "consent" ? "請勾選同意隱私權與個資告知事項" : (messages[invalidField?.name] || "請確認必填資料"));
+    invalidField?.focus();
+    return;
+  }
+  const button = event.submitter || form.querySelector('button[type="submit"]'); button.disabled = true; button.textContent = "資料送出中…";
   try {
     const body = Object.fromEntries(new FormData(event.currentTarget)); body.activityId = state.selected.id; body.lineIdToken = state.lineIdToken;
     const response = await fetch(apiUrl("/api/orders"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
