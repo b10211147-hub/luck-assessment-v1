@@ -49,7 +49,7 @@ async function submitRegistration(event) {
     const order = await response.json(); if (!response.ok) throw new Error(order.error);
     const notice = order.lineNotificationSent ? "專屬編號已傳送至你的 LINE" : "請先截圖保存專屬編號；正式 LINE 通知尚未連線";
     $("#orderSummary").innerHTML = `<div class="summary"><div><span>專屬報名編號</span><b>${order.id}</b></div><div><span>祈福活動</span><b>${order.activityTitle}</b></div><div><span>祈福人數</span><b>${order.people} 人</b></div><div><span>報名費用</span><strong>隨喜</strong></div><div><span>LINE 通知</span><b>${notice}</b></div></div>`;
-    event.currentTarget.reset(); showView("successView");
+    form.reset(); showView("successView");
   } catch (error) { showToast(error.message || "報名失敗，請稍後再試"); }
   finally { button.disabled = false; button.textContent = "確認送出報名"; }
 }
