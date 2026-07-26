@@ -29,6 +29,11 @@
       <button class="tab is-active" data-view="activities">活動報名</button>
       <button class="tab" data-view="orders">我的報名</button>
     </nav>
+    <div id="lineIdentityStatus" class="line-identity is-loading" role="status" aria-live="polite">
+      <span class="line-identity__icon">•••</span>
+      <strong id="lineIdentityText">正在連接 LINE 身分…</strong>
+      <button id="retryLineBtn" type="button" hidden>重新連接</button>
+    </div>
 
     <section id="activitiesView" class="view">
       <div class="section-heading"><div><span>近期法會</span><h2>選擇祈福活動</h2></div><p>左右滑動查看更多</p></div>
@@ -83,7 +88,7 @@
         </details>
         <details>
           <summary>如何查詢我的報名？<i aria-hidden="true"></i></summary>
-          <p>點選頁面上方「我的報名」，輸入 LINE 收到的專屬報名編號，即可查看報名紀錄。</p>
+          <p>點選頁面上方「我的報名」，輸入報名成功畫面顯示的專屬報名編號，即可查看報名紀錄。</p>
         </details>
         <details>
           <summary>專屬報名編號要如何保存？<i aria-hidden="true"></i></summary>
@@ -104,6 +109,6 @@
   <footer><b>奉母宮</b><span>一站式線上祈福報名</span></footer>
   <div id="toast" class="toast" role="status"></div>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script src="app.js?v=20260724-5"></script>
+  <script src="app.js?v=20260726-1"></script>
 </body>
 </html>

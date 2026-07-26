@@ -1,19 +1,41 @@
 const $ = (selector) => document.querySelector(selector);
 const API_BASE = "https://fengmugong-registration-api.b10211147.chatgpt.site";
 const apiUrl = (path) => `${API_BASE}${path}`;
-const state = { activities: [], selected: null, lineIdToken: "", liffReady: false };
+const state = { activities: [], selected: null, lineIdToken: "", lineDisplayName: "", liffReady: false, identityStatus: "loading" };
 const views = ["activitiesView", "formView", "successView", "ordersView"];
+let lineIdentityPromise;
 
 function money(value) { return `NT$${Number(value).toLocaleString("zh-TW")}`; }
 function showToast(message) { const toast = $("#toast"); toast.textContent = message; toast.classList.add("is-visible"); setTimeout(() => toast.classList.remove("is-visible"), 2400); }
 function showView(id) { views.forEach((view) => $("#" + view).classList.toggle("is-hidden", view !== id)); window.scrollTo({ top: 300, behavior: "smooth" }); }
 function setTab(name) { document.querySelectorAll(".tab").forEach((tab) => tab.classList.toggle("is-active", tab.dataset.view === name)); }
 
+function renderIdentityStatus() {
+  const box = $("#lineIdentityStatus");
+  const icon = box.querySelector(".line-identity__icon");
+  const retry = $("#retryLineBtn");
+  box.className = `line-identity is-${state.identityStatus}`;
+  if (state.identityStatus === "ready") {
+    icon.textContent = "✓";
+    $("#lineIdentityText").textContent = `已連接 LINE：${state.lineDisplayName}`;
+    retry.hidden = true;
+  } else if (state.identityStatus === "error") {
+    icon.textContent = "!";
+    $("#lineIdentityText").textContent = "LINE 身分連接失敗";
+    retry.hidden = false;
+  } else {
+    icon.textContent = "•••";
+    $("#lineIdentityText").textContent = "正在連接 LINE 身分…";
+    retry.hidden = true;
+  }
+}
+
 function renderActivities() {
+  const locked = !state.liffReady;
   $("#activityList").innerHTML = state.activities.map((item) => `
     <article class="activity-card">
       <div class="activity-card__top"><h3>${item.title}</h3></div>
-      <div class="activity-card__body"><p>${[...item.description].slice(0, 50).join("")}</p>${item.details ? `<button class="read-more" data-register="${item.id}">閱讀更多</button>` : ""}<div class="meta"><div><small>報名費用</small><strong>隨喜</strong></div><span class="registered">已報名 ${item.registered} 名</span></div><button class="primary-btn" data-register="${item.id}">立即報名</button></div>
+      <div class="activity-card__body"><p>${[...item.description].slice(0, 50).join("")}</p>${item.details ? `<button class="read-more" data-register="${item.id}" ${locked ? "disabled" : ""}>閱讀更多</button>` : ""}<div class="meta"><div><small>報名費用</small><strong>隨喜</strong></div><span class="registered">已報名 ${item.registered} 名</span></div><button class="primary-btn" data-register="${item.id}" ${locked ? "disabled" : ""}>${locked ? "連接 LINE 中…" : "立即報名"}</button></div>
     </article>`).join("");
 }
 
@@ -40,6 +62,10 @@ function configureRegistrationFields(isEnterprise) {
 }
 
 function openRegistration(id) {
+  if (!state.liffReady) {
+    showToast("正在連接 LINE 身分，請稍候");
+    return;
+  }
   state.selected = state.activities.find((item) => item.id === id);
   const item = state.selected;
   configureRegistrationFields(item.id === "enterprise-2026");
@@ -53,6 +79,13 @@ function updateTotal() { $("#totalPrice").textContent = "隨喜"; }
 async function submitRegistration(event) {
   event.preventDefault();
   const form = event.currentTarget;
+  if (!state.liffReady) {
+    await lineIdentityPromise;
+    if (!state.liffReady) {
+      showToast("LINE 身分尚未連接完成，請重新連接");
+      return;
+    }
+  }
   if (!form.checkValidity()) {
     const invalidField = form.querySelector(":invalid");
     const isEnterprise = state.selected?.id === "enterprise-2026";
@@ -95,20 +128,45 @@ $("#newOrderBtn").addEventListener("click", () => { setTab("activities"); showVi
 $("select[name=people]").addEventListener("change", updateTotal);
 $("#registrationForm").addEventListener("submit", submitRegistration);
 $("#lookupForm").addEventListener("submit", lookupOrders);
+$("#retryLineBtn").addEventListener("click", () => { lineIdentityPromise = initLineIdentity(); });
 
 fetch(apiUrl("/api/activities")).then((response) => response.json()).then((items) => { state.activities = items; renderActivities(); }).catch(() => showToast("活動資料載入失敗"));
 
 async function initLineIdentity() {
+  state.identityStatus = "loading";
+  state.liffReady = false;
+  renderIdentityStatus();
+  renderActivities();
   try {
     const config = await fetch(apiUrl("/api/config")).then((response) => response.json());
-    if (!config.liffId || !window.liff) return;
+    if (!config.liffId || !window.liff) throw new Error("LIFF unavailable");
     await liff.init({ liffId: config.liffId });
-    if (!liff.isLoggedIn()) { liff.login({ redirectUri: window.location.href }); return; }
+    if (!liff.isLoggedIn()) {
+      liff.login({ redirectUri: window.location.href });
+      return false;
+    }
     state.lineIdToken = liff.getIDToken() || "";
-    state.liffReady = Boolean(state.lineIdToken);
+    if (!state.lineIdToken) throw new Error("Missing LINE ID token");
+    const response = await fetch(apiUrl("/api/identity"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lineIdToken: state.lineIdToken }) });
+    const identity = await response.json();
+    if (!response.ok) throw new Error(identity.error || "LINE identity verification failed");
+    state.lineDisplayName = identity.displayName;
+    state.liffReady = true;
+    state.identityStatus = "ready";
+    renderIdentityStatus();
+    renderActivities();
+    return true;
   } catch (error) {
+    state.lineIdToken = "";
+    state.lineDisplayName = "";
+    state.liffReady = false;
+    state.identityStatus = "error";
+    renderIdentityStatus();
+    renderActivities();
     console.warn("LINE identity is not available", error);
+    return false;
   }
 }
 
-initLineIdentity();
+renderIdentityStatus();
+lineIdentityPromise = initLineIdentity();
