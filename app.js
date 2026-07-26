@@ -1,7 +1,7 @@
 const $ = (selector) => document.querySelector(selector);
 const API_BASE = "https://fengmugong-registration-api.b10211147.chatgpt.site";
 const apiUrl = (path) => `${API_BASE}${path}`;
-const state = { activities: [], selected: null, lineIdToken: "", lineDisplayName: "", liffReady: false, identityStatus: "loading" };
+const state = { activities: [], selected: null, lineIdToken: "", lineDisplayName: "", liffReady: false, identityStatus: "loading", sourceCode: "main" };
 const views = ["activitiesView", "formView", "successView", "ordersView"];
 let lineIdentityPromise;
 
@@ -106,7 +106,7 @@ async function submitRegistration(event) {
   }
   const button = event.submitter || form.querySelector('button[type="submit"]'); button.disabled = true; button.textContent = "資料送出中…";
   try {
-    const body = Object.fromEntries(new FormData(event.currentTarget)); body.activityId = state.selected.id; body.lineIdToken = state.lineIdToken;
+    const body = Object.fromEntries(new FormData(event.currentTarget)); body.activityId = state.selected.id; body.lineIdToken = state.lineIdToken; body.sourceCode = state.sourceCode;
     const response = await fetch(apiUrl("/api/orders"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
     const order = await response.json(); if (!response.ok) throw new Error(order.error);
     $("#orderSummary").innerHTML = `<div class="summary"><div><span>專屬報名編號</span><b>${order.id}</b></div><div><span>祈福活動</span><b>${order.activityTitle}</b></div><div><span>祈福人數</span><b>${order.people} 人</b></div><div><span>報名費用</span><strong>隨喜</strong></div><div><span>重要提醒</span><b>請截圖保存專屬報名編號</b></div></div>`;
@@ -141,6 +141,7 @@ async function initLineIdentity() {
     const config = await fetch(apiUrl("/api/config")).then((response) => response.json());
     if (!config.liffId || !window.liff) throw new Error("LIFF unavailable");
     await liff.init({ liffId: config.liffId });
+    state.sourceCode = new URLSearchParams(window.location.search).get("src")?.trim().toLowerCase() || "main";
     if (!liff.isLoggedIn()) {
       liff.login({ redirectUri: window.location.href });
       return false;
