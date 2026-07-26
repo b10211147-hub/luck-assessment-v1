@@ -128,7 +128,12 @@ $("#newOrderBtn").addEventListener("click", () => { setTab("activities"); showVi
 $("select[name=people]").addEventListener("change", updateTotal);
 $("#registrationForm").addEventListener("submit", submitRegistration);
 $("#lookupForm").addEventListener("submit", lookupOrders);
-$("#retryLineBtn").addEventListener("click", () => { lineIdentityPromise = initLineIdentity(); });
+$("#retryLineBtn").addEventListener("click", () => {
+  const url = new URL(window.location.href);
+  url.searchParams.delete("_line_refresh");
+  window.history.replaceState({}, "", url);
+  lineIdentityPromise = initLineIdentity();
+});
 
 fetch(apiUrl("/api/activities")).then((response) => response.json()).then((items) => { state.activities = items; renderActivities(); }).catch(() => showToast("活動資料載入失敗"));
 
@@ -150,7 +155,18 @@ async function initLineIdentity() {
     if (!state.lineIdToken) throw new Error("Missing LINE ID token");
     const response = await fetch(apiUrl("/api/identity"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lineIdToken: state.lineIdToken }) });
     const identity = await response.json();
-    if (!response.ok) throw new Error(identity.error || "LINE identity verification failed");
+    if (!response.ok) {
+      const url = new URL(window.location.href);
+      if (response.status === 401 && !url.searchParams.has("_line_refresh")) {
+        url.searchParams.set("_line_refresh", "1");
+        liff.logout();
+        liff.login({ redirectUri: url.toString() });
+        return false;
+      }
+      throw new Error(identity.error || "LINE identity verification failed");
+    }
+    const cleanUrl = new URL(window.location.href);
+    if (cleanUrl.searchParams.delete("_line_refresh")) window.history.replaceState({}, "", cleanUrl);
     state.lineDisplayName = identity.displayName;
     state.liffReady = true;
     state.identityStatus = "ready";
