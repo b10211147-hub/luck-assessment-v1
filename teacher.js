@@ -34,6 +34,8 @@ const elementGenerates = {木:"火",火:"土",土:"金",金:"水",水:"木"};
 const elementControls = {木:"土",土:"水",水:"火",火:"金",金:"木"};
 const advanceBranch = {亥:"子",寅:"卯",巳:"午",申:"酉",丑:"辰",辰:"未",未:"戌",戌:"丑"};
 const sixGods = ["青龍","朱雀","勾陳","螣蛇","白虎","玄武"];
+const sixGodMeanings = {青龍:"喜、順、享受",朱雀:"表達、消息、文書",勾陳:"拖延、穩定、土地",螣蛇:"猜疑、幻想、糾纏",白虎:"強烈、傷害、衝突",玄武:"隱藏、秘密、欺瞞"};
+const yaoTextDataPromise = import("./assets/yao-texts.mjs").then(module=>module.default).catch(()=>null);
 const godStart = {甲:0,乙:0,丙:1,丁:1,戊:2,己:3,庚:4,辛:4,壬:5,癸:5};
 const lineLabels = ["初","二","三","四","五","上"];
 const useGodOptions = ["父母","兄弟","子孫","妻財","官鬼"];
@@ -93,6 +95,27 @@ function simpleReadingItems(result) {
   const shi=result.rows[result.palace.shi-1],ying=result.rows[result.palace.ying-1];
   items.push(`世爻為${shi.relative}${shi.stem}${shi.branch}${shi.element}（${shi.strength}），應爻為${ying.relative}${ying.stem}${ying.branch}${ying.element}（${ying.strength}）；用來對照我方與對方／事情環境。`);
   return items;
+}
+function hexagramTextRecord(data,fullName) {
+  if(!data)return null;
+  const normalized=fullName.replaceAll("無","无");
+  return Object.entries(data).sort((a,b)=>b[0].length-a[0].length).find(([name])=>normalized.includes(name))?.[1]||null;
+}
+async function renderMovingLines(result) {
+  const moving=result.rows.filter(row=>row.moving);
+  if(!moving.length) {
+    $("#movingAnalysis").innerHTML="<p>本卦無動爻，以本卦、世用及月日生剋為主要觀察。</p>";
+    return;
+  }
+  $("#movingAnalysis").innerHTML="<p>正在載入動爻白話解釋…</p>";
+  const data=await yaoTextDataPromise;
+  if(currentResult!==result)return;
+  const record=hexagramTextRecord(data,result.hex.name);
+  $("#movingAnalysis").innerHTML=`<ul>${moving.map(row=>{
+    const yao=record?.yaoTexts?.[row.position-1];
+    if(yao){row.yaoText=yao.text;row.yaoTranslation=yao.translation;}
+    return `<li><strong>${row.position}爻・${row.lineTitle}</strong>：${row.relative}${row.stem}${row.branch}${row.element}，變 ${row.changedNaJia.stem}${row.changedNaJia.branch}${row.changedNaJia.element}${row.changeTags.length?`，判為<strong>${row.changeTags.join("、")}</strong>`:""}。<div class="line-reading">${yao?`<b>爻辭：</b>${yao.text}<br><b>白話：</b>${yao.translation}`:`<b>白話提示：</b>${positionMeanings[row.position-1]} 此爻由${row.yang?"陽":"陰"}轉${row.changedYang?"陽":"陰"}。`}</div></li>`;
+  }).join("")}</ul>`;
 }
 
 function trigramFromBits(bits) { return Object.keys(trigramBits).find((key) => trigramBits[key] === bits); }
@@ -209,7 +232,7 @@ function renderResult(result) {
   const useGods=getUseGods(result.input);
   $("#strengthSummary").innerHTML=[`月建 ${result.input.monthBranch}`,`日辰 ${result.input.dayStem}${result.input.dayBranch}`,`旬空 ${result.input.voidBranches||"未填"}`,`世爻 ${result.palace.shi}`,`應爻 ${result.palace.ying}`,`用神 ${useGods.length?useGods.map((god,index)=>`${index+1}.${god}`).join(" → "):"未指定"}`].map(x=>`<span>${x}</span>`).join("");
   $("#hexagramRows").innerHTML=[...result.rows].reverse().map(row=>`<tr class="${row.moving?"moving":""} ${useGods.includes(row.relative)?"use-god":""}">
-    <td>${row.god}</td><td>${row.relative}${useGods.includes(row.relative)?`・用${useGods.indexOf(row.relative)+1}`:""}</td><td>${row.stem}${row.branch}${row.element}</td><td>${row.strength}</td><td>${row.shiYing}</td>
+    <td title="${sixGodMeanings[row.god]}">${row.god}<br><small>${sixGodMeanings[row.god]}</small></td><td>${row.relative}${useGods.includes(row.relative)?`・用${useGods.indexOf(row.relative)+1}`:""}</td><td>${row.stem}${row.branch}${row.element}</td><td>${row.strength}</td><td>${row.shiYing}</td>
     <td><span class="yao"><i class="${row.yang?"yang":"yin"}"></i>${row.moving?`<b class="move">${row.value===9?"○":"×"}</b>`:""}</span></td>
     <td>${row.moving?`${row.changedNaJia.stem}${row.changedNaJia.branch}${row.changedNaJia.element}・${row.changedYang?"陽":"陰"}${row.changeTags.length?`<br><b>${row.changeTags.join("・")}</b>`:""}`:"—"}</td>
     <td>${row.fushen.length?row.fushen.map(f=>`伏：${f.relative}${f.stem}${f.branch}${f.element}<br>飛：${row.relative}${row.stem}${row.branch}${row.element}`).join("<br>"):"—"}</td></tr>`).join("");
@@ -217,10 +240,8 @@ function renderResult(result) {
     ? `<ol class="reading-list">${useGods.map((god,index)=>`<li><strong>${god}${index===0?"（主要）":""}</strong>：${useGodDetails(result,god)}</li>`).join("")}</ol>`
     : "<p>尚未指定用神。請依占問類別與實際取象，由老師選定後再看旺衰、生剋與動變。</p>";
   $("#simpleReading").innerHTML=`<ul class="reading-list">${simpleReadingItems(result).map(item=>`<li>${item}</li>`).join("")}</ul><p class="reading-note">這是快速整理，不是最終吉凶；仍需合看日辰、空破、合沖、生剋與占問背景。</p>`;
-  const moving=result.rows.filter(r=>r.moving);
-  $("#movingAnalysis").innerHTML=moving.length
-    ? `<ul>${moving.map(r=>`<li><strong>${r.position}爻・${r.lineTitle}</strong>：${r.relative}${r.stem}${r.branch}${r.element}，變 ${r.changedNaJia.stem}${r.changedNaJia.branch}${r.changedNaJia.element}${r.changeTags.length?`，判為<strong>${r.changeTags.join("、")}</strong>`:""}。<div class="line-reading"><b>簡易爻意：</b>${positionMeanings[r.position-1]} 此爻由${r.yang?"陽":"陰"}轉${r.changedYang?"陽":"陰"}，表示此層面的狀態正在改變；正式判斷請再對照《周易》「${result.hex.name}」${r.lineTitle}原文。</div></li>`).join("")}</ul>`
-    : "<p>本卦無動爻，以本卦、世用及月日生剋為主要觀察。</p>";
+  $("#sixGodGuide").innerHTML=`<div class="six-god-guide">${sixGods.map(god=>`<span><b>${god}</b>${sixGodMeanings[god]}</span>`).join("")}</div>`;
+  renderMovingLines(result);
   $("#resultNotes").textContent=result.input.notes||"尚未填寫老師筆記。";
   $("#resultView").scrollIntoView({behavior:"smooth",block:"start"});
 }
@@ -229,7 +250,8 @@ function resultText(result) {
   [...result.rows].reverse().forEach(r=>lines.push(`${r.god}　${r.relative}　${r.stem}${r.branch}${r.element}　${r.strength}　${r.shiYing||"　"}　${r.yang?"━━━":"━ ━"}${r.moving?` ${r.value===9?"○":"×"} → ${r.changedNaJia.stem}${r.changedNaJia.branch}${r.changedNaJia.element}${r.changeTags.length?`（${r.changeTags.join("、")}）`:""}`:""}${r.fushen.length?`　伏神：${r.fushen.map(f=>`${f.relative}${f.stem}${f.branch}${f.element}`).join("、")}／飛神：${r.relative}${r.stem}${r.branch}${r.element}`:""}`));
   lines.push("",`用神順序：${getUseGods(result.input).map((god,index)=>`${index+1}.${god}`).join(" → ")||"未指定"}`,"【簡易判讀】",...simpleReadingItems(result));
   const moving=result.rows.filter(row=>row.moving);
-  if(moving.length) lines.push("","【動爻簡易爻意】",...moving.map(row=>`${row.position}爻・${row.lineTitle}：${positionMeanings[row.position-1]}`));
+  if(moving.length) lines.push("","【動爻爻辭白話】",...moving.map(row=>`${row.position}爻・${row.lineTitle}：${row.yaoText?`${row.yaoText}｜${row.yaoTranslation}`:positionMeanings[row.position-1]}`));
+  lines.push("","【六神簡義】",...sixGods.map(god=>`${god}：${sixGodMeanings[god]}`));
   lines.push("",`老師筆記：${result.input.notes||"無"}`);
   return lines.join("\n");
 }

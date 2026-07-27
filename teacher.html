@@ -16,6 +16,11 @@
     .ghost.small{padding:8px 11px;font-size:13px}.field-help{display:block;margin-top:7px;color:var(--muted);font-weight:400}
     .reading-list{margin:0;padding-left:20px}.reading-list li+li{margin-top:7px}.reading-note{padding:9px 11px;border-left:3px solid var(--gold);background:#fffaf0}
     .line-reading{margin-top:6px;padding:8px 10px;border-radius:8px;background:#fff;color:#534a3d;font-weight:400}
+    td small{display:block;margin-top:4px;color:#746d63;font-size:11px;font-weight:400;white-space:nowrap}
+    tr.moving td small{color:#8b5b60}.six-god-guide{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .six-god-guide span{display:flex;gap:9px;padding:10px;border:1px solid var(--line);border-radius:9px;background:#fff}
+    .six-god-guide b{min-width:34px;color:var(--green)}
+    @media(max-width:720px){.six-god-guide{grid-template-columns:1fr 1fr}}
   </style>
 </head>
 <body>
@@ -85,6 +90,7 @@
           <div class="analysis-grid">
             <article><h3>用神提示</h3><div id="useGodAnalysis"></div></article>
             <article><h3>簡易判讀</h3><div id="simpleReading"></div></article>
+            <article class="wide"><h3>六神簡義</h3><div id="sixGodGuide"></div></article>
             <article class="wide"><h3>動爻／簡易爻意</h3><div id="movingAnalysis"></div></article>
             <article class="wide"><h3>老師筆記</h3><p id="resultNotes"></p></article>
           </div>
@@ -100,6 +106,6 @@
   </main>
   <div id="toast" class="toast"></div>
   <script src="assets/lunar.js"></script>
-  <script src="teacher.js?v=20260728-4"></script>
+  <script src="teacher.js?v=20260728-5"></script>
 </body>
 </html>
