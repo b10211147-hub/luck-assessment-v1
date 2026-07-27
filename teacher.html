@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#183c32">
+  <title>奉母宮｜老師六爻工具</title>
+  <link rel="stylesheet" href="teacher.css?v=20260728-1">
+</head>
+<body>
+  <main>
+    <header class="tool-header">
+      <div><small>奉母宮・老師專用</small><h1>《增刪卜易》六爻排盤</h1></div>
+      <button id="logoutBtn" class="ghost" hidden>登出</button>
+    </header>
+
+    <section id="loginView" class="login-card">
+      <span class="seal">易</span>
+      <h2>老師工具登入</h2>
+      <p>此頁不會出現在公開報名網站，請輸入老師密碼。</p>
+      <form id="loginForm">
+        <input name="password" type="password" autocomplete="current-password" placeholder="老師密碼" required>
+        <button class="primary">登入工具</button>
+      </form>
+      <p id="loginError" class="error"></p>
+    </section>
+
+    <section id="toolView" hidden>
+      <nav class="tool-tabs">
+        <button class="active" data-panel="castingPanel">快速排盤</button>
+        <button data-panel="historyPanel">歷史案例</button>
+      </nav>
+
+      <section id="castingPanel" class="panel">
+        <form id="castingForm" class="casting-form">
+          <div class="section-title"><span>01</span><div><small>基本資料</small><h2>建立占問</h2></div></div>
+          <div class="grid two">
+            <label>占問事項<input name="question" required placeholder="例如：這次合作能否順利？"></label>
+            <label>求占者<input name="clientName" placeholder="姓名或代稱"></label>
+            <label>起卦時間<input name="castTime" type="datetime-local" required></label>
+            <label>占問類別<select name="topic">
+              <option>一般／其他</option><option>財運</option><option>工作事業</option><option>感情婚姻</option>
+              <option>健康疾病</option><option>考試學業</option><option>官司訴訟</option><option>出行</option>
+              <option>失物</option><option>家宅</option>
+            </select></label>
+            <label>月建<select name="monthBranch" required></select></label>
+            <label>日辰<div class="inline"><select name="dayStem" required></select><select name="dayBranch" required></select></div></label>
+            <label>旬空<input name="voidBranches" maxlength="3" placeholder="例如：戌亥"></label>
+            <label>指定用神<select name="useGod"><option value="">請選擇</option><option>父母</option><option>兄弟</option><option>子孫</option><option>妻財</option><option>官鬼</option></select></label>
+          </div>
+
+          <div class="section-title cast-title"><span>02</span><div><small>由下往上</small><h2>輸入六次擲卦結果</h2></div></div>
+          <p class="hint">初爻至上爻依序輸入：6 老陰、7 少陽、8 少陰、9 老陽。6、9 為動爻。</p>
+          <div id="lineInputs" class="line-inputs"></div>
+          <label>老師判卦筆記<textarea name="notes" rows="4" placeholder="可記錄取用、應期及斷語"></textarea></label>
+          <button class="primary large" type="submit">立即排盤</button>
+        </form>
+
+        <section id="resultView" class="result" hidden>
+          <div class="result-head">
+            <div><small id="resultMeta"></small><h2><span id="mainHexagram"></span><i>→</i><span id="changedHexagram"></span></h2></div>
+            <div class="actions"><button id="copyBtn" class="ghost">複製排盤</button><button id="saveBtn" class="primary">儲存案例</button></div>
+          </div>
+          <div id="strengthSummary" class="summary-strip"></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>六神</th><th>六親</th><th>納甲</th><th>旺衰</th><th>世應</th><th>本卦</th><th>動變</th></tr></thead>
+              <tbody id="hexagramRows"></tbody>
+            </table>
+          </div>
+          <div class="analysis-grid">
+            <article><h3>用神提示</h3><div id="useGodAnalysis"></div></article>
+            <article><h3>動爻／爻辭位置</h3><div id="movingAnalysis"></div></article>
+            <article class="wide"><h3>老師筆記</h3><p id="resultNotes"></p></article>
+          </div>
+          <p class="method-note">排盤依六爻納甲、八宮世應及《增刪卜易》重月建、日辰、動變的原則整理；旺衰提示供老師研判，不自動代替斷卦。</p>
+        </section>
+      </section>
+
+      <section id="historyPanel" class="panel" hidden>
+        <div class="section-title"><span>歷</span><div><small>已儲存案例</small><h2>歷史排盤</h2></div></div>
+        <div id="caseList" class="case-list"></div>
+      </section>
+    </section>
+  </main>
+  <div id="toast" class="toast"></div>
+  <script src="teacher.js?v=20260728-1"></script>
+</body>
+</html>
