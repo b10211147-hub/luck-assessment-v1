@@ -26,6 +26,9 @@
     .line-judgment-list section{padding:11px;border:1px solid var(--line);border-radius:10px;background:#fff}
     .line-judgment-list h4{margin:0 0 6px;color:var(--green)}.line-judgment-list p{margin:3px 0!important;font-size:13px}
     .line-judgment-list section.harmony{border-color:var(--gold);background:#fff9e9}
+    .timing-list{display:grid;gap:10px}.timing-card{padding:13px;border:1px solid var(--line);border-radius:11px;background:#fff}
+    .timing-card h4{margin:0 0 8px;color:var(--green)}.timing-card ol{margin:0;padding-left:22px}.timing-card li{margin:5px 0;color:#5b554b;line-height:1.55}
+    .timing-card em{color:var(--red);font-style:normal;font-weight:800}
     @media(max-width:720px){.six-god-guide{grid-template-columns:1fr 1fr}}
     @media(max-width:720px){.line-judgment-list{grid-template-columns:1fr}}
   </style>
@@ -97,6 +100,7 @@
           <div class="analysis-grid">
             <article><h3>用神提示</h3><div id="useGodAnalysis"></div></article>
             <article><h3>簡易判讀</h3><div id="simpleReading"></div></article>
+            <article class="wide"><h3>應期候選（依優先順序）</h3><div id="timingAnalysis"></div></article>
             <article class="wide"><h3>逐爻判別白話</h3><div id="lineJudgmentGuide"></div></article>
             <article class="wide"><h3>六神簡義</h3><div id="sixGodGuide"></div></article>
             <article class="wide"><h3>動爻／簡易爻意</h3><div id="movingAnalysis"></div></article>
@@ -114,6 +118,6 @@
   </main>
   <div id="toast" class="toast"></div>
   <script src="assets/lunar.js"></script>
-  <script src="teacher.js?v=20260728-6"></script>
+  <script src="teacher.js?v=20260728-7"></script>
 </body>
 </html>

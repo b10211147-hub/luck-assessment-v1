@@ -247,6 +247,68 @@ function calendarFromSolar(value) {
     voidBranches: lunar.getDayXunKongExact2()
   };
 }
+function dateText(date){
+  return `${date.getFullYear()}/${String(date.getMonth()+1).padStart(2,"0")}/${String(date.getDate()).padStart(2,"0")}`;
+}
+function dateInputText(date){
+  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}T12:00`;
+}
+function addDays(date,days){const next=new Date(date);next.setDate(next.getDate()+days);return next;}
+function firstBranchDays(start,targetBranch,limit=120,count=2){
+  const found=[];
+  for(let offset=0;offset<=limit&&found.length<count;offset++){
+    const date=addDays(start,offset),calendar=calendarFromSolar(dateInputText(date));
+    if(calendar?.dayBranch===targetBranch)found.push(dateText(date));
+  }
+  return found;
+}
+function valueMonthWindow(start,targetBranch){
+  let first=null;
+  for(let offset=0;offset<=800;offset++){
+    const date=addDays(start,offset);
+    if(calendarFromSolar(dateInputText(date))?.monthBranch===targetBranch){first=date;break;}
+  }
+  if(!first)return null;
+  let end=first;
+  for(let offset=1;offset<=40;offset++){
+    const date=addDays(first,offset);
+    if(calendarFromSolar(dateInputText(date))?.monthBranch!==targetBranch)break;
+    end=date;
+  }
+  return {start:dateText(first),end:dateText(end),current:dateText(first)===dateText(start)};
+}
+function firstOutOfVoid(start,targetBranch){
+  for(let offset=1;offset<=20;offset++){
+    const date=addDays(start,offset),calendar=calendarFromSolar(dateInputText(date));
+    if(calendar&&!calendar.voidBranches.includes(targetBranch))return dateText(date);
+  }
+  return null;
+}
+function timingTargets(result){
+  return getUseGods(result.input).flatMap((useGod,index)=>{
+    const visible=result.rows.filter(row=>row.relative===useGod);
+    const source=visible.length?visible:result.hidden.filter(row=>row.relative===useGod).map(row=>({...row,moving:false,changedNaJia:null}));
+    return source.map(row=>({useGod,order:index+1,row}));
+  }).filter((target,index,all)=>all.findIndex(item=>item.useGod===target.useGod&&item.row.branch===target.row.branch)===index);
+}
+function timingForTarget(result,target){
+  const start=new Date(result.input.castTime);
+  const branch=target.row.branch;
+  const isVoid=(result.input.voidBranches||"").includes(branch);
+  const valueDays=firstBranchDays(start,branch);
+  const month=valueMonthWindow(start,branch);
+  const combineDays=firstBranchDays(start,combineBranch[branch],120,1);
+  const clashDays=firstBranchDays(start,clashBranch[branch],120,1);
+  const changed=target.row.moving&&target.row.changedNaJia?target.row.changedNaJia.branch:null;
+  const changedDays=changed?firstBranchDays(start,changed,120,1):[];
+  return [
+    `<b>動而逢值：</b>${target.row.moving?"此用神爻正在動；":"此用神爻未動；"}值日為 ${valueDays.join("、")||"未找到"}；${month?`值月約 ${month.start}～${month.end}${month.current?"（目前正在值月）":""}`:"未找到值月"}`,
+    `<b>填實／出空：</b>${isVoid?`目前空亡；<em>${valueDays[0]||"未找到"} 值日兼填實</em>，另於 ${firstOutOfVoid(start,branch)||"未找到"} 起先脫離本旬空亡`:"目前不空亡，不必只等出空；若後續論填實，可優先參考值日"}`,
+    `<b>逢合、逢沖：</b>${combineBranch[branch]}日 ${combineDays[0]||"未找到"} 為逢合；${clashBranch[branch]}日 ${clashDays[0]||"未找到"} 為逢沖`,
+    `<b>化神應期：</b>${changed?`此爻變${changed}，可先看 ${changedDays[0]||"未找到"}（${changed}日）`:"此用神爻未動，沒有直接化神日期"}`,
+    `<b>月令轉換：</b>${month?`${month.start} 左右進入${branch}月，至 ${month.end} 左右結束`:"未找到"}`
+  ];
+}
 function updateCalendarPreview() {
   const calendar = calendarFromSolar($('[name="castTime"]').value);
   $("#calendarPreview").textContent = calendar ? `月柱 ${calendar.monthGanZhi}（月建 ${calendar.monthBranch}）・日辰 ${calendar.dayGanZhi}・旬空 ${calendar.voidBranches}` : "請選擇有效的國曆時間";
@@ -303,6 +365,10 @@ function renderResult(result) {
     ? `<ol class="reading-list">${useGods.map((god,index)=>`<li><strong>${god}${index===0?"（主要）":""}</strong>：${useGodDetails(result,god)}</li>`).join("")}</ol>`
     : "<p>尚未指定用神。請依占問類別與實際取象，由老師選定後再看旺衰、生剋與動變。</p>";
   $("#simpleReading").innerHTML=`<ul class="reading-list">${simpleReadingItems(result).map(item=>`<li>${item}</li>`).join("")}</ul><p class="reading-note">這是快速整理，不是最終吉凶；仍需合看日辰、空破、合沖、生剋與占問背景。</p>`;
+  const targets=timingTargets(result);
+  $("#timingAnalysis").innerHTML=targets.length
+    ? `<div class="timing-list">${targets.map(target=>`<section class="timing-card"><h4>用${target.order}・${target.useGod}：${target.row.stem}${target.row.branch}${target.row.element}${target.row.moving?"・動爻":""}</h4><ol>${timingForTarget(result,target).map(item=>`<li>${item}</li>`).join("")}</ol></section>`).join("")}</div><p class="reading-note">日期是候選應期，不是保證發生日期；依序看動而逢值、填實／出空、合沖、化神與月令轉換，再配合用神旺衰及事情進度。</p>`
+    : "<p>請先指定至少一個用神，系統才能依用神地支計算值日、值月與出空。</p>";
   $("#lineJudgmentGuide").innerHTML=`<div class="line-judgment-list">${[...result.rows].reverse().map(row=>{
     const items=allJudgments(result,row);
     return `<section><h4>${row.position}爻・${row.relative}${row.stem}${row.branch}${row.element}${row.shiYing?`・${row.shiYing}`:""}</h4>${items.length?items.map(item=>`<p><b>${item.label}</b>：${item.text}</p>`).join(""):"<p>目前未見明顯月日、合沖或空亡標記。</p>"}</section>`;
@@ -319,6 +385,8 @@ function resultText(result) {
   const moving=result.rows.filter(row=>row.moving);
   if(moving.length) lines.push("","【動爻爻辭白話】",...moving.map(row=>`${row.position}爻・${row.lineTitle}：${row.yaoText?`${row.yaoText}｜${row.yaoTranslation}`:positionMeanings[row.position-1]}`));
   lines.push("","【逐爻判別白話】",...[...result.rows].reverse().flatMap(row=>allJudgments(result,row).map(item=>`${row.position}爻 ${item.label}：${item.text}`)),...harmonyFindings(result).map(item=>`${item.label}：${item.text}`));
+  const targets=timingTargets(result);
+  if(targets.length)lines.push("","【應期候選】",...targets.flatMap(target=>[`用${target.order}・${target.useGod} ${target.row.stem}${target.row.branch}${target.row.element}`,...timingForTarget(result,target).map(text=>text.replace(/<[^>]+>/g,""))]));
   lines.push("","【六神簡義】",...sixGods.map(god=>`${god}：${sixGodMeanings[god]}`));
   lines.push("",`老師筆記：${result.input.notes||"無"}`);
   return lines.join("\n");
