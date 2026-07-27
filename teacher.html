@@ -7,6 +7,16 @@
   <title>奉母宮｜老師六爻工具</title>
   <link rel="stylesheet" href="teacher.css?v=20260728-1">
   <link rel="stylesheet" href="teacher-calendar.css?v=20260728-1">
+  <style>
+    .use-god-field{padding:12px;border:1px solid var(--line);border-radius:12px;background:#faf7ef}
+    .use-god-list{display:grid;gap:8px;margin:8px 0}
+    .use-god-row{display:grid;grid-template-columns:30px 1fr auto;gap:7px;align-items:center}
+    .use-god-row select{margin:0}.use-god-order{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--green);color:#fff;font-size:13px;font-weight:900}
+    .use-god-actions{display:flex;gap:4px}.use-god-actions button{width:32px;height:32px;padding:0;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--green);font-weight:900}
+    .ghost.small{padding:8px 11px;font-size:13px}.field-help{display:block;margin-top:7px;color:var(--muted);font-weight:400}
+    .reading-list{margin:0;padding-left:20px}.reading-list li+li{margin-top:7px}.reading-note{padding:9px 11px;border-left:3px solid var(--gold);background:#fffaf0}
+    .line-reading{margin-top:6px;padding:8px 10px;border-radius:8px;background:#fff;color:#534a3d;font-weight:400}
+  </style>
 </head>
 <body>
   <main>
@@ -45,7 +55,12 @@
               <option>失物</option><option>家宅</option>
             </select></label>
             <div class="calendar-card"><small>國曆自動換算</small><strong id="calendarPreview">選擇起卦時間後自動計算月建、日辰與旬空</strong></div>
-            <label>指定用神<select name="useGod"><option value="">請選擇</option><option>父母</option><option>兄弟</option><option>子孫</option><option>妻財</option><option>官鬼</option></select></label>
+            <div class="use-god-field">
+              <label>複數用神（依判讀順序）</label>
+              <div id="useGodList" class="use-god-list"></div>
+              <button id="addUseGodBtn" class="ghost small" type="button">＋ 新增用神</button>
+              <small class="field-help">第一項為主要用神，可用箭頭調整先後順序。</small>
+            </div>
           </div>
 
           <div class="section-title cast-title"><span>02</span><div><small>由下往上</small><h2>輸入六次擲卦結果</h2></div></div>
@@ -69,7 +84,8 @@
           </div>
           <div class="analysis-grid">
             <article><h3>用神提示</h3><div id="useGodAnalysis"></div></article>
-            <article><h3>動爻／爻辭位置</h3><div id="movingAnalysis"></div></article>
+            <article><h3>簡易判讀</h3><div id="simpleReading"></div></article>
+            <article class="wide"><h3>動爻／簡易爻意</h3><div id="movingAnalysis"></div></article>
             <article class="wide"><h3>老師筆記</h3><p id="resultNotes"></p></article>
           </div>
           <p class="method-note">排盤依六爻納甲、八宮世應及《增刪卜易》重月建、日辰、動變的原則整理；旺衰提示供老師研判，不自動代替斷卦。</p>
@@ -84,6 +100,6 @@
   </main>
   <div id="toast" class="toast"></div>
   <script src="assets/lunar.js"></script>
-  <script src="teacher.js?v=20260728-3"></script>
+  <script src="teacher.js?v=20260728-4"></script>
 </body>
 </html>
