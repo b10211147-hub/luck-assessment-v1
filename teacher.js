@@ -32,6 +32,7 @@ const palacePatterns = [
 ];
 const elementGenerates = {木:"火",火:"土",土:"金",金:"水",水:"木"};
 const elementControls = {木:"土",土:"水",水:"火",火:"金",金:"木"};
+const advanceBranch = {亥:"子",寅:"卯",巳:"午",申:"酉",丑:"辰",辰:"未",未:"戌",戌:"丑"};
 const sixGods = ["青龍","朱雀","勾陳","螣蛇","白虎","玄武"];
 const godStart = {甲:0,乙:0,丙:1,丁:1,戊:2,己:3,庚:4,辛:4,壬:5,癸:5};
 const lineLabels = ["初","二","三","四","五","上"];
@@ -77,6 +78,14 @@ function strengthFor(element,monthBranch) {
   if (elementControls[element] === monthElement) return "囚";
   return "死";
 }
+function changeTags(original,changed) {
+  const tags=[];
+  if (elementGenerates[changed.element] === original.element) tags.push("回頭生");
+  if (elementControls[changed.element] === original.element) tags.push("回頭剋");
+  if (original.element === changed.element && advanceBranch[original.branch] === changed.branch) tags.push("化進");
+  if (original.element === changed.element && advanceBranch[changed.branch] === original.branch) tags.push("化退");
+  return tags;
+}
 function showToast(text) { const t=$("#toast");t.textContent=text;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2300); }
 function authHeaders() { return {"Content-Type":"application/json","Authorization":`Bearer ${password}`}; }
 function calendarFromSolar(value) {
@@ -121,11 +130,19 @@ function calculate(data) {
     strength:strengthFor(najia[i].element,data.monthBranch),
     shiYing:palace.shi===i+1?"世":palace.ying===i+1?"應":"",
     changedYang:changedLines[i], changedNaJia:changedNajia[i],
+    changeTags:values[i]===6||values[i]===9 ? changeTags(najia[i],changedNajia[i]) : [],
     lineTitle:`${i===0?"初":i===5?"上":lineLabels[i]}${yang?"九":"六"}`
   }));
-  return {input:data,values,hex,changedHex,palace,rows};
+  const visibleRelatives=new Set(rows.map(row=>row.relative));
+  const pureLines=(trigramBits[palace.palace]+trigramBits[palace.palace]).split("").map(Number);
+  const pureNaJia=getNaJia(pureLines);
+  const hidden=pureNaJia.map((item,i)=>({...item,position:i+1,relative:relativeFor(item.element,palace.element)})).filter(item=>!visibleRelatives.has(item.relative));
+  rows.forEach(row=>{row.fushen=hidden.filter(item=>item.position===row.position);});
+  return {input:data,values,hex,changedHex,palace,rows,hidden};
 }
 function renderResult(result) {
+  result.hidden ||= [];
+  result.rows.forEach(row=>{row.changeTags ||= [];row.fushen ||= [];});
   currentResult=result;
   $("#resultView").hidden=false;
   $("#mainHexagram").textContent=result.hex.name;
@@ -135,21 +152,24 @@ function renderResult(result) {
   $("#hexagramRows").innerHTML=[...result.rows].reverse().map(row=>`<tr class="${row.moving?"moving":""} ${result.input.useGod===row.relative?"use-god":""}">
     <td>${row.god}</td><td>${row.relative}${result.input.useGod===row.relative?"・用":""}</td><td>${row.stem}${row.branch}${row.element}</td><td>${row.strength}</td><td>${row.shiYing}</td>
     <td><span class="yao"><i class="${row.yang?"yang":"yin"}"></i>${row.moving?`<b class="move">${row.value===9?"○":"×"}</b>`:""}</span></td>
-    <td>${row.moving?`${row.changedNaJia.stem}${row.changedNaJia.branch}${row.changedNaJia.element}・${row.changedYang?"陽":"陰"}`:"—"}</td></tr>`).join("");
+    <td>${row.moving?`${row.changedNaJia.stem}${row.changedNaJia.branch}${row.changedNaJia.element}・${row.changedYang?"陽":"陰"}${row.changeTags.length?`<br><b>${row.changeTags.join("・")}</b>`:""}`:"—"}</td>
+    <td>${row.fushen.length?row.fushen.map(f=>`伏：${f.relative}${f.stem}${f.branch}${f.element}<br>飛：${row.relative}${row.stem}${row.branch}${row.element}`).join("<br>"):"—"}</td></tr>`).join("");
   const useRows=result.rows.filter(r=>r.relative===result.input.useGod);
   $("#useGodAnalysis").innerHTML=result.input.useGod
-    ? `<p>指定「${result.input.useGod}」為用神，共見於 ${useRows.length} 爻：${useRows.map(r=>`${r.position}爻（${r.stem}${r.branch}${r.element}・${r.strength}${r.moving?"・動":""}）`).join("、")||"不上卦，需再查伏神"}。</p>`
+    ? useRows.length
+      ? `<p>指定「${result.input.useGod}」為用神，共見於 ${useRows.length} 爻：${useRows.map(r=>`${r.position}爻（${r.stem}${r.branch}${r.element}・${r.strength}${r.moving?"・動":""}）`).join("、")}。</p>`
+      : `<p>「${result.input.useGod}」不上卦，取本宮首卦伏神：${result.hidden.filter(f=>f.relative===result.input.useGod).map(f=>`${f.position}爻伏 ${f.stem}${f.branch}${f.element}，飛神為 ${result.rows[f.position-1].relative}${result.rows[f.position-1].stem}${result.rows[f.position-1].branch}${result.rows[f.position-1].element}`).join("；")||"未找到"}。</p>`
     : "<p>尚未指定用神。請依占問類別與實際取象，由老師選定後再看旺衰、生剋與動變。</p>";
   const moving=result.rows.filter(r=>r.moving);
   $("#movingAnalysis").innerHTML=moving.length
-    ? `<ul>${moving.map(r=>`<li>${r.position}爻・${r.lineTitle}：${r.relative}${r.stem}${r.branch}${r.element}，變 ${r.changedNaJia.stem}${r.changedNaJia.branch}${r.changedNaJia.element}。請對照《周易》「${result.hex.name}」${r.lineTitle}爻辭。</li>`).join("")}</ul>`
+    ? `<ul>${moving.map(r=>`<li>${r.position}爻・${r.lineTitle}：${r.relative}${r.stem}${r.branch}${r.element}，變 ${r.changedNaJia.stem}${r.changedNaJia.branch}${r.changedNaJia.element}${r.changeTags.length?`，判為<strong>${r.changeTags.join("、")}</strong>`:""}。請對照《周易》「${result.hex.name}」${r.lineTitle}爻辭。</li>`).join("")}</ul>`
     : "<p>本卦無動爻，以本卦、世用及月日生剋為主要觀察。</p>";
   $("#resultNotes").textContent=result.input.notes||"尚未填寫老師筆記。";
   $("#resultView").scrollIntoView({behavior:"smooth",block:"start"});
 }
 function resultText(result) {
   const lines=[`【奉母宮六爻排盤】`,`占問：${result.input.question}`,`求占者：${result.input.clientName||"未填"}`,`起卦：${result.input.castTime.replace("T"," ")}`,`月建：${result.input.monthBranch}　日辰：${result.input.dayStem}${result.input.dayBranch}　旬空：${result.input.voidBranches||"未填"}`,`本卦：${result.hex.name}　→　變卦：${result.changedHex.name}`,`${result.palace.palace}宮・${result.palace.stage}　世${result.palace.shi} 應${result.palace.ying}`,``];
-  [...result.rows].reverse().forEach(r=>lines.push(`${r.god}　${r.relative}　${r.stem}${r.branch}${r.element}　${r.strength}　${r.shiYing||"　"}　${r.yang?"━━━":"━ ━"}${r.moving?` ${r.value===9?"○":"×"} → ${r.changedNaJia.stem}${r.changedNaJia.branch}${r.changedNaJia.element}`:""}`));
+  [...result.rows].reverse().forEach(r=>lines.push(`${r.god}　${r.relative}　${r.stem}${r.branch}${r.element}　${r.strength}　${r.shiYing||"　"}　${r.yang?"━━━":"━ ━"}${r.moving?` ${r.value===9?"○":"×"} → ${r.changedNaJia.stem}${r.changedNaJia.branch}${r.changedNaJia.element}${r.changeTags.length?`（${r.changeTags.join("、")}）`:""}`:""}${r.fushen.length?`　伏神：${r.fushen.map(f=>`${f.relative}${f.stem}${f.branch}${f.element}`).join("、")}／飛神：${r.relative}${r.stem}${r.branch}${r.element}`:""}`));
   lines.push("",`用神：${result.input.useGod||"未指定"}`,`老師筆記：${result.input.notes||"無"}`);
   return lines.join("\n");
 }
