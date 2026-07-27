@@ -79,16 +79,37 @@ function strengthFor(element,monthBranch) {
 }
 function showToast(text) { const t=$("#toast");t.textContent=text;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2300); }
 function authHeaders() { return {"Content-Type":"application/json","Authorization":`Bearer ${password}`}; }
+function calendarFromSolar(value) {
+  if (!value || typeof Solar === "undefined") return null;
+  const [date,time="00:00"] = value.split("T");
+  const [year,month,day] = date.split("-").map(Number);
+  const [hour,minute] = time.split(":").map(Number);
+  const lunar = Solar.fromYmdHms(year,month,day,hour,minute,0).getLunar();
+  const monthGanZhi = lunar.getMonthInGanZhiExact();
+  const dayGanZhi = lunar.getDayInGanZhiExact2();
+  return {
+    monthGanZhi,
+    monthBranch: monthGanZhi.slice(1),
+    dayGanZhi,
+    dayStem: dayGanZhi.slice(0,1),
+    dayBranch: dayGanZhi.slice(1),
+    voidBranches: lunar.getDayXunKongExact2()
+  };
+}
+function updateCalendarPreview() {
+  const calendar = calendarFromSolar($('[name="castTime"]').value);
+  $("#calendarPreview").textContent = calendar ? `月柱 ${calendar.monthGanZhi}（月建 ${calendar.monthBranch}）・日辰 ${calendar.dayGanZhi}・旬空 ${calendar.voidBranches}` : "請選擇有效的國曆時間";
+}
 function setupInputs() {
   const now = new Date(); now.setMinutes(now.getMinutes()-now.getTimezoneOffset());
   $('[name="castTime"]').value = now.toISOString().slice(0,16);
-  $('[name="monthBranch"]').innerHTML = branches.map(v=>`<option>${v}</option>`).join("");
-  $('[name="dayStem"]').innerHTML = stems.map(v=>`<option>${v}</option>`).join("");
-  $('[name="dayBranch"]').innerHTML = branches.map(v=>`<option>${v}</option>`).join("");
-  $("#lineInputs").innerHTML = lineLabels.map((label,i)=>`<div class="line-input"><label>${label}爻<select name="line${i+1}"><option value="7">7 少陽 ⚊</option><option value="8">8 少陰 ⚋</option><option value="9">9 老陽 ○</option><option value="6">6 老陰 ×</option></select></label></div>`).join("");
+  updateCalendarPreview();
 }
 function calculate(data) {
-  const values = Array.from({length:6},(_,i)=>Number(data[`line${i+1}`]));
+  const calendar = calendarFromSolar(data.castTime);
+  if (!calendar) throw new Error("無法換算起卦時間");
+  Object.assign(data,calendar);
+  const values = data.castCode.split("").map(Number);
   const lines = values.map(v => v === 7 || v === 9 ? 1 : 0);
   const changedLines = values.map((v,i) => v === 6 || v === 9 ? 1-lines[i] : lines[i]);
   const hex = getHexagram(lines), changedHex = getHexagram(changedLines), palace=getPalace(lines);
@@ -150,8 +171,10 @@ async function login(pass) {
 $("#loginForm").addEventListener("submit",async e=>{e.preventDefault();$("#loginError").textContent="";try{await login(new FormData(e.currentTarget).get("password"));}catch(err){$("#loginError").textContent=err.message;}});
 $("#logoutBtn").addEventListener("click",()=>{sessionStorage.removeItem("teacherPassword");location.reload();});
 document.querySelectorAll(".tool-tabs button").forEach(btn=>btn.addEventListener("click",()=>{document.querySelectorAll(".tool-tabs button").forEach(b=>b.classList.toggle("active",b===btn));["castingPanel","historyPanel"].forEach(id=>$("#"+id).hidden=id!==btn.dataset.panel);if(btn.dataset.panel==="historyPanel")loadCases().catch(e=>showToast(e.message));}));
-$("#castingForm").addEventListener("submit",e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.currentTarget));renderResult(calculate(data));});
+$("#castingForm").addEventListener("submit",e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.currentTarget));try{renderResult(calculate(data));}catch(error){showToast(error.message||"排盤資料有誤");}});
 $("#copyBtn").addEventListener("click",async()=>{await navigator.clipboard.writeText(resultText(currentResult));showToast("排盤已複製");});
 $("#saveBtn").addEventListener("click",async()=>{if(!currentResult)return;const res=await fetch(`${API_BASE}/api/teacher/cases`,{method:"POST",headers:authHeaders(),body:JSON.stringify({question:currentResult.input.question,clientName:currentResult.input.clientName,hexagramName:currentResult.hex.name,changedHexagramName:currentResult.changedHex.name,data:currentResult})});const body=await res.json();if(!res.ok)return showToast(body.error||"儲存失敗");showToast(`案例已儲存：${body.id}`);await loadCases();});
 setupInputs();
+$('[name="castTime"]').addEventListener("change",updateCalendarPreview);
+$('[name="castCode"]').addEventListener("input",event=>{event.target.value=event.target.value.replace(/[^6789]/g,"").slice(0,6);});
 if(password)login(password).catch(()=>sessionStorage.removeItem("teacherPassword"));

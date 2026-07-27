@@ -1,0 +1,35 @@
+.calendar-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 73px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #f3ecdd;
+}
+
+.calendar-card small {
+  color: var(--gold);
+  font-weight: 800;
+}
+
+.calendar-card strong {
+  margin-top: 5px;
+  color: var(--green);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.cast-code {
+  display: block;
+  max-width: 520px;
+  margin: 0 auto 20px;
+}
+
+.cast-code input {
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: .34em;
+  text-align: center;
+}
