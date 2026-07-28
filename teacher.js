@@ -326,6 +326,39 @@ function timingForTarget(result,target){
     `<b>月令轉換：</b>${month?`${month.start} 左右進入${branch}月，至 ${month.end} 左右結束`:"未找到"}`
   ];
 }
+function elementRelationText(a,b,aName,bName){
+  if(!a||!b)return "五行關係未取得";
+  if(a.element===b.element)return `${aName}與${bName}五行同氣，彼此力量容易連動`;
+  if(elementGenerates[a.element]===b.element)return `${aName}生${bName}，力量由${aName}流向${bName}`;
+  if(elementGenerates[b.element]===a.element)return `${bName}生${aName}，${aName}受到${bName}支持`;
+  if(elementControls[a.element]===b.element)return `${aName}剋${bName}，${aName}對${bName}形成制約`;
+  return `${bName}剋${aName}，${aName}受到${bName}壓力`;
+}
+function analysisFlowSteps(result){
+  const gods=getUseGods(result.input),mainGod=gods[0];
+  const visible=mainGod?result.rows.filter(row=>row.relative===mainGod):[];
+  const hidden=mainGod&&!visible.length?result.hidden.filter(row=>row.relative===mainGod):[];
+  const mainRows=visible.length?visible:hidden;
+  const shi=result.rows[result.palace.shi-1],ying=result.rows[result.palace.ying-1];
+  const moving=result.rows.filter(row=>row.moving);
+  const mainSummary=mainGod
+    ? `${mainGod}為第一順位主用神。${visible.length?visible.map(row=>`${row.position}爻${row.stem}${row.branch}${row.element}（${row.strength}${row.moving?"、動":""}；${allJudgments(result,row).map(item=>item.label).join("、")||"無特殊標記"}）`).join("；"):`不上本卦，伏於${hidden.map(row=>`${row.position}爻${row.stem}${row.branch}${row.element}`).join("、")||"未找到伏神"}`}。`
+    :"尚未指定主用神，請先把最重要的用神排在第一順位。";
+  const mainRelation=mainRows[0]?elementRelationText(mainRows[0],shi,"主用神","世爻"):"主用神與世爻關係尚無法判斷";
+  const movingRelations=moving.map(row=>{
+    const toMain=mainRows[0]?elementRelationText(row,mainRows[0],`${row.position}爻動爻`,"主用神"):"尚無主用神";
+    return `${toMain}；${elementRelationText(row,shi,`${row.position}爻動爻`,"世爻")}`;
+  }).join("。");
+  const timingTarget=timingTargets(result).find(target=>target.order===1);
+  const timingSummary=timingTarget?timingForTarget(result,timingTarget).map(text=>text.replace(/<[^>]+>/g,"")):["尚無主用神，無法計算應期"];
+  return [
+    {title:"主用神",body:mainSummary,extra:gods.length>1?`輔助用神順序：${gods.slice(1).map((god,index)=>`${index+2}.${god}`).join(" → ")}`:"目前未設定輔助用神"},
+    {title:"世爻",body:`世爻在${shi.position}爻：${shi.relative}${shi.stem}${shi.branch}${shi.element}，旺衰為${shi.strength}。${allJudgments(result,shi).map(item=>item.label).join("、")||"未見特殊標記"}。`,extra:mainRelation},
+    {title:"動爻",body:moving.length?`共有${moving.length}個動爻：${moving.map(row=>`${row.position}爻${row.relative}${row.branch}→${row.changedNaJia.branch}${row.changeTags.length?`（${row.changeTags.join("、")}）`:""}`).join("；")}。`:"本卦無動爻，事情目前較偏靜態，以主用神、世應及月日為重。",extra:moving.length?movingRelations:"沒有動爻時，不強行套用化神應期。"},
+    {title:"應爻",body:`應爻在${ying.position}爻：${ying.relative}${ying.stem}${ying.branch}${ying.element}，旺衰為${ying.strength}。${allJudgments(result,ying).map(item=>item.label).join("、")||"未見特殊標記"}。`,extra:elementRelationText(shi,ying,"世爻","應爻")},
+    {title:"應期",body:timingSummary[0],extra:timingSummary.slice(1).join("；")}
+  ];
+}
 function updateCalendarPreview() {
   const calendar = calendarFromSolar($('[name="castTime"]').value);
   $("#calendarPreview").textContent = calendar ? `月柱 ${calendar.monthGanZhi}（月建 ${calendar.monthBranch}）・日辰 ${calendar.dayGanZhi}・旬空 ${calendar.voidBranches}` : "請選擇有效的國曆時間";
@@ -381,7 +414,7 @@ function renderResult(result) {
   $("#useGodAnalysis").innerHTML=useGods.length
     ? `<ol class="reading-list">${useGods.map((god,index)=>`<li><strong>${god}${index===0?"（主要）":""}</strong>：${useGodDetails(result,god)}</li>`).join("")}</ol>`
     : "<p>尚未指定用神。請依占問類別與實際取象，由老師選定後再看旺衰、生剋與動變。</p>";
-  $("#simpleReading").innerHTML=`<ul class="reading-list">${simpleReadingItems(result).map(item=>`<li>${item}</li>`).join("")}</ul><p class="reading-note">這是快速整理，不是最終吉凶；仍需合看日辰、空破、合沖、生剋與占問背景。</p>`;
+  $("#simpleReading").innerHTML=`<div class="analysis-flow">${analysisFlowSteps(result).map((step,index)=>`<section class="flow-step"><span class="flow-number">${index+1}</span><div><h4>${step.title}</h4><p>${step.body}</p><p class="flow-tags">${step.extra}</p></div></section>`).join("")}</div><p class="reading-note">固定依主用神、世爻、動爻、應爻、應期逐步閱讀；這是整理流程，不直接取代老師斷卦。</p>`;
   const targets=timingTargets(result);
   $("#timingAnalysis").innerHTML=targets.length
     ? `<div class="timing-list">${targets.map(target=>`<section class="timing-card"><h4>用${target.order}・${target.useGod}：${target.row.stem}${target.row.branch}${target.row.element}${target.row.moving?"・動爻":""}</h4><ol>${timingForTarget(result,target).map(item=>`<li>${item}</li>`).join("")}</ol></section>`).join("")}</div><p class="reading-note">日期是候選應期，不是保證發生日期；依序看動而逢值、填實／出空、合沖、化神與月令轉換，再配合用神旺衰及事情進度。</p>`
@@ -398,7 +431,7 @@ function renderResult(result) {
 function resultText(result) {
   const lines=[`【奉母宮六爻排盤】`,`占問：${result.input.question}`,`求占者：${result.input.clientName||"未填"}`,`起卦：${result.input.castTime.replace("T"," ")}`,`月建：${result.input.monthBranch}　日辰：${result.input.dayStem}${result.input.dayBranch}　旬空：${result.input.voidBranches||"未填"}`,`本卦：${result.hex.name}　→　變卦：${result.changedHex.name}`,`${result.palace.palace}宮・${result.palace.stage}　世${result.palace.shi} 應${result.palace.ying}`,``];
   [...result.rows].reverse().forEach(r=>lines.push(`${r.god}　${r.relative}　${r.stem}${r.branch}${r.element}　${r.strength}　${r.shiYing||"　"}　${r.yang?"━━━":"━ ━"}${r.moving?` ${r.value===9?"○":"×"} → ${r.changedNaJia.stem}${r.changedNaJia.branch}${r.changedNaJia.element}${r.changeTags.length?`（${r.changeTags.join("、")}）`:""}`:""}${r.fushen.length?`　伏神：${r.fushen.map(f=>`${f.relative}${f.stem}${f.branch}${f.element}`).join("、")}／飛神：${r.relative}${r.stem}${r.branch}${r.element}`:""}　判別：${allJudgments(result,r).map(item=>item.label).join("、")||"無"}`));
-  lines.push("",`用神順序：${getUseGods(result.input).map((god,index)=>`${index+1}.${god}`).join(" → ")||"未指定"}`,"【簡易判讀】",...simpleReadingItems(result));
+  lines.push("",`用神順序：${getUseGods(result.input).map((god,index)=>`${index+1}.${god}`).join(" → ")||"未指定"}`,"【五步分析流程】",...analysisFlowSteps(result).flatMap((step,index)=>[`${index+1}. ${step.title}：${step.body}`,`   ${step.extra}`]));
   const moving=result.rows.filter(row=>row.moving);
   if(moving.length) lines.push("","【動爻爻辭白話】",...moving.map(row=>`${row.position}爻・${row.lineTitle}：${row.yaoText?`${row.yaoText}｜${row.yaoTranslation}`:positionMeanings[row.position-1]}`));
   lines.push("","【逐爻判別白話】",...[...result.rows].reverse().flatMap(row=>allJudgments(result,row).map(item=>`${row.position}爻 ${item.label}：${item.text}`)),...harmonyFindings(result).map(item=>`${item.label}：${item.text}`));

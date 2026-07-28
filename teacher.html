@@ -29,6 +29,9 @@
     .timing-list{display:grid;gap:10px}.timing-card{padding:13px;border:1px solid var(--line);border-radius:11px;background:#fff}
     .timing-card h4{margin:0 0 8px;color:var(--green)}.timing-card ol{margin:0;padding-left:22px}.timing-card li{margin:5px 0;color:#5b554b;line-height:1.55}
     .timing-card em{color:var(--red);font-style:normal;font-weight:800}
+    .analysis-flow{display:grid;gap:0}.flow-step{display:grid;grid-template-columns:46px 1fr;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+    .flow-step:last-child{border-bottom:0}.flow-number{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:var(--green);color:#fff;font-weight:900}
+    .flow-step h4{margin:0 0 6px;color:var(--green);font-size:17px}.flow-step p{margin:3px 0!important}.flow-step .flow-tags{color:#7c2630;font-size:13px;font-weight:700}
     @media(max-width:720px){.six-god-guide{grid-template-columns:1fr 1fr}}
     @media(max-width:720px){.line-judgment-list{grid-template-columns:1fr}}
   </style>
@@ -99,7 +102,7 @@
           </div>
           <div class="analysis-grid">
             <article><h3>用神提示</h3><div id="useGodAnalysis"></div></article>
-            <article><h3>簡易判讀</h3><div id="simpleReading"></div></article>
+            <article class="wide"><h3>主用神 → 世爻 → 動爻 → 應爻 → 應期</h3><div id="simpleReading"></div></article>
             <article class="wide"><h3>應期候選（依優先順序）</h3><div id="timingAnalysis"></div></article>
             <article class="wide"><h3>逐爻判別白話</h3><div id="lineJudgmentGuide"></div></article>
             <article class="wide"><h3>六神簡義</h3><div id="sixGodGuide"></div></article>
@@ -118,6 +121,6 @@
   </main>
   <div id="toast" class="toast"></div>
   <script src="assets/lunar.js"></script>
-  <script src="teacher.js?v=20260729-8"></script>
+  <script src="teacher.js?v=20260729-9"></script>
 </body>
 </html>
