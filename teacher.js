@@ -163,8 +163,9 @@ function relativeFor(lineElement,palaceElement) {
   if (elementControls[lineElement] === palaceElement) return "官鬼";
   return "妻財";
 }
-function strengthFor(element,monthBranch) {
+function strengthFor(element,monthBranch,lineBranch) {
   const monthElement = branchElement[monthBranch];
+  if (clashBranch[lineBranch] === monthBranch) return "破";
   if (element === monthElement) return "旺";
   if (elementGenerates[monthElement] === element) return "相";
   if (elementGenerates[element] === monthElement) return "休";
@@ -183,10 +184,12 @@ function addJudgment(items,label,text){if(!items.some(item=>item.label===label))
 function judgmentsFor(row,input) {
   const items=[];
   const month=input.monthBranch,day=input.dayBranch;
-  if(row.element===branchElement[month])addJudgment(items,"臨月建","與當月五行同氣，當下力量較明顯。");
+  if(row.branch===month)addJudgment(items,"臨月建","爻支與月建完全相同，得到當月最直接的力量。");
+  else if(row.element===branchElement[month]&&clashBranch[row.branch]!==month)addJudgment(items,"得月令","雖非同一地支，但五行與月建同氣，當月力量偏旺。");
   else if(elementGenerates[branchElement[month]]===row.element)addJudgment(items,"月生","受到月建生扶，基礎力量有助。");
   else if(elementControls[branchElement[month]]===row.element)addJudgment(items,"月剋","受到月建壓制，行動較受限制。");
-  if(row.element===branchElement[day])addJudgment(items,"臨日辰","與當日五行同氣，當天助力較直接。");
+  if(row.branch===day)addJudgment(items,"臨日辰","爻支與日辰完全相同，得到當日最直接的力量。");
+  else if(row.element===branchElement[day]&&clashBranch[row.branch]!==day)addJudgment(items,"日辰同氣","雖非同一地支，但五行與日辰相同，當日有同氣助力。");
   else if(elementGenerates[branchElement[day]]===row.element)addJudgment(items,"日生","日辰生扶此爻，短期有支援。");
   else if(elementControls[branchElement[day]]===row.element)addJudgment(items,"日剋","日辰克制此爻，短期承受壓力。");
   if(combineBranch[row.branch]===month)addJudgment(items,"合月","與月建六合，事情容易受當月環境牽合。");
@@ -222,9 +225,14 @@ function harmonyFindings(result) {
 }
 function allJudgments(result,row) {
   const items=judgmentsFor(row,result.input);
-  result.rows.filter(other=>other.position!==row.position).forEach(other=>{
-    if(combineBranch[row.branch]===other.branch)addJudgment(items,"卦內六合",`與${other.position}爻${other.branch}六合，兩個層面容易互相連結，也可能彼此牽制。`);
-    if(clashBranch[row.branch]===other.branch)addJudgment(items,"卦內六沖",`與${other.position}爻${other.branch}相沖，兩個層面立場或節奏容易衝突。`);
+  const fullClash=[0,1,2].every(index=>clashBranch[result.rows[index].branch]===result.rows[index+3].branch);
+  const fullCombine=[0,1,2].every(index=>combineBranch[result.rows[index].branch]===result.rows[index+3].branch);
+  const counterpart=row.position<=3?result.rows[row.position+2]:result.rows[row.position-4];
+  if(fullClash)addJudgment(items,"六沖卦",`本卦三組內外爻全部相沖；此爻與${counterpart.position}爻${counterpart.branch}相沖，整體變動與分散性較強。`);
+  if(fullCombine)addJudgment(items,"六合卦",`本卦三組內外爻全部六合；此爻與${counterpart.position}爻${counterpart.branch}相合，整體較有結合、維繫或牽絆之象。`);
+  result.rows.filter(other=>other.position!==row.position&&(row.moving||other.moving)).forEach(other=>{
+    if(combineBranch[row.branch]===other.branch)addJudgment(items,"動爻相合",`與${other.position}爻${other.branch}六合，且至少一方為動爻，表示兩個層面正在結合或互相牽制。`);
+    if(clashBranch[row.branch]===other.branch)addJudgment(items,"動爻相沖",`與${other.position}爻${other.branch}相沖，且至少一方為動爻，表示衝突或變動正在發生。`);
   });
   return items;
 }
@@ -264,18 +272,27 @@ function firstBranchDays(start,targetBranch,limit=120,count=2){
 }
 function valueMonthWindow(start,targetBranch){
   let first=null;
+  const current=calendarFromSolar(dateInputText(start))?.monthBranch===targetBranch;
   for(let offset=0;offset<=800;offset++){
     const date=addDays(start,offset);
     if(calendarFromSolar(dateInputText(date))?.monthBranch===targetBranch){first=date;break;}
   }
   if(!first)return null;
+  let actualStart=first;
+  if(current){
+    for(let offset=1;offset<=40;offset++){
+      const date=addDays(first,-offset);
+      if(calendarFromSolar(dateInputText(date))?.monthBranch!==targetBranch)break;
+      actualStart=date;
+    }
+  }
   let end=first;
   for(let offset=1;offset<=40;offset++){
     const date=addDays(first,offset);
     if(calendarFromSolar(dateInputText(date))?.monthBranch!==targetBranch)break;
     end=date;
   }
-  return {start:dateText(first),end:dateText(end),current:dateText(first)===dateText(start)};
+  return {start:dateText(actualStart),end:dateText(end),current};
 }
 function firstOutOfVoid(start,targetBranch){
   for(let offset=1;offset<=20;offset++){
@@ -331,7 +348,7 @@ function calculate(data) {
   const rows = lines.map((yang,i)=>({
     position:i+1, yang, value:values[i], moving:values[i]===6||values[i]===9,
     god:gods[i], ...najia[i], relative:relativeFor(najia[i].element,palace.element),
-    strength:strengthFor(najia[i].element,data.monthBranch),
+    strength:strengthFor(najia[i].element,data.monthBranch,najia[i].branch),
     shiYing:palace.shi===i+1?"世":palace.ying===i+1?"應":"",
     changedYang:changedLines[i], changedNaJia:changedNajia[i],
     changeTags:values[i]===6||values[i]===9 ? changeTags(najia[i],changedNajia[i]) : [],
@@ -346,7 +363,7 @@ function calculate(data) {
 }
 function renderResult(result) {
   result.hidden ||= [];
-  result.rows.forEach(row=>{row.changeTags ||= [];row.fushen ||= [];});
+  result.rows.forEach(row=>{row.changeTags ||= [];row.fushen ||= [];row.strength=strengthFor(row.element,result.input.monthBranch,row.branch);});
   result.input.useGods=getUseGods(result.input);
   result.input.useGod=result.input.useGods[0]||"";
   currentResult=result;
