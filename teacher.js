@@ -163,9 +163,8 @@ function relativeFor(lineElement,palaceElement) {
   if (elementControls[lineElement] === palaceElement) return "官鬼";
   return "妻財";
 }
-function strengthFor(element,monthBranch,lineBranch) {
+function strengthFor(element,monthBranch) {
   const monthElement = branchElement[monthBranch];
-  if (clashBranch[lineBranch] === monthBranch) return "破";
   if (element === monthElement) return "旺";
   if (elementGenerates[monthElement] === element) return "相";
   if (elementGenerates[element] === monthElement) return "休";
@@ -197,7 +196,7 @@ function judgmentsFor(row,input) {
   if(clashBranch[row.branch]===month)addJudgment(items,"月破","被月建沖破，整月基礎較不穩定。");
   if(clashBranch[row.branch]===day){
     addJudgment(items,"日沖","受日辰衝動，事情容易突然變化。");
-    if(!row.moving&&(row.strength==="旺"||row.strength==="相"))addJudgment(items,"暗動","靜爻旺相而受日沖，表面不動、實際已在變化。");
+    if(!row.moving&&clashBranch[row.branch]!==month&&(row.strength==="旺"||row.strength==="相"))addJudgment(items,"暗動","靜爻旺相而受日沖，表面不動、實際已在變化。");
     else if(!row.moving)addJudgment(items,"日破","靜爻休囚又受日沖，短期力量較散弱。");
   }
   if((input.voidBranches||"").includes(row.branch)){
@@ -381,7 +380,7 @@ function calculate(data) {
   const rows = lines.map((yang,i)=>({
     position:i+1, yang, value:values[i], moving:values[i]===6||values[i]===9,
     god:gods[i], ...najia[i], relative:relativeFor(najia[i].element,palace.element),
-    strength:strengthFor(najia[i].element,data.monthBranch,najia[i].branch),
+    strength:strengthFor(najia[i].element,data.monthBranch),
     shiYing:palace.shi===i+1?"世":palace.ying===i+1?"應":"",
     changedYang:changedLines[i], changedNaJia:changedNajia[i],
     changeTags:values[i]===6||values[i]===9 ? changeTags(najia[i],changedNajia[i]) : [],
@@ -396,7 +395,7 @@ function calculate(data) {
 }
 function renderResult(result) {
   result.hidden ||= [];
-  result.rows.forEach(row=>{row.changeTags ||= [];row.fushen ||= [];row.strength=strengthFor(row.element,result.input.monthBranch,row.branch);});
+  result.rows.forEach(row=>{row.changeTags ||= [];row.fushen ||= [];row.strength=strengthFor(row.element,result.input.monthBranch);});
   result.input.useGods=getUseGods(result.input);
   result.input.useGod=result.input.useGods[0]||"";
   currentResult=result;
