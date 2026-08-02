@@ -119,44 +119,36 @@
 
     .drawn-stick {
       position: absolute;
-      z-index: 1;
-      left: 53%;
-      bottom: 31%;
-      width: 4.2%;
-      height: 50%;
-      min-width: 14px;
-      border: 1px solid #9f6426;
-      border-top: 5px solid var(--red);
-      border-radius: 8px 8px 3px 3px;
+      inset: 0;
+      z-index: 5;
       opacity: 0;
-      transform: translate(-50%, 32%) rotate(2deg);
-      background:
-        linear-gradient(90deg, rgba(94, 49, 15, .27), transparent 22% 67%, rgba(94, 49, 15, .28)),
-        repeating-linear-gradient(88deg, rgba(109, 62, 22, .09) 0 1px, transparent 1px 9px),
-        linear-gradient(90deg, #bd7b31, #f4da9b 38%, #d69947 73%, #a76425);
-      box-shadow: inset 2px 0 rgba(255,255,255,.35), 0 8px 10px rgba(56, 29, 13, .2);
-      transform-origin: 50% 100%;
+      overflow: hidden;
+      clip-path: inset(6% 47.3% 56% 47.3% round 7px);
+      transform: translateY(24%) rotate(.6deg);
+      transform-origin: 50% 42%;
+      filter: drop-shadow(0 9px 6px rgba(69, 36, 15, .22));
       will-change: transform, opacity;
     }
 
-    .drawn-stick::before {
-      content: "奉母宮";
+    .drawn-stick img {
       position: absolute;
-      left: 50%; top: 12%;
-      color: rgba(105, 27, 35, .78);
-      font-size: clamp(.48rem, 1.5vw, .7rem);
-      font-weight: 700;
-      writing-mode: vertical-rl;
-      transform: translateX(-50%);
+      left: 6%; top: 6%;
+      width: 88%; height: auto;
+      user-select: none;
+      -webkit-user-drag: none;
     }
 
     .stick-number {
       position: absolute;
-      left: 50%; top: 48%;
+      z-index: 2;
+      left: 50%; top: 18%;
       transform: translateX(-50%);
+      padding: 3px 1px;
       color: #6c1724;
+      background: rgba(245, 215, 151, .72);
+      border-radius: 4px;
       font-family: Georgia, serif;
-      font-size: clamp(.55rem, 1.6vw, .78rem);
+      font-size: clamp(.48rem, 1.45vw, .7rem);
       font-weight: 700;
       writing-mode: vertical-rl;
       letter-spacing: .08em;
@@ -187,10 +179,10 @@
     }
 
     @keyframes draw-stick {
-      0% { opacity: 0; transform: translate(-50%, 32%) rotate(2deg); }
+      0% { opacity: 0; transform: translateY(24%) rotate(.6deg); }
       18% { opacity: 1; }
-      72% { opacity: 1; transform: translate(-50%, -35%) rotate(-1deg); }
-      100% { opacity: 1; transform: translate(-50%, -31%) rotate(0deg); }
+      72% { opacity: 1; transform: translateY(-31%) rotate(-.35deg); }
+      100% { opacity: 1; transform: translateY(-28%) rotate(0deg); }
     }
 
     .result-card {
@@ -270,7 +262,10 @@
 
     <section id="stage" class="stage" aria-label="奉母宮籤筒動畫">
       <div class="halo" aria-hidden="true"></div>
-      <div id="drawnStick" class="drawn-stick" aria-hidden="true"><span id="stickNumber" class="stick-number"></span></div>
+      <div id="drawnStick" class="drawn-stick" aria-hidden="true">
+        <img src="assets/fengmu-lot-vessel-engraved.png" alt="">
+        <span id="stickNumber" class="stick-number"></span>
+      </div>
       <div class="photo-wrap">
         <img class="vessel-photo" src="assets/fengmu-lot-vessel-engraved.png" alt="奉母宮紅漆金飾一百零八籤籤筒，筒內有九支籤">
       </div>
