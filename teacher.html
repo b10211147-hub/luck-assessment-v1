@@ -74,7 +74,7 @@
               <option>健康疾病</option><option>考試學業</option><option>官司訴訟</option><option>出行</option>
               <option>失物</option><option>家宅</option>
             </select></label>
-            <label>排盤模式<select name="readingMode"><option value="單次占問">單次占問</option><option value="流年推演">流年推演（前3月＋未來12月）</option></select></label>
+            <label>排盤模式<select name="readingMode"><option value="單次占問">單次占問</option><option value="六爻流月推演">六爻流月推演（前3月＋未來12月）</option><option value="六爻流年推演">六爻流年推演（當年＋未來12年）</option></select></label>
             <label>應期條件<select name="timingRule">
               <option value="auto">自動依優先順序</option><option value="value">動而逢值（值日／值月）</option>
               <option value="fill">填實／出空</option><option value="combine">逢合</option><option value="clash">逢沖</option>
@@ -115,6 +115,7 @@
             <article class="wide"><h3>主用神 → 世爻 → 動爻 → 應爻 → 應期</h3><div id="simpleReading"></div></article>
             <article class="wide"><h3>應期候選（依優先順序）</h3><div id="timingAnalysis"></div></article>
             <article id="yearlyTimelineCard" class="wide" hidden><h3>流年流月時間軸</h3><div id="yearlyTimeline"></div></article>
+            <article id="annualTimelineCard" class="wide" hidden><h3>六爻流年・太歲時間軸</h3><div id="annualTimeline"></div></article>
             <article class="wide"><h3>逐爻判別白話</h3><div id="lineJudgmentGuide"></div></article>
             <article class="wide"><h3>動爻／簡易爻意</h3><div id="movingAnalysis"></div></article>
             <article class="wide"><h3>老師筆記</h3><p id="resultNotes"></p></article>
@@ -133,6 +134,6 @@
   <script src="assets/lunar.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="teacher.js?v=20260802-12"></script>
+  <script src="teacher.js?v=20260802-13"></script>
 </body>
 </html>

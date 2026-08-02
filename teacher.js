@@ -261,6 +261,28 @@ function dateInputText(date){
   return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}T12:00`;
 }
 function addDays(date,days){const next=new Date(date);next.setDate(next.getDate()+days);return next;}
+function yearGanZhiForDate(date){
+  const lunar=Solar.fromYmdHms(date.getFullYear(),date.getMonth()+1,date.getDate(),12,0,0).getLunar();
+  const ganZhi=lunar.getYearInGanZhiExact();
+  return {ganZhi,stem:ganZhi.slice(0,1),branch:ganZhi.slice(1)};
+}
+function yearBoundary(year){
+  const before=yearGanZhiForDate(new Date(year,0,31)).ganZhi;
+  for(let day=1;day<=10;day++){
+    const date=new Date(year,1,day);
+    if(yearGanZhiForDate(date).ganZhi!==before)return date;
+  }
+  return new Date(year,1,4);
+}
+function annualSegments(result,count=13){
+  const center=new Date(result.input.castTime),year=center.getFullYear();
+  const thisBoundary=yearBoundary(year),startYear=center>=thisBoundary?year:year-1;
+  return Array.from({length:count},(_,offset)=>{
+    const start=yearBoundary(startYear+offset),next=yearBoundary(startYear+offset+1),info=yearGanZhiForDate(addDays(start,1));
+    return {offset,ganZhi:info.ganZhi,branch:info.branch,start:dateText(start),end:dateText(addDays(next,-1))};
+  });
+}
+function nextAnnualBranch(result,targetBranch){return annualSegments(result,25).find(segment=>segment.branch===targetBranch)||null;}
 function firstBranchDays(start,targetBranch,limit=120,count=2){
   const found=[];
   for(let offset=0;offset<=limit&&found.length<count;offset++){
@@ -330,6 +352,7 @@ function timingForTarget(result,target){
   ];
 }
 function primaryTimingForTarget(result,target){
+  if(result.input.readingMode==="六爻流年推演")return annualPrimaryTimingForTarget(result,target);
   const choices=timingForTarget(result,target);
   const branch=target.row.branch,start=new Date(result.input.castTime),isVoid=(result.input.voidBranches||"").includes(branch);
   const rule=result.input.timingRule||"auto";
@@ -345,6 +368,25 @@ function primaryTimingForTarget(result,target){
   if(target.row.moving)return manual.value();
   if(isVoid)return manual.fill();
   return {rank:3,title:"逢合／逢沖",html:choices[2]};
+}
+function annualCandidateText(segment,label){return segment?`${label}落在 ${segment.ganZhi}年（約 ${segment.start}～${segment.end}）`:`未來24年內未找到${label}`;}
+function annualPrimaryTimingForTarget(result,target){
+  const branch=target.row.branch,isVoid=(result.input.voidBranches||"").includes(branch),rule=result.input.timingRule||"auto";
+  const value=nextAnnualBranch(result,branch),combine=nextAnnualBranch(result,combineBranch[branch]),clash=nextAnnualBranch(result,clashBranch[branch]);
+  const changed=target.row.moving&&target.row.changedNaJia?nextAnnualBranch(result,target.row.changedNaJia.branch):null;
+  const manual={
+    value:()=>target.row.moving?{rank:1,title:"動而逢值年",html:annualCandidateText(value,"主用神值年")}:{rank:1,title:"動而逢值年（條件未成立）",html:"主用神不是動爻，不能以動而逢值年作第一優先。"},
+    fill:()=>isVoid?{rank:2,title:"太歲填實",html:annualCandidateText(value,"太歲值用神並填實")}:{rank:2,title:"太歲填實（條件未成立）",html:"主用神目前沒有空亡，不需要以流年填實為第一優先。"},
+    combine:()=>({rank:3,title:"太歲逢合",html:annualCandidateText(combine,`${combineBranch[branch]}年合主用神`)}),
+    clash:()=>({rank:3,title:"太歲逢沖",html:annualCandidateText(clash,`${clashBranch[branch]}年沖主用神`)}),
+    changed:()=>changed?{rank:4,title:"化神值年",html:annualCandidateText(changed,`${target.row.changedNaJia.branch}化神值年`)}:{rank:4,title:"化神值年（條件未成立）",html:"主用神不是動爻，沒有化神可供流年取期。"},
+    month:()=>({rank:5,title:"月令轉換（不適用）",html:"目前選擇六爻流年推演；月令轉換屬流月條件，請改選值年、太歲合沖或化神值年。"})
+  };
+  if(rule!=="auto"&&manual[rule])return manual[rule]();
+  if(target.row.moving)return manual.value();
+  if(isVoid)return manual.fill();
+  const first=[combine,clash].filter(Boolean).sort((a,b)=>a.start.localeCompare(b.start))[0];
+  return first===combine?manual.combine():manual.clash();
 }
 function flowMonthSegments(result){
   const center=new Date(result.input.castTime),start=addDays(center,-150),end=addDays(center,430),segments=[];
@@ -372,7 +414,7 @@ function monthReadingFor(result,segment,target){
   return {label:labels.join("・"),text:texts.join("；")+"。"};
 }
 function renderYearTimeline(result){
-  const card=$("#yearlyTimelineCard"),enabled=result.input.readingMode==="流年推演";
+  const card=$("#yearlyTimelineCard"),enabled=result.input.readingMode==="六爻流月推演"||result.input.readingMode==="流年推演";
   card.hidden=!enabled;
   if(!enabled)return;
   const target=mainTimingTarget(result),segments=flowMonthSegments(result);
@@ -381,6 +423,26 @@ function renderYearTimeline(result){
     const title=segment.offset<0?`前${Math.abs(segment.offset)}月`:segment.offset===0?"起卦當月":`後${segment.offset}月`;
     return `<section class="month-card ${state}"><h4>${title}・${segment.branch}月</h4><small>${segment.start}～${segment.end}</small><b>${reading.label}</b><p>${reading.text}</p></section>`;
   }).join("")}</div><p class="reading-note">前3個節氣月供驗卦，起卦當月與後續12個節氣月供趨勢觀察；流月提示不等於單獨定吉凶。</p>`;
+}
+function annualReadingFor(result,segment,target){
+  if(!target)return {label:"未指定主用神",text:"請先設定第一順位用神。"};
+  const row=target.row,labels=[],texts=[];
+  if(segment.branch===row.branch){labels.push("太歲值用神");texts.push("主用神值年，是長期應期的重要觀察年");if((result.input.voidBranches||"").includes(row.branch)){labels.push("太歲填實");texts.push("起卦時的空亡地支在此年得到填實");}}
+  else if(clashBranch[row.branch]===segment.branch){labels.push("太歲沖用神");texts.push("流年太歲沖主用神，容易出現明顯變動或壓力");}
+  else if(combineBranch[row.branch]===segment.branch){labels.push("太歲合用神");texts.push("流年太歲合主用神，容易出現合作、結合或牽絆");}
+  else if(branchElement[segment.branch]===row.element){labels.push("太歲同氣");texts.push("太歲五行與主用神同氣，主用神力量偏旺");}
+  else if(elementGenerates[branchElement[segment.branch]]===row.element){labels.push("太歲生用神");texts.push("流年太歲生扶主用神，長期環境較有助力");}
+  else if(elementControls[branchElement[segment.branch]]===row.element){labels.push("太歲剋用神");texts.push("流年太歲克制主用神，這一年壓力較明顯");}
+  else if(elementGenerates[row.element]===branchElement[segment.branch]){labels.push("用神生太歲");texts.push("主用神力量向流年環境輸出，較容易耗力");}
+  else {labels.push("用神剋太歲");texts.push("主用神對流年形成制約，需要主動掌握局面");}
+  if(row.moving&&row.changedNaJia?.branch===segment.branch){labels.push("化神值年");texts.push("變爻地支在此年當值，可留意變化落實");}
+  return {label:labels.join("・"),text:texts.join("；")+"。"};
+}
+function renderAnnualTimeline(result){
+  const card=$("#annualTimelineCard"),enabled=result.input.readingMode==="六爻流年推演";
+  card.hidden=!enabled;if(!enabled)return;
+  const target=mainTimingTarget(result),segments=annualSegments(result,13);
+  $("#annualTimeline").innerHTML=`<div class="year-timeline">${segments.map(segment=>{const reading=annualReadingFor(result,segment,target);return `<section class="month-card ${segment.offset===0?"current":"future"}"><h4>${segment.offset===0?"起卦流年":`後${segment.offset}年`}・${segment.ganZhi}</h4><small>${segment.start}～${segment.end}</small><b>${reading.label}</b><p>${reading.text}</p></section>`;}).join("")}</div><p class="reading-note">本區是六爻太歲流年：從起卦流年到未來12年，只延伸本卦主用神、動變與太歲關係，不是八字大運或八字流年。</p>`;
 }
 function elementRelationText(a,b,aName,bName){
   if(!a||!b)return "五行關係未取得";
@@ -477,6 +539,7 @@ function renderResult(result) {
     ? `<div class="timing-list"><section class="timing-card"><h4>第一優先・${primaryTiming.title}</h4><p>主用神 ${primaryTarget.useGod}：${primaryTarget.row.stem}${primaryTarget.row.branch}${primaryTarget.row.element}${primaryTarget.row.moving?"・動爻":""}</p><ol><li>${primaryTiming.html}</li></ol></section></div><p class="reading-note">只顯示目前條件下的第一優先應期，其餘順位不列出；日期是候選，不是保證發生日期。</p>`
     : "<p>請先指定至少一個用神，系統才能依用神地支計算值日、值月與出空。</p>";
   renderYearTimeline(result);
+  renderAnnualTimeline(result);
   $("#lineJudgmentGuide").innerHTML=`<div class="line-judgment-list">${[...result.rows].reverse().map(row=>{
     const items=allJudgments(result,row);
     return `<section><h4>${row.position}爻・${row.relative}${row.stem}${row.branch}${row.element}${row.shiYing?`・${row.shiYing}`:""}</h4>${items.length?items.map(item=>`<p><b>${item.label}</b>：${item.text}</p>`).join(""):"<p>目前未見明顯月日、合沖或空亡標記。</p>"}</section>`;
@@ -494,10 +557,11 @@ function resultText(result) {
   lines.push("","【逐爻判別白話】",...[...result.rows].reverse().flatMap(row=>allJudgments(result,row).map(item=>`${row.position}爻 ${item.label}：${item.text}`)),...harmonyFindings(result).map(item=>`${item.label}：${item.text}`));
   const primaryTarget=mainTimingTarget(result);
   if(primaryTarget){const primary=primaryTimingForTarget(result,primaryTarget);lines.push("","【第一優先應期】",`${primary.title}：${primary.html.replace(/<[^>]+>/g,"")}`);}
-  if(result.input.readingMode==="流年推演"){
+  if(result.input.readingMode==="六爻流月推演"||result.input.readingMode==="流年推演"){
     const target=primaryTarget;
     lines.push("","【流年流月】",...flowMonthSegments(result).map(segment=>{const reading=monthReadingFor(result,segment,target);return `${segment.branch}月 ${segment.start}～${segment.end}｜${reading.label}：${reading.text}`;}));
   }
+  if(result.input.readingMode==="六爻流年推演")lines.push("","【六爻流年・太歲】",...annualSegments(result,13).map(segment=>{const reading=annualReadingFor(result,segment,primaryTarget);return `${segment.ganZhi}年 ${segment.start}～${segment.end}｜${reading.label}：${reading.text}`;}));
   lines.push("",`老師筆記：${result.input.notes||"無"}`);
   return lines.join("\n");
 }
