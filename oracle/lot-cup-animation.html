@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#671723">
+  <meta name="description" content="奉母宮一百零八籤・照片籤筒動畫展示">
+  <title>奉母宮・籤筒動畫</title>
+  <style>
+    :root {
+      --red: #791f2d;
+      --red-dark: #3d0c14;
+      --gold: #b98235;
+      --gold-light: #efd291;
+      --green: #173f35;
+      --paper: #fbf2df;
+      --ink: #372923;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      font-family: "Noto Serif TC", "PingFang TC", "Microsoft JhengHei", serif;
+      background:
+        radial-gradient(circle at 50% 18%, rgba(245, 218, 151, .58), transparent 28rem),
+        repeating-linear-gradient(90deg, rgba(110, 65, 29, .025) 0 1px, transparent 1px 9px),
+        linear-gradient(145deg, #f8efd9, #e7d3b3);
+    }
+
+    button, a { font: inherit; }
+
+    .page {
+      width: min(100%, 720px);
+      min-height: 100vh;
+      margin: auto;
+      padding: 36px 18px 42px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .eyebrow {
+      margin: 0 0 7px;
+      color: var(--red);
+      font-size: .8rem;
+      font-weight: 700;
+      letter-spacing: .23em;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--red-dark);
+      font-size: clamp(2rem, 8vw, 3.35rem);
+      letter-spacing: .16em;
+      text-indent: .16em;
+    }
+
+    .intro {
+      max-width: 31rem;
+      margin: 11px auto 0;
+      color: #7b6b5e;
+      line-height: 1.75;
+    }
+
+    .stage {
+      position: relative;
+      width: min(92vw, 465px);
+      aspect-ratio: 1 / 1;
+      margin: 0 auto -10px;
+      display: grid;
+      place-items: center;
+      isolation: isolate;
+    }
+
+    .halo {
+      position: absolute;
+      z-index: -3;
+      width: 77%;
+      aspect-ratio: 1;
+      border: 1px solid rgba(178, 126, 48, .23);
+      border-radius: 50%;
+      background:
+        radial-gradient(circle, rgba(255, 248, 217, .76) 0 43%, rgba(220, 176, 89, .18) 44% 61%, transparent 62%);
+      animation: halo-breathe 3.8s ease-in-out infinite;
+    }
+
+    .halo::before,
+    .halo::after {
+      content: "";
+      position: absolute;
+      inset: 9%;
+      border: 1px dashed rgba(161, 101, 38, .25);
+      border-radius: 50%;
+    }
+    .halo::after { inset: 20%; border-style: solid; }
+
+    .photo-wrap {
+      position: relative;
+      z-index: 2;
+      width: 88%;
+      transform-origin: 50% 74%;
+      animation: quiet-float 3.6s ease-in-out infinite;
+      will-change: transform;
+    }
+
+    .vessel-photo {
+      display: block;
+      width: 100%;
+      height: auto;
+      filter: drop-shadow(0 18px 15px rgba(71, 37, 21, .2));
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .drawn-stick {
+      position: absolute;
+      z-index: 1;
+      left: 53%;
+      bottom: 31%;
+      width: 4.2%;
+      height: 50%;
+      min-width: 14px;
+      border: 1px solid #9f6426;
+      border-top: 5px solid var(--red);
+      border-radius: 8px 8px 3px 3px;
+      opacity: 0;
+      transform: translate(-50%, 32%) rotate(2deg);
+      background:
+        linear-gradient(90deg, rgba(94, 49, 15, .27), transparent 22% 67%, rgba(94, 49, 15, .28)),
+        repeating-linear-gradient(88deg, rgba(109, 62, 22, .09) 0 1px, transparent 1px 9px),
+        linear-gradient(90deg, #bd7b31, #f4da9b 38%, #d69947 73%, #a76425);
+      box-shadow: inset 2px 0 rgba(255,255,255,.35), 0 8px 10px rgba(56, 29, 13, .2);
+      transform-origin: 50% 100%;
+      will-change: transform, opacity;
+    }
+
+    .drawn-stick::before {
+      content: "奉母宮";
+      position: absolute;
+      left: 50%; top: 12%;
+      color: rgba(105, 27, 35, .78);
+      font-size: clamp(.48rem, 1.5vw, .7rem);
+      font-weight: 700;
+      writing-mode: vertical-rl;
+      transform: translateX(-50%);
+    }
+
+    .stick-number {
+      position: absolute;
+      left: 50%; top: 48%;
+      transform: translateX(-50%);
+      color: #6c1724;
+      font-family: Georgia, serif;
+      font-size: clamp(.55rem, 1.6vw, .78rem);
+      font-weight: 700;
+      writing-mode: vertical-rl;
+      letter-spacing: .08em;
+    }
+
+    .stage.is-shaking .photo-wrap { animation: vessel-shake .13s linear 8; }
+    .stage.is-shaking .halo { animation: halo-pulse .26s ease-in-out 4; }
+    .stage.is-drawn .drawn-stick { animation: draw-stick 1.05s cubic-bezier(.16,.82,.2,1) forwards; }
+
+    @keyframes quiet-float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-4px) rotate(.25deg); }
+    }
+
+    @keyframes halo-breathe {
+      0%, 100% { transform: scale(.98); opacity: .72; }
+      50% { transform: scale(1.025); opacity: 1; }
+    }
+
+    @keyframes vessel-shake {
+      0%, 100% { transform: translateX(-5px) rotate(-2deg); }
+      50% { transform: translateX(5px) rotate(2deg) translateY(-2px); }
+    }
+
+    @keyframes halo-pulse {
+      0%, 100% { transform: scale(.97); opacity: .7; }
+      50% { transform: scale(1.04); opacity: 1; }
+    }
+
+    @keyframes draw-stick {
+      0% { opacity: 0; transform: translate(-50%, 32%) rotate(2deg); }
+      18% { opacity: 1; }
+      72% { opacity: 1; transform: translate(-50%, -35%) rotate(-1deg); }
+      100% { opacity: 1; transform: translate(-50%, -31%) rotate(0deg); }
+    }
+
+    .result-card {
+      width: min(100%, 390px);
+      min-height: 74px;
+      padding: 14px 20px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(185, 130, 53, .42);
+      border-radius: 16px;
+      background: rgba(255, 250, 239, .72);
+      box-shadow: 0 10px 26px rgba(81, 42, 22, .08);
+    }
+
+    .result-card p { margin: 0; color: #77665a; }
+    .result-card strong { display: block; color: var(--red); font-size: 1.35rem; letter-spacing: .1em; }
+
+    .actions {
+      width: min(100%, 390px);
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 9px;
+    }
+
+    .draw-button,
+    .reading-link {
+      min-height: 58px;
+      display: grid;
+      place-items: center;
+      padding: 10px 22px;
+      border-radius: 14px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-decoration: none;
+    }
+
+    .draw-button {
+      color: #fff8e8;
+      border: 1px solid #a77334;
+      background: linear-gradient(135deg, #9e3441, var(--red-dark));
+      box-shadow: 0 11px 22px rgba(91, 25, 34, .24), inset 0 1px rgba(255,255,255,.17);
+      cursor: pointer;
+    }
+    .draw-button:disabled { cursor: wait; opacity: .72; }
+
+    .reading-link {
+      color: #fff9e9;
+      background: var(--green);
+    }
+
+    .reading-link[hidden] { display: none; }
+
+    .note {
+      margin: 18px 0 0;
+      color: #857469;
+      font-size: .79rem;
+      line-height: 1.65;
+    }
+
+    @media (max-width: 430px) {
+      .page { padding-top: 28px; }
+      .stage { width: min(105vw, 440px); margin: -13px auto -18px; }
+      .photo-wrap { width: 91%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <p class="eyebrow">照片籤筒・HTML 動畫</p>
+    <h1>奉母宮一百零八籤</h1>
+    <p class="intro">靜心默念姓名與所問之事，心念安定後，再誠心搖籤。</p>
+
+    <section id="stage" class="stage" aria-label="奉母宮籤筒動畫">
+      <div class="halo" aria-hidden="true"></div>
+      <div id="drawnStick" class="drawn-stick" aria-hidden="true"><span id="stickNumber" class="stick-number"></span></div>
+      <div class="photo-wrap">
+        <img class="vessel-photo" src="assets/fengmu-lot-vessel-engraved.png" alt="奉母宮紅漆金飾一百零八籤籤筒，筒內有九支籤">
+      </div>
+    </section>
+
+    <div class="result-card" role="status" aria-live="polite">
+      <p id="resultText">請先靜心，再按下誠心搖籤</p>
+    </div>
+
+    <div class="actions">
+      <button id="drawButton" class="draw-button" type="button">誠心搖籤</button>
+      <a id="readingLink" class="reading-link" href="index.html" hidden>查看這支籤的完整解籤</a>
+    </div>
+    <p class="note">籤詩用於安定心念與整理方向；重大決定仍需依實際情況審慎判斷。</p>
+  </main>
+
+  <script>
+    (() => {
+      const stage = document.querySelector("#stage");
+      const button = document.querySelector("#drawButton");
+      const result = document.querySelector("#resultText");
+      const stickNumber = document.querySelector("#stickNumber");
+      const readingLink = document.querySelector("#readingLink");
+      let lastNumber = 0;
+
+      function random(max) {
+        if (window.crypto?.getRandomValues) {
+          const value = new Uint32Array(1);
+          window.crypto.getRandomValues(value);
+          return value[0] % max;
+        }
+        return Math.floor(Math.random() * max);
+      }
+
+      button.addEventListener("click", () => {
+        stage.classList.remove("is-drawn");
+        stage.classList.add("is-shaking");
+        readingLink.hidden = true;
+        button.disabled = true;
+        result.textContent = "誠心求籤中……";
+
+        setTimeout(() => {
+          let number = random(108) + 1;
+          if (number === lastNumber) number = (number % 108) + 1;
+          lastNumber = number;
+          const formatted = String(number).padStart(3, "0");
+          stickNumber.textContent = formatted;
+          stage.classList.remove("is-shaking");
+          void stage.offsetWidth;
+          stage.classList.add("is-drawn");
+
+          setTimeout(() => {
+            result.innerHTML = `<strong>奉母宮・第 ${formatted} 籤</strong>`;
+            readingLink.href = `index.html?lot=${number}`;
+            readingLink.hidden = false;
+            button.textContent = "再搖一次";
+            button.disabled = false;
+          }, 900);
+        }, 1050);
+      });
+    })();
+  </script>
+</body>
+</html>
