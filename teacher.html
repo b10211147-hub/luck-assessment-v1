@@ -34,8 +34,12 @@
     .month-card.past{opacity:.72}.month-card.current{border:2px solid var(--gold);background:#fff9e9}.month-card h4{margin:0 0 5px;color:var(--green)}
     .month-card small{display:block;color:var(--muted)}.month-card b{display:inline-block;margin:7px 0 4px;padding:3px 7px;border-radius:12px;background:#efe2bd;color:#6b4b18;font-size:12px}.month-card p{margin:0!important;font-size:13px}
     #pdfCaptureArea.pdf-export{width:1080px;max-width:none;padding:18px;background:#fff}.pdf-export .actions{visibility:hidden}.pdf-export .table-wrap{overflow:visible}
+    .mode-picker{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:-6px 0 20px;padding:6px;border-radius:14px;background:#e9dfcd}.mode-option{position:relative;cursor:pointer}
+    .mode-option input{position:absolute;opacity:0;pointer-events:none}.mode-option span{display:block;height:100%;padding:12px;border:1px solid transparent;border-radius:10px;background:transparent;color:var(--muted);text-align:center;font-weight:800}
+    .mode-option small{display:block;margin-top:3px;font-weight:400}.mode-option input:checked+span{border-color:#cbb57f;background:#fff;color:var(--green);box-shadow:0 3px 12px rgba(45,36,22,.1)}
     @media(max-width:720px){.line-judgment-list{grid-template-columns:1fr}}
     @media(max-width:720px){.year-timeline{grid-template-columns:1fr 1fr}.actions{flex-wrap:wrap}}
+    @media(max-width:720px){.mode-picker{grid-template-columns:1fr}.mode-option span{padding:10px}}
   </style>
 </head>
 <body>
@@ -65,6 +69,11 @@
       <section id="castingPanel" class="panel">
         <form id="castingForm" class="casting-form">
           <div class="section-title"><span>01</span><div><small>基本資料</small><h2>建立占問</h2></div></div>
+          <div class="mode-picker" role="radiogroup" aria-label="排盤模式">
+            <label class="mode-option"><input type="radio" name="readingMode" value="單次占問" checked><span>單次占問<small>具體事件與近期應期</small></span></label>
+            <label class="mode-option"><input type="radio" name="readingMode" value="六爻流月推演"><span>六爻流月<small>前3月＋未來12月</small></span></label>
+            <label class="mode-option"><input type="radio" name="readingMode" value="六爻流年推演"><span>六爻流年<small>當年＋未來12年</small></span></label>
+          </div>
           <div class="grid two">
             <label>占問事項<input name="question" required placeholder="例如：這次合作能否順利？"></label>
             <label>求占者<input name="clientName" placeholder="姓名或代稱"></label>
@@ -74,7 +83,6 @@
               <option>健康疾病</option><option>考試學業</option><option>官司訴訟</option><option>出行</option>
               <option>失物</option><option>家宅</option>
             </select></label>
-            <label>排盤模式<select name="readingMode"><option value="單次占問">單次占問</option><option value="六爻流月推演">六爻流月推演（前3月＋未來12月）</option><option value="六爻流年推演">六爻流年推演（當年＋未來12年）</option></select></label>
             <label>應期條件<select name="timingRule">
               <option value="auto">自動依優先順序</option><option value="value">動而逢值（值日／值月）</option>
               <option value="fill">填實／出空</option><option value="combine">逢合</option><option value="clash">逢沖</option>
