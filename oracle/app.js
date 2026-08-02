@@ -7,6 +7,7 @@
   const resultPanel = document.querySelector("#resultPanel");
   const drawBtn = document.querySelector("#drawBtn");
   const lotVisual = document.querySelector("#lotVisual");
+  const stickNumber = document.querySelector("#stickNumber");
   const numberForm = document.querySelector("#numberForm");
   const numberInput = document.querySelector("#lotNumber");
   const numberError = document.querySelector("#numberError");
@@ -255,6 +256,9 @@
     resultPanel.hidden = true;
     drawPanel.hidden = false;
     currentOracle = null;
+    lotVisual.classList.remove("is-shaking", "is-drawn");
+    stickNumber.textContent = "";
+    drawBtn.disabled = false;
     history.replaceState(null, "", location.pathname);
     drawPanel.scrollIntoView({ behavior: "smooth", block: "start" });
   }
@@ -264,13 +268,23 @@
       numberError.textContent = "籤詩資料尚未完整，請通知管理者。";
       return;
     }
+    const chosenOracle = getRandomOracle();
+    const formattedNumber = String(chosenOracle.number).padStart(3, "0");
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     drawBtn.disabled = true;
+    stickNumber.textContent = "";
+    lotVisual.classList.remove("is-drawn");
     lotVisual.classList.add("is-shaking");
     setTimeout(() => {
       lotVisual.classList.remove("is-shaking");
-      drawBtn.disabled = false;
-      showOracle(getRandomOracle());
-    }, 950);
+      stickNumber.textContent = formattedNumber;
+      void lotVisual.offsetWidth;
+      lotVisual.classList.add("is-drawn");
+      setTimeout(() => {
+        drawBtn.disabled = false;
+        showOracle(chosenOracle);
+      }, reducedMotion ? 220 : 1250);
+    }, reducedMotion ? 80 : 900);
   });
 
   numberForm.addEventListener("submit", event => {

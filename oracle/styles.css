@@ -179,6 +179,128 @@ main { width: min(760px, calc(100% - 28px)); margin: -38px auto 0; position: rel
 .lot-visual.is-shaking .lot-sticks > span:nth-child(odd) { transform: translateY(-8px) rotate(-5deg); }
 @keyframes shake { 0%, 100% { transform: rotate(-2deg); } 50% { transform: rotate(2deg) translateY(-2px); } }
 
+/* 奉母宮照片籤筒 */
+.lot-stage {
+  --photo-size: 88%;
+  position: relative;
+  width: min(92vw, 465px);
+  aspect-ratio: 1;
+  margin: 0 auto -8px;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+}
+
+.lot-halo {
+  position: absolute;
+  z-index: -1;
+  width: 77%;
+  aspect-ratio: 1;
+  border: 1px solid rgba(178, 126, 48, .23);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 248, 217, .76) 0 43%, rgba(220, 176, 89, .18) 44% 61%, transparent 62%);
+  animation: lot-halo-breathe 3.8s ease-in-out infinite;
+}
+
+.lot-halo::before,
+.lot-halo::after {
+  content: "";
+  position: absolute;
+  inset: 9%;
+  border: 1px dashed rgba(161, 101, 38, .25);
+  border-radius: 50%;
+}
+
+.lot-halo::after { inset: 20%; border-style: solid; }
+
+.lot-photo-wrap {
+  position: relative;
+  z-index: 2;
+  width: var(--photo-size);
+  transform-origin: 50% 74%;
+  animation: lot-quiet-float 3.6s ease-in-out infinite;
+  will-change: transform;
+}
+
+.lot-vessel-photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 18px 15px rgba(71, 37, 21, .2));
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.lot-drawn-stick {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  opacity: 0;
+  overflow: hidden;
+  clip-path: inset(8% 46.8% 64% 48.4% round 7px);
+  transform: translateY(10%) rotate(.45deg);
+  transform-origin: 50% 42%;
+  filter: drop-shadow(0 9px 6px rgba(69, 36, 15, .22));
+  will-change: transform, opacity;
+}
+
+.lot-drawn-stick img {
+  position: absolute;
+  left: calc((100% - var(--photo-size)) / 2);
+  top: calc((100% - var(--photo-size)) / 2);
+  width: var(--photo-size);
+  height: auto;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.stick-number {
+  position: absolute;
+  z-index: 2;
+  left: 50.9%;
+  top: 13.5%;
+  transform: translateX(-50%);
+  padding: 1px;
+  color: #6c1724;
+  text-shadow: 0 1px rgba(255, 238, 188, .72);
+  font-family: Georgia, serif;
+  font-size: clamp(.48rem, 1.45vw, .7rem);
+  font-weight: 700;
+  writing-mode: vertical-rl;
+  letter-spacing: .08em;
+}
+
+.lot-stage.is-shaking .lot-photo-wrap { animation: lot-vessel-shake .13s linear 8; }
+.lot-stage.is-shaking .lot-halo { animation: lot-halo-pulse .26s ease-in-out 4; }
+.lot-stage.is-drawn .lot-drawn-stick { animation: lot-draw-stick 1.05s cubic-bezier(.16,.82,.2,1) forwards; }
+
+@keyframes lot-quiet-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-4px) rotate(.25deg); }
+}
+
+@keyframes lot-halo-breathe {
+  0%, 100% { transform: scale(.98); opacity: .72; }
+  50% { transform: scale(1.025); opacity: 1; }
+}
+
+@keyframes lot-vessel-shake {
+  0%, 100% { transform: translateX(-5px) rotate(-2deg); }
+  50% { transform: translateX(5px) rotate(2deg) translateY(-2px); }
+}
+
+@keyframes lot-halo-pulse {
+  0%, 100% { transform: scale(.97); opacity: .7; }
+  50% { transform: scale(1.04); opacity: 1; }
+}
+
+@keyframes lot-draw-stick {
+  0% { opacity: 0; transform: translateY(10%) rotate(.45deg); }
+  18% { opacity: 1; }
+  72% { opacity: 1; transform: translateY(-18%) rotate(-.3deg); }
+  100% { opacity: 1; transform: translateY(-15%) rotate(0deg); }
+}
+
 .primary-action {
   width: min(100%, 360px);
   min-height: 66px;
@@ -274,6 +396,11 @@ footer p { margin: 4px 0; }
   .masthead { padding-top: 38px; }
   main { width: min(100% - 20px, 760px); }
   .draw-panel { border-radius: 22px; }
+  .lot-stage {
+    --photo-size: 91%;
+    width: min(105vw, 440px);
+    margin: -10px auto -16px;
+  }
   .aspect-grid { grid-template-columns: 1fr; }
   .aspect-item, .aspect-item:nth-child(odd), .aspect-item:nth-last-child(-n + 2) { border-right: 0; border-bottom: 1px solid var(--line); }
   .aspect-item:last-child { border-bottom: 0; }
