@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#661724">
+  <title>奉母宮籤筒・HTML 設計稿</title>
+  <style>
+    :root {
+      --wine: #721d2b;
+      --wine-dark: #390b13;
+      --wine-light: #a13a46;
+      --gold: #c89543;
+      --gold-light: #f4d891;
+      --ink: #33251f;
+      --paper: #fbf1dc;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      color: var(--ink);
+      font-family: "Noto Serif TC", "PingFang TC", "Microsoft JhengHei", serif;
+      background:
+        radial-gradient(circle at 50% 18%, rgba(231, 194, 117, .31), transparent 26rem),
+        repeating-linear-gradient(90deg, rgba(116, 80, 43, .025) 0 1px, transparent 1px 8px),
+        linear-gradient(145deg, #f8efd9, #e9d7b8);
+      overflow-x: hidden;
+    }
+
+    button { font: inherit; cursor: pointer; }
+
+    .demo-shell {
+      width: min(100%, 720px);
+      min-height: 100vh;
+      padding: 38px 20px 34px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--wine);
+      font-size: .82rem;
+      font-weight: 700;
+      letter-spacing: .25em;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--wine-dark);
+      font-size: clamp(2rem, 8vw, 3.4rem);
+      letter-spacing: .16em;
+      text-indent: .16em;
+    }
+
+    .intro {
+      max-width: 32rem;
+      margin: 12px auto 10px;
+      color: #78675b;
+      line-height: 1.75;
+    }
+
+    .altar-stage {
+      position: relative;
+      width: min(100%, 480px);
+      height: 430px;
+      margin-top: 3px;
+      display: grid;
+      place-items: end center;
+      perspective: 850px;
+    }
+
+    .halo {
+      position: absolute;
+      left: 50%; top: 42px;
+      width: 300px; height: 300px;
+      transform: translateX(-50%);
+      border: 1px solid rgba(181, 129, 53, .22);
+      border-radius: 50%;
+      background:
+        radial-gradient(circle, rgba(255, 248, 213, .7) 0 42%, rgba(229, 189, 108, .19) 43% 58%, transparent 59%);
+    }
+
+    .halo::before, .halo::after {
+      content: "";
+      position: absolute;
+      inset: 25px;
+      border: 1px dashed rgba(160, 102, 41, .24);
+      border-radius: 50%;
+    }
+    .halo::after { inset: 54px; border-style: solid; }
+
+    .oracle-vessel {
+      position: relative;
+      width: 280px;
+      height: 378px;
+      transform-style: preserve-3d;
+    }
+
+    .sticks {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      transform-origin: 50% 82%;
+    }
+
+    .stick {
+      --x: 130px;
+      --r: 0deg;
+      --h: 220px;
+      position: absolute;
+      left: var(--x);
+      bottom: 100px;
+      width: 17px;
+      height: var(--h);
+      border: 1px solid #9a642c;
+      border-top: 6px solid var(--wine);
+      border-radius: 8px 8px 3px 3px;
+      background:
+        linear-gradient(90deg, rgba(96, 53, 20, .26), transparent 20% 66%, rgba(96, 53, 20, .3)),
+        linear-gradient(90deg, #bd7c32, #f7dfa2 38%, #d69c4b 73%, #a96827);
+      box-shadow: inset 2px 0 rgba(255, 255, 255, .32), 0 3px 4px rgba(60, 27, 13, .15);
+      transform: rotate(var(--r));
+      transform-origin: 50% 100%;
+      transition: bottom .55s cubic-bezier(.2, .8, .2, 1), transform .45s ease, filter .3s ease;
+    }
+
+    .stick::before {
+      content: "奉";
+      position: absolute;
+      left: 1px; top: 19px;
+      color: rgba(105, 22, 34, .78);
+      font-size: .72rem;
+      font-weight: 700;
+      writing-mode: vertical-rl;
+    }
+
+    .stick::after {
+      content: attr(data-order);
+      position: absolute;
+      left: 2px; bottom: 32px;
+      color: rgba(96, 46, 21, .68);
+      font-family: Georgia, serif;
+      font-size: .62rem;
+      writing-mode: vertical-rl;
+    }
+
+    .stick:nth-child(1) { --x: 69px;  --r: -21deg; --h: 183px; }
+    .stick:nth-child(2) { --x: 88px;  --r: -15deg; --h: 216px; }
+    .stick:nth-child(3) { --x: 106px; --r: -9deg;  --h: 199px; }
+    .stick:nth-child(4) { --x: 124px; --r: -3deg;  --h: 230px; }
+    .stick:nth-child(5) { --x: 143px; --r: 3deg;   --h: 207px; }
+    .stick:nth-child(6) { --x: 161px; --r: 9deg;   --h: 224px; }
+    .stick:nth-child(7) { --x: 178px; --r: 15deg;  --h: 194px; }
+    .stick:nth-child(8) { --x: 53px;  --r: -27deg; --h: 169px; }
+    .stick:nth-child(9) { --x: 194px; --r: 24deg;  --h: 177px; }
+
+    .stick.is-drawn {
+      bottom: 214px;
+      z-index: 5;
+      filter: drop-shadow(0 8px 6px rgba(94, 44, 19, .25));
+      transform: rotate(0deg) scale(1.06);
+    }
+
+    .vessel-rim {
+      position: absolute;
+      left: 30px; top: 190px;
+      z-index: 4;
+      width: 220px; height: 40px;
+      border: 3px solid #d6a656;
+      border-radius: 50%;
+      background: linear-gradient(180deg, #5d111c, #a83d48 48%, #451019);
+      box-shadow: inset 0 6px 6px rgba(255,255,255,.12), 0 5px 7px rgba(55, 14, 20, .3);
+    }
+
+    .vessel-rim::after {
+      content: "";
+      position: absolute;
+      inset: 8px 17px;
+      border: 1px solid rgba(246, 218, 157, .75);
+      border-radius: 50%;
+      background: #2b0b10;
+    }
+
+    .vessel-body {
+      position: absolute;
+      left: 40px; top: 210px;
+      z-index: 3;
+      width: 200px; height: 147px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #f7dfa8;
+      border: 3px double #d5a758;
+      border-radius: 15px 15px 74px 74px;
+      background:
+        radial-gradient(ellipse at 50% 21%, rgba(210, 91, 94, .39), transparent 35%),
+        linear-gradient(100deg, #3d0c14, #8e2937 35%, #a23844 50%, #6b1a27 72%, #310910);
+      box-shadow:
+        inset 18px 0 25px rgba(0,0,0,.23),
+        inset -18px 0 25px rgba(0,0,0,.29),
+        0 20px 25px rgba(71, 30, 22, .19);
+    }
+
+    .vessel-body::before,
+    .vessel-body::after {
+      content: "◆";
+      position: absolute;
+      top: 65px;
+      color: #d4a553;
+      font-size: .7rem;
+    }
+    .vessel-body::before { left: 24px; }
+    .vessel-body::after { right: 24px; }
+
+    .temple-seal {
+      width: 54px; height: 54px;
+      display: grid;
+      place-items: center;
+      margin: -7px 0 9px;
+      color: var(--wine);
+      border: 3px double #996526;
+      outline: 1px solid #ead091;
+      outline-offset: 4px;
+      background: linear-gradient(145deg, #f6e2ac, #cfa65c);
+      transform: rotate(45deg);
+      box-shadow: 0 4px 8px rgba(33, 7, 12, .3);
+    }
+    .temple-seal span { transform: rotate(-45deg); font-size: 1.7rem; font-weight: 700; }
+
+    .vessel-body b { margin-top: 2px; font-size: 1.12rem; letter-spacing: .34em; text-indent: .34em; }
+    .vessel-body small { margin-top: 4px; color: rgba(247,223,168,.72); font-size: .68rem; letter-spacing: .19em; }
+
+    .vessel-foot {
+      position: absolute;
+      left: 101px; bottom: 1px;
+      z-index: 2;
+      width: 78px; height: 27px;
+      border: 3px solid #c89446;
+      border-radius: 50% 50% 9px 9px;
+      background: linear-gradient(#8e2e39, #350b12);
+      box-shadow: 0 8px 10px rgba(63, 28, 18, .18);
+    }
+
+    .table-line {
+      position: absolute;
+      left: 0; right: 0; bottom: 13px;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #a97b3b 18% 82%, transparent);
+      box-shadow: 0 8px 14px rgba(78, 43, 22, .18);
+    }
+
+    .oracle-vessel.is-shaking .sticks { animation: sticks-shake .12s linear infinite; }
+    .oracle-vessel.is-shaking .vessel-body,
+    .oracle-vessel.is-shaking .vessel-rim,
+    .oracle-vessel.is-shaking .vessel-foot { animation: vessel-shake .12s linear infinite; }
+
+    @keyframes vessel-shake {
+      0%, 100% { transform: translateX(-3px) rotate(-1deg); }
+      50% { transform: translateX(3px) rotate(1deg); }
+    }
+    @keyframes sticks-shake {
+      0%, 100% { transform: translateX(-4px) translateY(1px); }
+      50% { transform: translateX(4px) translateY(-3px); }
+    }
+
+    .result {
+      min-height: 31px;
+      margin: -3px 0 12px;
+      color: var(--wine);
+      font-weight: 700;
+      letter-spacing: .08em;
+    }
+
+    .draw-button {
+      width: min(100%, 320px);
+      min-height: 60px;
+      padding: 10px 24px;
+      color: #fff8e8;
+      border: 1px solid #9a6b2d;
+      border-radius: 15px;
+      background: linear-gradient(135deg, var(--wine-light), var(--wine-dark));
+      box-shadow: 0 11px 22px rgba(91, 25, 34, .24), inset 0 1px rgba(255,255,255,.18);
+      font-weight: 700;
+      letter-spacing: .13em;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .draw-button:hover { transform: translateY(-2px); box-shadow: 0 15px 25px rgba(91, 25, 34, .29); }
+    .draw-button:disabled { cursor: wait; opacity: .72; transform: none; }
+
+    .design-note {
+      margin: 20px 0 0;
+      color: #79695d;
+      font-size: .82rem;
+      line-height: 1.65;
+    }
+
+    @media (max-width: 430px) {
+      .demo-shell { padding-top: 28px; justify-content: flex-start; }
+      .altar-stage { transform: scale(.88); margin: -18px 0 -26px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="demo-shell">
+    <p class="eyebrow">HTML・CSS 籤筒設計稿</p>
+    <h1>奉母宮籤筒</h1>
+    <p class="intro">深紅漆金象徵莊嚴與納福，九支主籤代表奉祀九尊神明，籤筒正面保留奉母宮專屬宮印。</p>
+
+    <section class="altar-stage" aria-label="奉母宮一百零八籤籤筒互動展示">
+      <div class="halo" aria-hidden="true"></div>
+      <div id="oracleVessel" class="oracle-vessel" aria-hidden="true">
+        <div class="sticks">
+          <span class="stick" data-order="一"></span>
+          <span class="stick" data-order="二"></span>
+          <span class="stick" data-order="三"></span>
+          <span class="stick" data-order="四"></span>
+          <span class="stick" data-order="五"></span>
+          <span class="stick" data-order="六"></span>
+          <span class="stick" data-order="七"></span>
+          <span class="stick" data-order="八"></span>
+          <span class="stick" data-order="九"></span>
+        </div>
+        <div class="vessel-rim"></div>
+        <div class="vessel-body">
+          <div class="temple-seal"><span>奉</span></div>
+          <b>奉母宮</b>
+          <small>一百零八籤</small>
+        </div>
+        <div class="vessel-foot"></div>
+      </div>
+      <div class="table-line" aria-hidden="true"></div>
+    </section>
+
+    <p id="result" class="result" role="status" aria-live="polite">請靜心默念所問之事</p>
+    <button id="drawButton" class="draw-button" type="button">誠心搖籤</button>
+    <p class="design-note">此頁為純 HTML、CSS 與 JavaScript 製作，沒有使用圖片；確認後可直接移植到正式解籤頁。</p>
+  </main>
+
+  <script>
+    (() => {
+      const vessel = document.querySelector("#oracleVessel");
+      const button = document.querySelector("#drawButton");
+      const result = document.querySelector("#result");
+      const sticks = [...document.querySelectorAll(".stick")];
+      let lastNumber = 0;
+
+      function random(max) {
+        if (window.crypto?.getRandomValues) {
+          const value = new Uint32Array(1);
+          window.crypto.getRandomValues(value);
+          return value[0] % max;
+        }
+        return Math.floor(Math.random() * max);
+      }
+
+      button.addEventListener("click", () => {
+        sticks.forEach(stick => stick.classList.remove("is-drawn"));
+        button.disabled = true;
+        result.textContent = "誠心求籤中……";
+        vessel.classList.add("is-shaking");
+
+        setTimeout(() => {
+          vessel.classList.remove("is-shaking");
+          let number = random(108) + 1;
+          if (number === lastNumber) number = (number % 108) + 1;
+          lastNumber = number;
+          const chosen = sticks[random(sticks.length)];
+          chosen.classList.add("is-drawn");
+          chosen.dataset.order = String(number).padStart(3, "0");
+          result.textContent = `奉母宮・第 ${String(number).padStart(3, "0")} 籤`;
+          button.textContent = "再搖一次";
+          button.disabled = false;
+        }, 1100);
+      });
+    })();
+  </script>
+</body>
+</html>
