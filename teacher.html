@@ -17,9 +17,7 @@
     .reading-list{margin:0;padding-left:20px}.reading-list li+li{margin-top:7px}.reading-note{padding:9px 11px;border-left:3px solid var(--gold);background:#fffaf0}
     .line-reading{margin-top:6px;padding:8px 10px;border-radius:8px;background:#fff;color:#534a3d;font-weight:400}
     td small{display:block;margin-top:4px;color:#746d63;font-size:11px;font-weight:400;white-space:nowrap}
-    tr.moving td small{color:#8b5b60}.six-god-guide{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-    .six-god-guide span{display:flex;gap:9px;padding:10px;border:1px solid var(--line);border-radius:9px;background:#fff}
-    .six-god-guide b{min-width:34px;color:var(--green)}
+    tr.moving td small{color:#8b5b60}
     .judgment-tags{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;min-width:125px}
     .judgment-tags b{padding:3px 6px;border-radius:10px;background:#efe2bd;color:#6b4b18;font-size:11px;white-space:nowrap}
     .line-judgment-list{display:grid;grid-template-columns:1fr 1fr;gap:9px}
@@ -32,8 +30,12 @@
     .analysis-flow{display:grid;gap:0}.flow-step{display:grid;grid-template-columns:46px 1fr;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
     .flow-step:last-child{border-bottom:0}.flow-number{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:var(--green);color:#fff;font-weight:900}
     .flow-step h4{margin:0 0 6px;color:var(--green);font-size:17px}.flow-step p{margin:3px 0!important}.flow-step .flow-tags{color:#7c2630;font-size:13px;font-weight:700}
-    @media(max-width:720px){.six-god-guide{grid-template-columns:1fr 1fr}}
+    .year-timeline{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.month-card{padding:11px;border:1px solid var(--line);border-radius:11px;background:#fff}
+    .month-card.past{opacity:.72}.month-card.current{border:2px solid var(--gold);background:#fff9e9}.month-card h4{margin:0 0 5px;color:var(--green)}
+    .month-card small{display:block;color:var(--muted)}.month-card b{display:inline-block;margin:7px 0 4px;padding:3px 7px;border-radius:12px;background:#efe2bd;color:#6b4b18;font-size:12px}.month-card p{margin:0!important;font-size:13px}
+    #pdfCaptureArea.pdf-export{width:1080px;max-width:none;padding:18px;background:#fff}.pdf-export .actions{visibility:hidden}.pdf-export .table-wrap{overflow:visible}
     @media(max-width:720px){.line-judgment-list{grid-template-columns:1fr}}
+    @media(max-width:720px){.year-timeline{grid-template-columns:1fr 1fr}.actions{flex-wrap:wrap}}
   </style>
 </head>
 <body>
@@ -72,6 +74,7 @@
               <option>健康疾病</option><option>考試學業</option><option>官司訴訟</option><option>出行</option>
               <option>失物</option><option>家宅</option>
             </select></label>
+            <label>排盤模式<select name="readingMode"><option value="單次占問">單次占問</option><option value="流年推演">流年推演（前3月＋未來12月）</option></select></label>
             <div class="calendar-card"><small>國曆自動換算</small><strong id="calendarPreview">選擇起卦時間後自動計算月建、日辰與旬空</strong></div>
             <div class="use-god-field">
               <label>複數用神（依判讀順序）</label>
@@ -89,9 +92,10 @@
         </form>
 
         <section id="resultView" class="result" hidden>
+          <div id="pdfCaptureArea">
           <div class="result-head">
             <div><small id="resultMeta"></small><h2><span id="mainHexagram"></span><i>→</i><span id="changedHexagram"></span></h2></div>
-            <div class="actions"><button id="copyBtn" class="ghost">複製排盤</button><button id="saveBtn" class="primary">儲存案例</button></div>
+            <div class="actions"><button id="pdfBtn" class="ghost">下載PDF</button><button id="copyBtn" class="ghost">複製排盤</button><button id="saveBtn" class="primary">儲存案例</button></div>
           </div>
           <div id="strengthSummary" class="summary-strip"></div>
           <div class="table-wrap">
@@ -100,12 +104,13 @@
               <tbody id="hexagramRows"></tbody>
             </table>
           </div>
+          </div>
           <div class="analysis-grid">
             <article><h3>用神提示</h3><div id="useGodAnalysis"></div></article>
             <article class="wide"><h3>主用神 → 世爻 → 動爻 → 應爻 → 應期</h3><div id="simpleReading"></div></article>
             <article class="wide"><h3>應期候選（依優先順序）</h3><div id="timingAnalysis"></div></article>
+            <article id="yearlyTimelineCard" class="wide" hidden><h3>流年流月時間軸</h3><div id="yearlyTimeline"></div></article>
             <article class="wide"><h3>逐爻判別白話</h3><div id="lineJudgmentGuide"></div></article>
-            <article class="wide"><h3>六神簡義</h3><div id="sixGodGuide"></div></article>
             <article class="wide"><h3>動爻／簡易爻意</h3><div id="movingAnalysis"></div></article>
             <article class="wide"><h3>老師筆記</h3><p id="resultNotes"></p></article>
           </div>
@@ -121,6 +126,8 @@
   </main>
   <div id="toast" class="toast"></div>
   <script src="assets/lunar.js"></script>
-  <script src="teacher.js?v=20260731-10"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="teacher.js?v=20260802-11"></script>
 </body>
 </html>

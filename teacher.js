@@ -40,7 +40,6 @@ const harmonyGroups = [
   {branches:["寅","午","戌"],element:"火"},{branches:["巳","酉","丑"],element:"金"}
 ];
 const sixGods = ["青龍","朱雀","勾陳","螣蛇","白虎","玄武"];
-const sixGodMeanings = {青龍:"喜、順、享受",朱雀:"表達、消息、文書",勾陳:"拖延、穩定、土地",螣蛇:"猜疑、幻想、糾纏",白虎:"強烈、傷害、衝突",玄武:"隱藏、秘密、欺瞞"};
 const yaoTextDataPromise = import("./assets/yao-texts.mjs").then(module=>module.default).catch(()=>null);
 const godStart = {甲:0,乙:0,丙:1,丁:1,戊:2,己:3,庚:4,辛:4,壬:5,癸:5};
 const lineLabels = ["初","二","三","四","五","上"];
@@ -307,6 +306,10 @@ function timingTargets(result){
     return source.map(row=>({useGod,order:index+1,row}));
   }).filter((target,index,all)=>all.findIndex(item=>item.useGod===target.useGod&&item.row.branch===target.row.branch)===index);
 }
+function mainTimingTarget(result){
+  const candidates=timingTargets(result).filter(target=>target.order===1);
+  return candidates.find(target=>target.row.moving)||candidates.find(target=>(result.input.voidBranches||"").includes(target.row.branch))||candidates[0]||null;
+}
 function timingForTarget(result,target){
   const start=new Date(result.input.castTime);
   const branch=target.row.branch;
@@ -324,6 +327,49 @@ function timingForTarget(result,target){
     `<b>化神應期：</b>${changed?`此爻變${changed}，可先看 ${changedDays[0]||"未找到"}（${changed}日）`:"此用神爻未動，沒有直接化神日期"}`,
     `<b>月令轉換：</b>${month?`${month.start} 左右進入${branch}月，至 ${month.end} 左右結束`:"未找到"}`
   ];
+}
+function primaryTimingForTarget(result,target){
+  const choices=timingForTarget(result,target);
+  const isVoid=(result.input.voidBranches||"").includes(target.row.branch);
+  if(target.row.moving)return {rank:1,title:"動而逢值",html:choices[0]};
+  if(isVoid)return {rank:2,title:"填實／出空",html:choices[1]};
+  return {rank:3,title:"逢合／逢沖",html:choices[2]};
+}
+function flowMonthSegments(result){
+  const center=new Date(result.input.castTime),start=addDays(center,-150),end=addDays(center,430),segments=[];
+  for(let date=new Date(start);date<=end;date=addDays(date,1)){
+    const branch=calendarFromSolar(dateInputText(date))?.monthBranch;
+    const last=segments[segments.length-1];
+    if(!last||last.branch!==branch)segments.push({branch,start:dateText(date),end:dateText(date)});
+    else last.end=dateText(date);
+  }
+  const centerText=dateText(center),currentIndex=segments.findIndex(segment=>segment.start<=centerText&&segment.end>=centerText);
+  return segments.slice(Math.max(0,currentIndex-3),currentIndex+13).map((segment,index)=>({...segment,offset:index-Math.min(3,currentIndex)}));
+}
+function monthReadingFor(result,segment,target){
+  if(!target)return {label:"未指定主用神",text:"請先設定第一順位用神。"};
+  const row=target.row,labels=[],texts=[];
+  if(segment.branch===row.branch){labels.push("主用神值月");texts.push("主用神當令，這個月是最直接的觀察月份");}
+  else if(clashBranch[row.branch]===segment.branch){labels.push("月沖／月破");texts.push("月令沖主用神，事情容易出現變動或壓力");}
+  else if(combineBranch[row.branch]===segment.branch){labels.push("月合");texts.push("月令合主用神，容易出現連結、合作或牽絆");}
+  else if(branchElement[segment.branch]===row.element){labels.push("得令同氣");texts.push("五行同氣，主用神力量偏旺");}
+  else if(elementGenerates[branchElement[segment.branch]]===row.element){labels.push("月生用神");texts.push("月令生扶主用神，整體較有助力");}
+  else if(elementControls[branchElement[segment.branch]]===row.element){labels.push("月剋用神");texts.push("月令克制主用神，推進時較有壓力");}
+  else if(elementGenerates[row.element]===branchElement[segment.branch]){labels.push("用神泄氣");texts.push("主用神生月令，力量容易向外耗散");}
+  else {labels.push("用神剋月");texts.push("主用神克月令，需要主動付出力量掌控局面");}
+  if(row.moving&&row.changedNaJia?.branch===segment.branch){labels.push("化神值月");texts.push("變爻地支在此月當值，可留意變化落實");}
+  return {label:labels.join("・"),text:texts.join("；")+"。"};
+}
+function renderYearTimeline(result){
+  const card=$("#yearlyTimelineCard"),enabled=result.input.readingMode==="流年推演";
+  card.hidden=!enabled;
+  if(!enabled)return;
+  const target=mainTimingTarget(result),segments=flowMonthSegments(result);
+  $("#yearlyTimeline").innerHTML=`<div class="year-timeline">${segments.map(segment=>{
+    const reading=monthReadingFor(result,segment,target),state=segment.offset<0?"past":segment.offset===0?"current":"future";
+    const title=segment.offset<0?`前${Math.abs(segment.offset)}月`:segment.offset===0?"起卦當月":`後${segment.offset}月`;
+    return `<section class="month-card ${state}"><h4>${title}・${segment.branch}月</h4><small>${segment.start}～${segment.end}</small><b>${reading.label}</b><p>${reading.text}</p></section>`;
+  }).join("")}</div><p class="reading-note">前3個節氣月供驗卦，起卦當月與後續12個節氣月供趨勢觀察；流月提示不等於單獨定吉凶。</p>`;
 }
 function elementRelationText(a,b,aName,bName){
   if(!a||!b)return "五行關係未取得";
@@ -348,8 +394,9 @@ function analysisFlowSteps(result){
     const toMain=mainRows[0]?elementRelationText(row,mainRows[0],`${row.position}爻動爻`,"主用神"):"尚無主用神";
     return `${toMain}；${elementRelationText(row,shi,`${row.position}爻動爻`,"世爻")}`;
   }).join("。");
-  const timingTarget=timingTargets(result).find(target=>target.order===1);
-  const timingSummary=timingTarget?timingForTarget(result,timingTarget).map(text=>text.replace(/<[^>]+>/g,"")):["尚無主用神，無法計算應期"];
+  const timingTarget=mainTimingTarget(result);
+  const primaryTiming=timingTarget?primaryTimingForTarget(result,timingTarget):null;
+  const timingSummary=primaryTiming?[`第一優先：${primaryTiming.title}`,primaryTiming.html.replace(/<[^>]+>/g,"")]:["尚無主用神，無法計算應期"];
   return [
     {title:"主用神",body:mainSummary,extra:gods.length>1?`輔助用神順序：${gods.slice(1).map((god,index)=>`${index+2}.${god}`).join(" → ")}`:"目前未設定輔助用神"},
     {title:"世爻",body:`世爻在${shi.position}爻：${shi.relative}${shi.stem}${shi.branch}${shi.element}，旺衰為${shi.strength}。${allJudgments(result,shi).map(item=>item.label).join("、")||"未見特殊標記"}。`,extra:mainRelation},
@@ -406,7 +453,7 @@ function renderResult(result) {
   const useGods=getUseGods(result.input);
   $("#strengthSummary").innerHTML=[`月建 ${result.input.monthBranch}`,`日辰 ${result.input.dayStem}${result.input.dayBranch}`,`旬空 ${result.input.voidBranches||"未填"}`,`世爻 ${result.palace.shi}`,`應爻 ${result.palace.ying}`,`用神 ${useGods.length?useGods.map((god,index)=>`${index+1}.${god}`).join(" → "):"未指定"}`].map(x=>`<span>${x}</span>`).join("");
   $("#hexagramRows").innerHTML=[...result.rows].reverse().map(row=>`<tr class="${row.moving?"moving":""} ${useGods.includes(row.relative)?"use-god":""}">
-    <td title="${sixGodMeanings[row.god]}">${row.god}<br><small>${sixGodMeanings[row.god]}</small></td><td>${row.relative}${useGods.includes(row.relative)?`・用${useGods.indexOf(row.relative)+1}`:""}</td><td>${row.stem}${row.branch}${row.element}</td><td>${row.strength}</td><td><div class="judgment-tags">${allJudgments(result,row).map(item=>`<b title="${item.text}">${item.label}</b>`).join("")||"—"}</div></td><td>${row.shiYing}</td>
+    <td>${row.god}</td><td>${row.relative}${useGods.includes(row.relative)?`・用${useGods.indexOf(row.relative)+1}`:""}</td><td>${row.stem}${row.branch}${row.element}</td><td>${row.strength}</td><td><div class="judgment-tags">${allJudgments(result,row).map(item=>`<b title="${item.text}">${item.label}</b>`).join("")||"—"}</div></td><td>${row.shiYing}</td>
     <td><span class="yao"><i class="${row.yang?"yang":"yin"}"></i>${row.moving?`<b class="move">${row.value===9?"○":"×"}</b>`:""}</span></td>
     <td>${row.moving?`${row.changedNaJia.stem}${row.changedNaJia.branch}${row.changedNaJia.element}・${row.changedYang?"陽":"陰"}${row.changeTags.length?`<br><b>${row.changeTags.join("・")}</b>`:""}`:"—"}</td>
     <td>${row.fushen.length?row.fushen.map(f=>`伏：${f.relative}${f.stem}${f.branch}${f.element}<br>飛：${row.relative}${row.stem}${row.branch}${row.element}`).join("<br>"):"—"}</td></tr>`).join("");
@@ -414,31 +461,54 @@ function renderResult(result) {
     ? `<ol class="reading-list">${useGods.map((god,index)=>`<li><strong>${god}${index===0?"（主要）":""}</strong>：${useGodDetails(result,god)}</li>`).join("")}</ol>`
     : "<p>尚未指定用神。請依占問類別與實際取象，由老師選定後再看旺衰、生剋與動變。</p>";
   $("#simpleReading").innerHTML=`<div class="analysis-flow">${analysisFlowSteps(result).map((step,index)=>`<section class="flow-step"><span class="flow-number">${index+1}</span><div><h4>${step.title}</h4><p>${step.body}</p><p class="flow-tags">${step.extra}</p></div></section>`).join("")}</div><p class="reading-note">固定依主用神、世爻、動爻、應爻、應期逐步閱讀；這是整理流程，不直接取代老師斷卦。</p>`;
-  const targets=timingTargets(result);
-  $("#timingAnalysis").innerHTML=targets.length
-    ? `<div class="timing-list">${targets.map(target=>`<section class="timing-card"><h4>用${target.order}・${target.useGod}：${target.row.stem}${target.row.branch}${target.row.element}${target.row.moving?"・動爻":""}</h4><ol>${timingForTarget(result,target).map(item=>`<li>${item}</li>`).join("")}</ol></section>`).join("")}</div><p class="reading-note">日期是候選應期，不是保證發生日期；依序看動而逢值、填實／出空、合沖、化神與月令轉換，再配合用神旺衰及事情進度。</p>`
+  const primaryTarget=mainTimingTarget(result),primaryTiming=primaryTarget?primaryTimingForTarget(result,primaryTarget):null;
+  $("#timingAnalysis").innerHTML=primaryTarget&&primaryTiming
+    ? `<div class="timing-list"><section class="timing-card"><h4>第一優先・${primaryTiming.title}</h4><p>主用神 ${primaryTarget.useGod}：${primaryTarget.row.stem}${primaryTarget.row.branch}${primaryTarget.row.element}${primaryTarget.row.moving?"・動爻":""}</p><ol><li>${primaryTiming.html}</li></ol></section></div><p class="reading-note">只顯示目前條件下的第一優先應期，其餘順位不列出；日期是候選，不是保證發生日期。</p>`
     : "<p>請先指定至少一個用神，系統才能依用神地支計算值日、值月與出空。</p>";
+  renderYearTimeline(result);
   $("#lineJudgmentGuide").innerHTML=`<div class="line-judgment-list">${[...result.rows].reverse().map(row=>{
     const items=allJudgments(result,row);
     return `<section><h4>${row.position}爻・${row.relative}${row.stem}${row.branch}${row.element}${row.shiYing?`・${row.shiYing}`:""}</h4>${items.length?items.map(item=>`<p><b>${item.label}</b>：${item.text}</p>`).join(""):"<p>目前未見明顯月日、合沖或空亡標記。</p>"}</section>`;
   }).join("")}${harmonyFindings(result).map(item=>`<section class="harmony"><h4>${item.label}</h4><p>${item.text}</p></section>`).join("")}</div>`;
-  $("#sixGodGuide").innerHTML=`<div class="six-god-guide">${sixGods.map(god=>`<span><b>${god}</b>${sixGodMeanings[god]}</span>`).join("")}</div>`;
   renderMovingLines(result);
   $("#resultNotes").textContent=result.input.notes||"尚未填寫老師筆記。";
   $("#resultView").scrollIntoView({behavior:"smooth",block:"start"});
 }
 function resultText(result) {
-  const lines=[`【奉母宮六爻排盤】`,`占問：${result.input.question}`,`求占者：${result.input.clientName||"未填"}`,`起卦：${result.input.castTime.replace("T"," ")}`,`月建：${result.input.monthBranch}　日辰：${result.input.dayStem}${result.input.dayBranch}　旬空：${result.input.voidBranches||"未填"}`,`本卦：${result.hex.name}　→　變卦：${result.changedHex.name}`,`${result.palace.palace}宮・${result.palace.stage}　世${result.palace.shi} 應${result.palace.ying}`,``];
+  const lines=[`【奉母宮六爻排盤】`,`排盤模式：${result.input.readingMode||"單次占問"}`,`占問：${result.input.question}`,`求占者：${result.input.clientName||"未填"}`,`起卦：${result.input.castTime.replace("T"," ")}`,`月建：${result.input.monthBranch}　日辰：${result.input.dayStem}${result.input.dayBranch}　旬空：${result.input.voidBranches||"未填"}`,`本卦：${result.hex.name}　→　變卦：${result.changedHex.name}`,`${result.palace.palace}宮・${result.palace.stage}　世${result.palace.shi} 應${result.palace.ying}`,``];
   [...result.rows].reverse().forEach(r=>lines.push(`${r.god}　${r.relative}　${r.stem}${r.branch}${r.element}　${r.strength}　${r.shiYing||"　"}　${r.yang?"━━━":"━ ━"}${r.moving?` ${r.value===9?"○":"×"} → ${r.changedNaJia.stem}${r.changedNaJia.branch}${r.changedNaJia.element}${r.changeTags.length?`（${r.changeTags.join("、")}）`:""}`:""}${r.fushen.length?`　伏神：${r.fushen.map(f=>`${f.relative}${f.stem}${f.branch}${f.element}`).join("、")}／飛神：${r.relative}${r.stem}${r.branch}${r.element}`:""}　判別：${allJudgments(result,r).map(item=>item.label).join("、")||"無"}`));
   lines.push("",`用神順序：${getUseGods(result.input).map((god,index)=>`${index+1}.${god}`).join(" → ")||"未指定"}`,"【五步分析流程】",...analysisFlowSteps(result).flatMap((step,index)=>[`${index+1}. ${step.title}：${step.body}`,`   ${step.extra}`]));
   const moving=result.rows.filter(row=>row.moving);
   if(moving.length) lines.push("","【動爻爻辭白話】",...moving.map(row=>`${row.position}爻・${row.lineTitle}：${row.yaoText?`${row.yaoText}｜${row.yaoTranslation}`:positionMeanings[row.position-1]}`));
   lines.push("","【逐爻判別白話】",...[...result.rows].reverse().flatMap(row=>allJudgments(result,row).map(item=>`${row.position}爻 ${item.label}：${item.text}`)),...harmonyFindings(result).map(item=>`${item.label}：${item.text}`));
-  const targets=timingTargets(result);
-  if(targets.length)lines.push("","【應期候選】",...targets.flatMap(target=>[`用${target.order}・${target.useGod} ${target.row.stem}${target.row.branch}${target.row.element}`,...timingForTarget(result,target).map(text=>text.replace(/<[^>]+>/g,""))]));
-  lines.push("","【六神簡義】",...sixGods.map(god=>`${god}：${sixGodMeanings[god]}`));
+  const primaryTarget=mainTimingTarget(result);
+  if(primaryTarget){const primary=primaryTimingForTarget(result,primaryTarget);lines.push("","【第一優先應期】",`${primary.title}：${primary.html.replace(/<[^>]+>/g,"")}`);}
+  if(result.input.readingMode==="流年推演"){
+    const target=primaryTarget;
+    lines.push("","【流年流月】",...flowMonthSegments(result).map(segment=>{const reading=monthReadingFor(result,segment,target);return `${segment.branch}月 ${segment.start}～${segment.end}｜${reading.label}：${reading.text}`;}));
+  }
   lines.push("",`老師筆記：${result.input.notes||"無"}`);
   return lines.join("\n");
+}
+async function downloadResultPdf(){
+  if(!currentResult)return;
+  if(typeof html2canvas==="undefined"||!window.jspdf)return showToast("PDF元件尚未載入，請重新整理後再試");
+  const result=$("#pdfCaptureArea"),tableWrap=result.querySelector(".table-wrap");
+  showToast("正在產生PDF，請稍候…");
+  result.classList.add("pdf-export");
+  const oldOverflow=tableWrap.style.overflow;tableWrap.style.overflow="visible";
+  try{
+    const canvas=await html2canvas(result,{scale:1.5,useCORS:true,backgroundColor:"#ffffff",windowWidth:1160,scrollX:0,scrollY:0});
+    const {jsPDF}=window.jspdf,pdf=new jsPDF({orientation:"landscape",unit:"mm",format:"a4",compress:true});
+    const margin=7,pageWidth=297,pageHeight=210,printWidth=pageWidth-margin*2,printHeight=pageHeight-margin*2;
+    const imageHeight=canvas.height*printWidth/canvas.width,image=canvas.toDataURL("image/jpeg",.92);
+    let offset=0,page=0;
+    while(offset<imageHeight){if(page>0)pdf.addPage("a4","landscape");pdf.addImage(image,"JPEG",margin,margin-offset,printWidth,imageHeight,undefined,"FAST");offset+=printHeight;page++;}
+    const safe=(currentResult.input.question||"六爻排盤").replace(/[\\/:*?"<>|]/g,"_").slice(0,35);
+    pdf.save(`${safe}-${dateText(new Date(currentResult.input.castTime))}.pdf`);
+    showToast("PDF已下載");
+  }catch(error){console.error(error);showToast("PDF產生失敗，請重新整理後再試");}
+  finally{tableWrap.style.overflow=oldOverflow;result.classList.remove("pdf-export");}
 }
 async function loadCases() {
   const res=await fetch(`${API_BASE}/api/teacher/cases`,{headers:authHeaders()});
@@ -460,6 +530,7 @@ $("#logoutBtn").addEventListener("click",()=>{sessionStorage.removeItem("teacher
 document.querySelectorAll(".tool-tabs button").forEach(btn=>btn.addEventListener("click",()=>{document.querySelectorAll(".tool-tabs button").forEach(b=>b.classList.toggle("active",b===btn));["castingPanel","historyPanel"].forEach(id=>$("#"+id).hidden=id!==btn.dataset.panel);if(btn.dataset.panel==="historyPanel")loadCases().catch(e=>showToast(e.message));}));
 $("#castingForm").addEventListener("submit",e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.currentTarget));data.useGods=selectedUseGods();data.useGod=data.useGods[0]||"";try{renderResult(calculate(data));}catch(error){showToast(error.message||"排盤資料有誤");}});
 $("#copyBtn").addEventListener("click",async()=>{await navigator.clipboard.writeText(resultText(currentResult));showToast("排盤已複製");});
+$("#pdfBtn").addEventListener("click",downloadResultPdf);
 $("#saveBtn").addEventListener("click",async()=>{if(!currentResult)return;const res=await fetch(`${API_BASE}/api/teacher/cases`,{method:"POST",headers:authHeaders(),body:JSON.stringify({question:currentResult.input.question,clientName:currentResult.input.clientName,hexagramName:currentResult.hex.name,changedHexagramName:currentResult.changedHex.name,data:currentResult})});const body=await res.json();if(!res.ok)return showToast(body.error||"儲存失敗");showToast(`案例已儲存：${body.id}`);await loadCases();});
 setupInputs();
 addUseGod("妻財");
