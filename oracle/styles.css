@@ -14,16 +14,41 @@
 
 * { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  background: #30251f;
+}
 
 body {
   margin: 0;
+  position: relative;
+  isolation: isolate;
   color: var(--ink);
   font-family: "Noto Serif TC", "PingFang TC", "Microsoft JhengHei", serif;
-  background:
-    radial-gradient(circle at 20% 0%, rgba(220, 183, 104, .19), transparent 34rem),
-    linear-gradient(180deg, #f4ead8 0%, #fffaf2 38%, #efe1c9 100%);
+  background: #30251f;
   min-height: 100vh;
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+body::before {
+  z-index: -2;
+  background: url("assets/fengmu-temple-background.jpg") center 18% / cover no-repeat;
+  filter: sepia(.16) saturate(1.08) contrast(1.06) brightness(.76);
+  transform: scale(1.015);
+}
+
+body::after {
+  z-index: -1;
+  background:
+    linear-gradient(180deg, rgba(48, 20, 23, .35) 0%, rgba(67, 42, 28, .22) 42%, rgba(39, 27, 21, .48) 100%),
+    radial-gradient(circle at 50% 18%, rgba(255, 224, 164, .16), transparent 42%);
 }
 
 button, input { font: inherit; }
@@ -36,9 +61,8 @@ button { cursor: pointer; }
   padding: 48px 20px 72px;
   text-align: center;
   color: #fff8e9;
-  background:
-    linear-gradient(rgba(60, 14, 23, .84), rgba(96, 25, 38, .93)),
-    radial-gradient(circle at center, #b47b4f, #5f1a27 72%);
+  background: linear-gradient(rgba(60, 14, 23, .68), rgba(96, 25, 38, .78));
+  backdrop-filter: blur(2px);
   border-bottom: 4px solid var(--gold);
 }
 
@@ -76,7 +100,8 @@ main { width: min(760px, calc(100% - 28px)); margin: -38px auto 0; position: rel
 .draw-panel,
 .result-panel,
 .deity-section {
-  background: rgba(255, 250, 240, .96);
+  background: rgba(255, 250, 240, .92);
+  backdrop-filter: blur(7px);
   border: 1px solid rgba(180, 135, 66, .35);
   border-radius: 26px;
   box-shadow: var(--shadow);
