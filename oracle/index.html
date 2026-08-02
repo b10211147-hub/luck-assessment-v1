@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#7b2432">
+  <meta name="description" content="奉母宮原創一百零八首籤詩，靜心求籤、閱讀神明慈語與行動提醒。">
+  <title>奉母宮・一百零八籤</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="masthead">
+      <p class="temple-name">神明仲介所｜奉母宮</p>
+      <h1>一百零八籤</h1>
+      <p class="subtitle">九尊神明・九種指引・一念誠心</p>
+    </header>
+
+    <main>
+      <section id="drawPanel" class="draw-panel" aria-labelledby="drawTitle">
+        <div class="seal" aria-hidden="true"><span>籤</span></div>
+        <p class="eyebrow">奉母宮原創籤詩</p>
+        <h2 id="drawTitle">先靜心，再問一件事</h2>
+        <p class="draw-guide">默念自己的姓名與想詢問的事情，心定之後，誠心抽取一支籤。</p>
+
+        <div id="lotVisual" class="lot-visual" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span>
+          <div class="lot-cup">奉母宮</div>
+        </div>
+
+        <button id="drawBtn" class="primary-action" type="button">
+          <span>誠心求籤</span>
+          <small>從 108 首籤詩中抽取</small>
+        </button>
+
+        <details class="number-entry">
+          <summary>已有籤號，直接解籤</summary>
+          <form id="numberForm">
+            <label for="lotNumber">請輸入 1～108</label>
+            <div class="number-row">
+              <input id="lotNumber" name="lotNumber" type="number" inputmode="numeric" min="1" max="108" required placeholder="例如：36">
+              <button type="submit">查看籤詩</button>
+            </div>
+            <p id="numberError" class="form-error" role="alert"></p>
+          </form>
+        </details>
+      </section>
+
+      <section id="resultPanel" class="result-panel" hidden aria-live="polite">
+        <div class="result-heading">
+          <p id="resultLevel" class="result-level"></p>
+          <p id="resultNumber" class="result-number"></p>
+          <h2 id="resultDeity"></h2>
+          <p id="resultAttitude" class="deity-attitude"></p>
+        </div>
+
+        <article class="poem-card">
+          <p id="resultTheme" class="poem-theme"></p>
+          <div id="resultPoem" class="poem-lines"></div>
+        </article>
+
+        <article class="message-card">
+          <p class="card-kicker">神明慈語</p>
+          <h3 id="resultTitle"></h3>
+          <p id="resultMessage"></p>
+        </article>
+
+        <article class="reading-card">
+          <h3>白話解籤</h3>
+          <p id="resultReading"></p>
+        </article>
+
+        <section class="aspect-section" aria-labelledby="aspectTitle">
+          <div class="aspect-heading">
+            <p class="card-kicker">六面向指引</p>
+            <h3 id="aspectTitle">現在可以怎麼做</h3>
+            <p id="resultAdvice" class="primary-guidance"></p>
+          </div>
+          <div id="aspectGrid" class="aspect-grid"></div>
+        </section>
+
+        <div class="result-actions">
+          <button id="copyBtn" type="button" class="secondary-action">複製籤詩</button>
+          <button id="againBtn" type="button" class="primary-action compact">重新求籤</button>
+        </div>
+      </section>
+
+      <section class="deity-section" aria-labelledby="deityTitle">
+        <p class="eyebrow">九尊神明・各有慈心</p>
+        <h2 id="deityTitle">每一種語氣，都是一種照顧</h2>
+        <div id="deityList" class="deity-list"></div>
+      </section>
+    </main>
+
+    <footer>
+      <p>籤詩是安定心念與整理方向的提醒，重大醫療、法律、財務決定，仍請尋求合格專業協助。</p>
+      <p>神明仲介所｜奉母宮</p>
+    </footer>
+  </div>
+
+  <script src="poems.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
