@@ -44,6 +44,7 @@ const yaoTextDataPromise = import("./assets/yao-texts.mjs").then(module=>module.
 const godStart = {甲:0,乙:0,丙:1,丁:1,戊:2,己:3,庚:4,辛:4,壬:5,癸:5};
 const lineLabels = ["初","二","三","四","五","上"];
 const useGodOptions = ["父母","兄弟","子孫","妻財","官鬼"];
+const timingRuleLabels = {auto:"自動優先",value:"動而逢值",fill:"填實／出空",combine:"逢合",clash:"逢沖",changed:"化神應期",month:"月令轉換"};
 const positionMeanings = [
   "事情剛開始，條件尚未成熟，宜先觀察與準備。",
   "事情進入互動階段，重點在取得支持、建立配合。",
@@ -330,9 +331,19 @@ function timingForTarget(result,target){
 }
 function primaryTimingForTarget(result,target){
   const choices=timingForTarget(result,target);
-  const isVoid=(result.input.voidBranches||"").includes(target.row.branch);
-  if(target.row.moving)return {rank:1,title:"動而逢值",html:choices[0]};
-  if(isVoid)return {rank:2,title:"填實／出空",html:choices[1]};
+  const branch=target.row.branch,start=new Date(result.input.castTime),isVoid=(result.input.voidBranches||"").includes(branch);
+  const rule=result.input.timingRule||"auto";
+  const manual={
+    value:()=>target.row.moving?{rank:1,title:"動而逢值",html:choices[0]}:{rank:1,title:"動而逢值（條件未成立）",html:"主用神不是動爻，不能以『動而逢值』作第一優先；可改選一般月令轉換，或使用自動判定。"},
+    fill:()=>isVoid?{rank:2,title:"填實／出空",html:choices[1]}:{rank:2,title:"填實／出空（條件未成立）",html:"主用神目前沒有空亡，不需要等待填實或出空。"},
+    combine:()=>{const date=firstBranchDays(start,combineBranch[branch],120,1)[0];return {rank:3,title:"逢合",html:`主用神為${branch}，下一個${combineBranch[branch]}日 ${date||"未找到"} 為六合候選。`};},
+    clash:()=>{const date=firstBranchDays(start,clashBranch[branch],120,1)[0];return {rank:3,title:"逢沖",html:`主用神為${branch}，下一個${clashBranch[branch]}日 ${date||"未找到"} 為相沖候選。`};},
+    changed:()=>target.row.moving&&target.row.changedNaJia?{rank:4,title:"化神應期",html:choices[3]}:{rank:4,title:"化神應期（條件未成立）",html:"主用神不是動爻，沒有直接化神可供取期。"},
+    month:()=>({rank:5,title:"月令轉換",html:choices[4]})
+  };
+  if(rule!=="auto"&&manual[rule])return manual[rule]();
+  if(target.row.moving)return manual.value();
+  if(isVoid)return manual.fill();
   return {rank:3,title:"逢合／逢沖",html:choices[2]};
 }
 function flowMonthSegments(result){
@@ -451,7 +462,7 @@ function renderResult(result) {
   $("#changedHexagram").textContent=result.changedHex.name;
   $("#resultMeta").textContent=`${result.input.castTime.replace("T"," ")}・${result.input.question}・${result.palace.palace}宮 ${result.palace.stage}`;
   const useGods=getUseGods(result.input);
-  $("#strengthSummary").innerHTML=[`月建 ${result.input.monthBranch}`,`日辰 ${result.input.dayStem}${result.input.dayBranch}`,`旬空 ${result.input.voidBranches||"未填"}`,`世爻 ${result.palace.shi}`,`應爻 ${result.palace.ying}`,`用神 ${useGods.length?useGods.map((god,index)=>`${index+1}.${god}`).join(" → "):"未指定"}`].map(x=>`<span>${x}</span>`).join("");
+  $("#strengthSummary").innerHTML=[`月建 ${result.input.monthBranch}`,`日辰 ${result.input.dayStem}${result.input.dayBranch}`,`旬空 ${result.input.voidBranches||"未填"}`,`世爻 ${result.palace.shi}`,`應爻 ${result.palace.ying}`,`用神 ${useGods.length?useGods.map((god,index)=>`${index+1}.${god}`).join(" → "):"未指定"}`,`應期 ${timingRuleLabels[result.input.timingRule||"auto"]}`].map(x=>`<span>${x}</span>`).join("");
   $("#hexagramRows").innerHTML=[...result.rows].reverse().map(row=>`<tr class="${row.moving?"moving":""} ${useGods.includes(row.relative)?"use-god":""}">
     <td>${row.god}</td><td>${row.relative}${useGods.includes(row.relative)?`・用${useGods.indexOf(row.relative)+1}`:""}</td><td>${row.stem}${row.branch}${row.element}</td><td>${row.strength}</td><td><div class="judgment-tags">${allJudgments(result,row).map(item=>`<b title="${item.text}">${item.label}</b>`).join("")||"—"}</div></td><td>${row.shiYing}</td>
     <td><span class="yao"><i class="${row.yang?"yang":"yin"}"></i>${row.moving?`<b class="move">${row.value===9?"○":"×"}</b>`:""}</span></td>
@@ -475,7 +486,7 @@ function renderResult(result) {
   $("#resultView").scrollIntoView({behavior:"smooth",block:"start"});
 }
 function resultText(result) {
-  const lines=[`【奉母宮六爻排盤】`,`排盤模式：${result.input.readingMode||"單次占問"}`,`占問：${result.input.question}`,`求占者：${result.input.clientName||"未填"}`,`起卦：${result.input.castTime.replace("T"," ")}`,`月建：${result.input.monthBranch}　日辰：${result.input.dayStem}${result.input.dayBranch}　旬空：${result.input.voidBranches||"未填"}`,`本卦：${result.hex.name}　→　變卦：${result.changedHex.name}`,`${result.palace.palace}宮・${result.palace.stage}　世${result.palace.shi} 應${result.palace.ying}`,``];
+  const lines=[`【奉母宮六爻排盤】`,`排盤模式：${result.input.readingMode||"單次占問"}`,`應期條件：${timingRuleLabels[result.input.timingRule||"auto"]}`,`占問：${result.input.question}`,`求占者：${result.input.clientName||"未填"}`,`起卦：${result.input.castTime.replace("T"," ")}`,`月建：${result.input.monthBranch}　日辰：${result.input.dayStem}${result.input.dayBranch}　旬空：${result.input.voidBranches||"未填"}`,`本卦：${result.hex.name}　→　變卦：${result.changedHex.name}`,`${result.palace.palace}宮・${result.palace.stage}　世${result.palace.shi} 應${result.palace.ying}`,``];
   [...result.rows].reverse().forEach(r=>lines.push(`${r.god}　${r.relative}　${r.stem}${r.branch}${r.element}　${r.strength}　${r.shiYing||"　"}　${r.yang?"━━━":"━ ━"}${r.moving?` ${r.value===9?"○":"×"} → ${r.changedNaJia.stem}${r.changedNaJia.branch}${r.changedNaJia.element}${r.changeTags.length?`（${r.changeTags.join("、")}）`:""}`:""}${r.fushen.length?`　伏神：${r.fushen.map(f=>`${f.relative}${f.stem}${f.branch}${f.element}`).join("、")}／飛神：${r.relative}${r.stem}${r.branch}${r.element}`:""}　判別：${allJudgments(result,r).map(item=>item.label).join("、")||"無"}`));
   lines.push("",`用神順序：${getUseGods(result.input).map((god,index)=>`${index+1}.${god}`).join(" → ")||"未指定"}`,"【五步分析流程】",...analysisFlowSteps(result).flatMap((step,index)=>[`${index+1}. ${step.title}：${step.body}`,`   ${step.extra}`]));
   const moving=result.rows.filter(row=>row.moving);

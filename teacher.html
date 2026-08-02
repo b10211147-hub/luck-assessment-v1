@@ -75,6 +75,11 @@
               <option>失物</option><option>家宅</option>
             </select></label>
             <label>排盤模式<select name="readingMode"><option value="單次占問">單次占問</option><option value="流年推演">流年推演（前3月＋未來12月）</option></select></label>
+            <label>應期條件<select name="timingRule">
+              <option value="auto">自動依優先順序</option><option value="value">動而逢值（值日／值月）</option>
+              <option value="fill">填實／出空</option><option value="combine">逢合</option><option value="clash">逢沖</option>
+              <option value="changed">化神應期</option><option value="month">月令轉換</option>
+            </select><small class="field-help">自動：動而逢值 → 填實／出空 → 合沖 → 化神 → 月令。</small></label>
             <div class="calendar-card"><small>國曆自動換算</small><strong id="calendarPreview">選擇起卦時間後自動計算月建、日辰與旬空</strong></div>
             <div class="use-god-field">
               <label>複數用神（依判讀順序）</label>
@@ -128,6 +133,6 @@
   <script src="assets/lunar.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="teacher.js?v=20260802-11"></script>
+  <script src="teacher.js?v=20260802-12"></script>
 </body>
 </html>
