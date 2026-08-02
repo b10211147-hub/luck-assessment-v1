@@ -195,13 +195,17 @@ main { width: min(760px, calc(100% - 28px)); margin: -38px auto 0; position: rel
 .aspect-heading h3 { margin: 0; font-size: 1.4rem; }
 .primary-guidance { margin: 10px 0 0; color: rgba(255, 250, 240, .84); line-height: 1.75; }
 .aspect-grid { display: grid; grid-template-columns: 1fr 1fr; background: #fffdf8; }
-.aspect-item { min-height: 132px; padding: 19px; border-bottom: 1px solid var(--line); }
+.aspect-item { min-height: 260px; padding: 19px; border-bottom: 1px solid var(--line); }
 .aspect-item:nth-child(odd) { border-right: 1px solid var(--line); }
 .aspect-item:nth-last-child(-n + 2) { border-bottom: 0; }
 .aspect-label { display: flex; align-items: center; gap: 9px; margin-bottom: 8px; }
 .aspect-icon { width: 32px; height: 32px; display: grid; place-items: center; color: var(--red); background: #f1dfbd; border-radius: 50%; font-family: sans-serif; font-weight: 700; }
 .aspect-label strong { color: var(--red-dark); }
-.aspect-item p { margin: 0; color: #5d5047; font-size: .92rem; line-height: 1.65; }
+.guidance-flow { display: grid; gap: 11px; }
+.guidance-step { display: grid; grid-template-columns: 25px 1fr; gap: 8px; align-items: start; }
+.guidance-mark { width: 25px; height: 25px; display: grid; place-items: center; color: #fff9eb; background: var(--red); border-radius: 7px; font-size: .75rem; font-weight: 700; }
+.guidance-step p { margin: 0; color: #5d5047; font-size: .9rem; line-height: 1.65; }
+.guidance-step b { display: block; margin-bottom: 2px; color: var(--red-dark); font-size: .78rem; letter-spacing: .08em; }
 
 .result-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
 .secondary-action, .primary-action.compact { width: 100%; min-height: 50px; border-radius: 12px; }
