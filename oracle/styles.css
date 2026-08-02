@@ -400,6 +400,8 @@ footer p { margin: 4px 0; }
     --photo-size: 91%;
     width: min(105vw, 440px);
     margin: -10px auto -16px;
+    left: 50%;
+    transform: translateX(-50%);
   }
   .aspect-grid { grid-template-columns: 1fr; }
   .aspect-item, .aspect-item:nth-child(odd), .aspect-item:nth-last-child(-n + 2) { border-right: 0; border-bottom: 1px solid var(--line); }
