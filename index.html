@@ -112,7 +112,8 @@
     (() => {
       const liffState = new URLSearchParams(window.location.search).get("liff.state");
       if (liffState && /^\/booking(?:\/|\?|$)/.test(liffState)) {
-        window.location.replace(new URL(liffState, window.location.origin).toString());
+        const endpointBase = new URL("./", window.location.href);
+        window.location.replace(new URL(liffState.replace(/^\/+/, ""), endpointBase).toString());
       }
     })();
   </script>

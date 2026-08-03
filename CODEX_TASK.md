@@ -48,5 +48,5 @@
 5. LIFF Console 的 Endpoint URL 必須維持 `https://b10211147-hub.github.io/luck-assessment-v1/`。若更換網域、路徑或 LIFF ID，要同時更新前端、後端與 LINE Developers Console。
 6. 每次發布後至少測試：LINE App 內開啟、手機外部瀏覽器開啟、LINE 暱稱是否取得、`/api/identity` 是否成功，以及網址是否仍保留正確的 `src`。
 7. 若出現 400 或驗證失敗，先檢查入口是否為 `liff.line.me`、LIFF ID／Channel ID 是否配對、Endpoint URL 是否正確，再檢查快取；不可先改成繞過驗證。
-8. LIFF 從子路徑登入後會以 `liff.state` 回到 Endpoint 根目錄；首頁必須把 `/booking/...` 的 `liff.state` 導回預約頁，且保留查詢參數。
+8. LIFF 從子路徑登入後會以 `liff.state` 回到 Endpoint 根目錄；首頁必須以 Endpoint 專案路徑（`/luck-assessment-v1/`）為基準，把 `/booking/...` 導回預約頁並保留查詢參數。不可使用網域根目錄 `window.location.origin` 組合，否則會錯誤導向 `b10211147-hub.github.io/booking/`。
 9. 身分驗證以 ID Token 為主、Access Token 驗證後取得 Profile 為備援；兩者皆須在後端確認屬於 Channel ID `2010747679`，不可直接信任前端傳來的 LINE 姓名或 User ID。
