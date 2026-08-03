@@ -31,7 +31,7 @@
       <div class="section-title"><span>02</span><div><small>YOUR DETAILS</small><h2>確認預約資料</h2></div></div>
       <div id="selectedSummary" class="selected-summary"></div>
       <form id="bookingForm">
-        <label>預約人姓名<span>*</span><input name="customerName" required minlength="2" maxlength="40" autocomplete="name" placeholder="請輸入真實姓名"></label>
+        <label>LINE 暱稱<span>*</span><input id="lineNickname" name="customerName" maxlength="40" readonly placeholder="連接 LINE 後自動帶入"></label>
         <label>想先告訴老師的事<textarea name="customerNote" maxlength="500" rows="4" placeholder="選填，例如：想詢問的主題或需要注意的事項"></textarea></label>
         <p id="errorMessage" class="error" hidden></p>
         <button id="submitButton" class="primary-button" type="submit" disabled>請先連接 LINE</button>
@@ -48,6 +48,6 @@
     <a class="admin-link" href="https://fengmugong-registration-api.b10211147.chatgpt.site/booking/admin">排程管理</a>
   </main>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script src="booking.js?v=20260803-2"></script>
+  <script src="booking.js?v=20260803-3"></script>
 </body>
 </html>

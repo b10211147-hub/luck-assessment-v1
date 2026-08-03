@@ -45,6 +45,7 @@ async function initLine() {
     if (!response.ok) throw new Error(identity.error || "LINE 身分驗證失敗");
     state.lineIdToken = token;
     state.lineDisplayName = identity.displayName || "LINE 使用者";
+    $("lineNickname").value = state.lineDisplayName;
     setIdentity("ready", `已連接 LINE：${state.lineDisplayName}`);
   } catch (error) {
     state.lineIdToken = "";
