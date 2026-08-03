@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#8f1d2c">
   <title>線上預約｜奉母宮</title>
   <meta name="description" content="奉母宮線上選擇服務與預約時間">
-  <link rel="stylesheet" href="booking.css?v=20260804-1">
+  <link rel="stylesheet" href="booking.css?v=20260804-2">
 </head>
 <body>
   <header class="hero">
@@ -34,8 +34,14 @@
 
     <section class="booking-card">
       <div class="section-title"><span>01</span><div><small>SELECT A DATE</small><h2>選擇預約日期</h2></div></div>
-      <div id="dateArea" class="empty">正在載入可預約時間…</div>
+      <div class="calendar-toolbar"><button id="prevMonth" type="button" aria-label="上一個月">‹</button><strong id="calendarMonthLabel"></strong><button id="nextMonth" type="button" aria-label="下一個月">›</button></div>
+      <div class="calendar-weekdays" aria-hidden="true"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+      <div id="dateArea" class="calendar-grid" aria-live="polite"><p class="empty calendar-loading">正在載入可預約時間…</p></div>
+      <div class="calendar-hint"><span></span>有可預約時間</div>
+      <div id="publicEventList" class="public-event-list" hidden></div>
+      <p id="selectedDateLabel" class="selected-date-label" hidden></p>
       <div id="timeGrid" class="time-grid" hidden></div>
+      <p id="timeEmpty" class="empty compact-empty" hidden>這一天目前沒有可預約時間。</p>
     </section>
 
     <section id="detailsCard" class="booking-card" hidden>
@@ -66,6 +72,6 @@
     <a id="adminLink" class="admin-link" href="https://fengmugong-registration-api.b10211147.chatgpt.site/booking/admin">排程管理</a>
   </main>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script src="booking.js?v=20260804-1"></script>
+  <script src="booking.js?v=20260804-2"></script>
 </body>
 </html>

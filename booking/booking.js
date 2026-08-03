@@ -5,7 +5,7 @@ const LIFF_FLOW_VERSION = "20260803b";
 const ENTRY_PARAMS = new URLSearchParams(location.search);
 const SOURCE_CODE = ENTRY_PARAMS.get("src")?.trim().toLowerCase() === "764catfn" ? "764catfn" : "main";
 const ENTERED_VIA_LIFF = ENTRY_PARAMS.get("via") === "liff";
-const state = { slots: [], selectedDate: "", selectedSlot: null, lineIdToken: "", lineAccessToken: "", lineDisplayName: "" };
+const state = { slots: [], publicEvents: [], selectedDate: "", selectedSlot: null, calendarMonth: "", lineIdToken: "", lineAccessToken: "", lineDisplayName: "" };
 const $ = (id) => document.getElementById(id);
 const format = (value, options) => new Intl.DateTimeFormat("zh-TW", { timeZone: "Asia/Taipei", ...options }).format(new Date(value));
 const dateKey = (value) => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Taipei", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(value));
@@ -13,6 +13,8 @@ const shortDate = (value) => format(value, { month: "numeric", day: "numeric" })
 const weekday = (value) => format(value, { weekday: "short" });
 const timeLabel = (value) => format(value, { hour: "2-digit", minute: "2-digit", hour12: false });
 const fullDateTime = (value) => format(value, { year: "numeric", month: "long", day: "numeric", weekday: "long", hour: "2-digit", minute: "2-digit", hour12: false });
+const monthLabel = (month) => `${Number(month.slice(0, 4))} 年 ${Number(month.slice(5, 7))} 月`;
+const shiftMonth = (month, offset) => { const [year, number] = month.split("-").map(Number); const shifted = new Date(Date.UTC(year, number - 1 + offset, 1)); return `${shifted.getUTCFullYear()}-${String(shifted.getUTCMonth() + 1).padStart(2, "0")}`; };
 
 function applySourceBranding() {
   if (SOURCE_CODE !== "764catfn") return;
@@ -84,41 +86,57 @@ async function initLine() {
 
 async function loadSlots() {
   try {
-    const response = await fetch(`${API_BASE}/api/booking/slots?source=${encodeURIComponent(SOURCE_CODE)}`, { cache: "no-store" });
-    const data = await response.json();
-    if (!response.ok || !Array.isArray(data)) throw new Error("可預約時段載入失敗");
-    state.slots = data;
-    state.selectedDate = data.length ? dateKey(data[0].startAt) : "";
-    renderDates();
+    const [slotResponse, eventResponse] = await Promise.all([
+      fetch(`${API_BASE}/api/booking/slots?source=${encodeURIComponent(SOURCE_CODE)}`, { cache: "no-store" }),
+      fetch(`${API_BASE}/api/booking/events?public=1&source=${encodeURIComponent(SOURCE_CODE)}`, { cache: "no-store" }),
+    ]);
+    const [slotData, eventData] = await Promise.all([slotResponse.json(), eventResponse.json()]);
+    if (!slotResponse.ok || !Array.isArray(slotData)) throw new Error("可預約時段載入失敗");
+    if (!eventResponse.ok || !Array.isArray(eventData)) throw new Error("公開行程載入失敗");
+    state.slots = slotData;
+    state.publicEvents = eventData;
+    const firstDate = slotData.length ? dateKey(slotData[0].startAt) : eventData.length ? dateKey(eventData[0].startAt) : dateKey(new Date());
+    state.selectedDate = firstDate;
+    state.calendarMonth = firstDate.slice(0, 7);
+    renderCalendar();
   } catch (error) {
-    $("dateArea").className = "empty";
-    $("dateArea").textContent = error instanceof Error ? error.message : "可預約時段載入失敗";
+    $("dateArea").className = "calendar-grid";
+    $("dateArea").replaceChildren(Object.assign(document.createElement("p"), { className: "empty calendar-loading", textContent: error instanceof Error ? error.message : "可預約時段載入失敗" }));
   }
 }
 
-function renderDates() {
+function eventsOnDate(date) {
+  const dayStart = Date.parse(`${date}T00:00:00+08:00`);
+  const dayEnd = dayStart + 86400000;
+  return state.publicEvents.filter((item) => Date.parse(item.startAt) < dayEnd && Date.parse(item.endAt) > dayStart);
+}
+
+function renderCalendar() {
   const area = $("dateArea");
   area.replaceChildren();
-  if (!state.slots.length) {
-    area.className = "empty";
-    area.textContent = "目前尚未開放預約時段，請稍後再回來查看。";
-    $("timeGrid").hidden = true;
-    return;
-  }
-  area.className = "date-rail";
-  const dates = [...new Map(state.slots.map((slot) => [dateKey(slot.startAt), slot])).entries()];
-  dates.forEach(([key, slot]) => {
+  area.className = "calendar-grid";
+  $("calendarMonthLabel").textContent = monthLabel(state.calendarMonth);
+  const [year, month] = state.calendarMonth.split("-").map(Number);
+  const firstWeekday = new Date(Date.UTC(year, month - 1, 1)).getUTCDay();
+  const days = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  for (let index = 0; index < firstWeekday; index += 1) area.append(Object.assign(document.createElement("span"), { className: "calendar-blank" }));
+  for (let day = 1; day <= days; day += 1) {
+    const key = `${state.calendarMonth}-${String(day).padStart(2, "0")}`;
+    const count = state.slots.filter((slot) => dateKey(slot.startAt) === key).length;
+    const publicEvents = eventsOnDate(key);
     const button = document.createElement("button");
     button.type = "button";
+    button.disabled = count === 0 && publicEvents.length === 0;
     if (key === state.selectedDate) button.className = "active";
     const strong = document.createElement("strong");
     const small = document.createElement("small");
-    strong.textContent = shortDate(slot.startAt);
-    small.textContent = weekday(slot.startAt);
+    strong.textContent = String(day);
+    small.textContent = count ? `${count} 個時段` : publicEvents.length ? "有公告" : "";
     button.append(strong, small);
-    button.addEventListener("click", () => { state.selectedDate = key; state.selectedSlot = null; $("detailsCard").hidden = true; renderDates(); renderTimes(); });
+    if (publicEvents.length) button.append(Object.assign(document.createElement("i"), { className: "event-dot", title: "公開行程" }));
+    button.addEventListener("click", () => { state.selectedDate = key; state.selectedSlot = null; $("detailsCard").hidden = true; renderCalendar(); });
     area.append(button);
-  });
+  }
   renderTimes();
 }
 
@@ -127,6 +145,13 @@ function renderTimes() {
   grid.replaceChildren();
   const visible = state.slots.filter((slot) => dateKey(slot.startAt) === state.selectedDate);
   grid.hidden = !visible.length;
+  $("timeEmpty").hidden = Boolean(visible.length);
+  $("selectedDateLabel").hidden = !state.selectedDate;
+  $("selectedDateLabel").textContent = state.selectedDate ? `${state.selectedDate.replaceAll("-", "/")} 可預約時間` : "";
+  const publicEvents = eventsOnDate(state.selectedDate);
+  const eventList = $("publicEventList");
+  eventList.replaceChildren(...publicEvents.map((item) => { const row = document.createElement("div"); const title = document.createElement("b"); const time = document.createElement("small"); title.textContent = item.title; time.textContent = `${timeLabel(item.startAt)}－${timeLabel(item.endAt)}`; row.append(title, time); return row; }));
+  eventList.hidden = !publicEvents.length;
   visible.forEach((slot) => {
     const button = document.createElement("button");
     button.type = "button";
@@ -140,6 +165,9 @@ function renderTimes() {
     grid.append(button);
   });
 }
+
+$("prevMonth").addEventListener("click", () => { state.calendarMonth = shiftMonth(state.calendarMonth, -1); renderCalendar(); });
+$("nextMonth").addEventListener("click", () => { state.calendarMonth = shiftMonth(state.calendarMonth, 1); renderCalendar(); });
 
 function selectSlot(slot) {
   state.selectedSlot = slot;
