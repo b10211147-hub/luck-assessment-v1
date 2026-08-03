@@ -1,6 +1,7 @@
 const API_BASE = "https://fengmugong-registration-api.b10211147.chatgpt.site";
 const LIFF_ID = "2010747679-nNL4BQhG";
 const LIFF_BOOKING_URL = `https://liff.line.me/${LIFF_ID}/booking/`;
+const LIFF_FLOW_VERSION = "20260803b";
 const ENTRY_PARAMS = new URLSearchParams(location.search);
 const SOURCE_CODE = ENTRY_PARAMS.get("src")?.trim().toLowerCase() === "764catfn" ? "764catfn" : "main";
 const ENTERED_VIA_LIFF = ENTRY_PARAMS.get("via") === "liff";
@@ -50,6 +51,7 @@ function redirectToLiff() {
   const target = new URL(LIFF_BOOKING_URL);
   ENTRY_PARAMS.forEach((value, key) => target.searchParams.set(key, value));
   target.searchParams.set("via", "liff");
+  target.searchParams.set("flow", LIFF_FLOW_VERSION);
   window.location.replace(target);
 }
 

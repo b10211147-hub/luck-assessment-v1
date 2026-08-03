@@ -43,8 +43,8 @@
 
 預約頁需要取得 LINE 暱稱時，必須遵守以下規則，避免再次出現驗證失敗或 400 Bad Request：
 
-1. 對外提供的客人入口一律使用帶有 `via=liff` 的 LIFF 官方網址；主官方使用 `https://liff.line.me/2010747679-nNL4BQhG/booking/?via=liff&src=main`，不可直接把 GitHub Pages 原始網址當作 LINE 登入入口。
-2. 不同官方帳號以 `src` 參數分流；`@764catfn` 使用 `https://liff.line.me/2010747679-nNL4BQhG/booking/?via=liff&src=764catfn`，重新導向時必須完整保留 `via=liff` 與 `src`。
+1. 對外提供的客人入口一律使用帶有 `via=liff` 的 LIFF 官方網址；主官方使用 `https://liff.line.me/2010747679-nNL4BQhG/booking/?via=liff&src=main&flow=20260803b`，不可直接把 GitHub Pages 原始網址當作 LINE 登入入口。
+2. 不同官方帳號以 `src` 參數分流；`@764catfn` 使用 `https://liff.line.me/2010747679-nNL4BQhG/booking/?via=liff&src=764catfn&flow=20260803b`，重新導向時必須完整保留 `via=liff`、`src` 與 `flow`。
 3. 前端 `LIFF_ID` 必須是完整值 `2010747679-nNL4BQhG`，後端驗證用的 LINE Login Channel ID 必須對應 `2010747679`，不可混用 Messaging API 的 Channel ID。
 4. 官方帳號入口必須使用帶有 `via=liff` 的 LIFF 官方網址。GitHub Pages 直連若沒有 `via=liff`，只轉到 LIFF 官方入口一次；帶有 `via=liff` 後才執行 `liff.init()`，若此時 `liff.isLoggedIn()` 仍為否，再呼叫 `liff.login({ redirectUri: window.location.href })`。
 5. LIFF Console 的 Endpoint URL 必須維持 `https://b10211147-hub.github.io/luck-assessment-v1/`。若更換網域、路徑或 LIFF ID，要同時更新前端、後端與 LINE Developers Console。

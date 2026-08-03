@@ -27,7 +27,7 @@ LINE Login Channel ID、LIFF ID 與 Messaging API Channel ID 是不同用途，�
 
 主要連結：
 
-`https://liff.line.me/2010747679-nNL4BQhG/booking/?via=liff&src=main`
+`https://liff.line.me/2010747679-nNL4BQhG/booking/?via=liff&src=main&flow=20260803b`
 
 相容舊連結：
 
@@ -37,7 +37,7 @@ LINE Login Channel ID、LIFF ID 與 Messaging API Channel ID 是不同用途，�
 
 主要連結：
 
-`https://liff.line.me/2010747679-nNL4BQhG/booking/?via=liff&src=764catfn`
+`https://liff.line.me/2010747679-nNL4BQhG/booking/?via=liff&src=764catfn&flow=20260803b`
 
 相容舊連結：
 
@@ -79,7 +79,8 @@ LINE Login Channel ID、LIFF ID 與 Messaging API Channel ID 是不同用途，�
 7. LINE API 網路或 JSON 解析錯誤必須捕捉，不能讓 `/api/identity` 產生空白 500。
 8. LIFF Endpoint 必須維持在專案根路徑；子路徑由 LIFF SDK 依 `liff.state` 導回，不能在初始化前自行拼接或改寫 `/booking/`。
 9. 發布前端 JavaScript 後必須更新資源版本參數，避免手機沿用舊快取。
-10. 舊入口要維持可用，但正式宣傳一律使用第 3 節的主要 LIFF 連結。
+10. 修正 LIFF 啟動流程後要更新正式入口的 `flow` 版本參數，強制手機避開舊的 GitHub Pages／LIFF 快取。
+11. 舊入口要維持可用，但正式宣傳一律使用第 3 節的主要 LIFF 連結。
 
 ## 6. 主官方與第二官方的隔離
 
