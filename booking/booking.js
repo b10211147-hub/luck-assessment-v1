@@ -150,7 +150,7 @@ function renderTimes() {
   $("selectedDateLabel").textContent = state.selectedDate ? `${state.selectedDate.replaceAll("-", "/")} 可預約時間` : "";
   const publicEvents = eventsOnDate(state.selectedDate);
   const eventList = $("publicEventList");
-  eventList.replaceChildren(...publicEvents.map((item) => { const row = document.createElement("div"); const title = document.createElement("b"); const time = document.createElement("small"); title.textContent = item.title; time.textContent = `${timeLabel(item.startAt)}－${timeLabel(item.endAt)}`; row.append(title, time); return row; }));
+  eventList.replaceChildren(...publicEvents.map((item) => { const row = document.createElement("div"); const title = document.createElement("b"); const time = document.createElement("small"); title.textContent = item.title; time.textContent = item.allDay ? "全天" : `${timeLabel(item.startAt)}－${timeLabel(item.endAt)}`; row.append(title, time); return row; }));
   eventList.hidden = !publicEvents.length;
   visible.forEach((slot) => {
     const button = document.createElement("button");
