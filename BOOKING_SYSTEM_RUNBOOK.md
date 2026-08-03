@@ -18,6 +18,8 @@
 | 預約前端 | `https://b10211147-hub.github.io/luck-assessment-v1/booking/` |
 | 預約 API | `https://fengmugong-registration-api.b10211147.chatgpt.site` |
 | 舊入口／轉址入口 | `https://fengmugong-registration-api.b10211147.chatgpt.site/booking` |
+| 主官方 Telegram | 使用正式環境的 `TELEGRAM_CHAT_ID` |
+| `@764catfn` Telegram | `@wendy138668`（與主官方共用同一個 Bot Token） |
 
 LINE Login Channel ID、LIFF ID 與 Messaging API Channel ID 是不同用途，不可混用。前端使用完整 LIFF ID；後端驗證 Token 時使用 LINE Login Channel ID。
 
@@ -86,6 +88,7 @@ LINE Login Channel ID、LIFF ID 與 Messaging API Channel ID 是不同用途，�
 
 - 兩個官方可共用同一個預約前端與 API，但必須用 `src` 分流。
 - Telegram 與管理後台必須顯示正確來源官方。
+- `@764catfn` 的 Telegram 報名與預約通知固定送到 `@wendy138668`；主官方仍使用 `TELEGRAM_CHAT_ID`，兩者共用 `TELEGRAM_BOT_TOKEN`。
 - `@764catfn` 的品牌、服務項目、預約須知與後台權限可獨立調整，不得改壞主官方畫面。
 - 未帶 `src` 時一律視為 `main`，確保主官方的舊連結相容。
 
@@ -104,6 +107,7 @@ LINE Login Channel ID、LIFF ID 與 Messaging API Channel ID 是不同用途，�
 - 確認顯示 `@764catfn` 專屬品牌與內容。
 - 確認 LINE 暱稱成功取得。
 - 確認 Telegram 與後台來源為 `@764catfn`。
+- 確認 Telegram 通知送到 `@wendy138668`，未誤送到主官方頻道。
 
 ### 共通
 
