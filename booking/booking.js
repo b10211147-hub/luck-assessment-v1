@@ -1,5 +1,5 @@
 const API_BASE = "https://fengmugong-registration-api.b10211147.chatgpt.site";
-const LIFF_ID = "2010747679";
+const LIFF_ID = "2010747679-nNL4BQhG";
 const state = { slots: [], selectedDate: "", selectedSlot: null, lineIdToken: "", lineDisplayName: "" };
 const $ = (id) => document.getElementById(id);
 const format = (value, options) => new Intl.DateTimeFormat("zh-TW", { timeZone: "Asia/Taipei", ...options }).format(new Date(value));
