@@ -156,6 +156,6 @@ $("bookingForm").addEventListener("submit", async (event) => {
 
 $("retryLine").addEventListener("click", initLine);
 $("newBooking").addEventListener("click", () => location.reload());
-if (SOURCE_CODE === "764catfn") $("adminLink").href = `${API_BASE}/booking/admin/764catfn`;
+if (SOURCE_CODE === "764catfn") $("adminLink").href = `${API_BASE}/booking-admin-764catfn`;
 loadSlots();
 initLine();
