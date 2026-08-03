@@ -10,6 +10,18 @@ const weekday = (value) => format(value, { weekday: "short" });
 const timeLabel = (value) => format(value, { hour: "2-digit", minute: "2-digit", hour12: false });
 const fullDateTime = (value) => format(value, { year: "numeric", month: "long", day: "numeric", weekday: "long", hour: "2-digit", minute: "2-digit", hour12: false });
 
+function applySourceBranding() {
+  if (SOURCE_CODE !== "764catfn") return;
+  document.body.classList.add("source-764catfn");
+  document.title = "線上預約｜羽曦通靈問事";
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", "#B771AD");
+  document.querySelector('meta[name="description"]')?.setAttribute("content", "羽曦通靈問事線上預約服務");
+  $("brandMark").textContent = "羽";
+  $("brandName").textContent = "羽曦通靈問事";
+  $("bookingNotice").hidden = false;
+  $("successHint").textContent = "羽曦通靈問事已收到 Telegram 通知，請截圖保存預約編號。";
+}
+
 function setIdentity(status, title) {
   const box = $("identity");
   box.className = `identity ${status}`;
@@ -162,5 +174,6 @@ $("bookingForm").addEventListener("submit", async (event) => {
 $("retryLine").addEventListener("click", initLine);
 $("newBooking").addEventListener("click", () => location.reload());
 if (SOURCE_CODE === "764catfn") $("adminLink").href = `${API_BASE}/booking-admin-764catfn`;
+applySourceBranding();
 loadSlots();
 initLine();

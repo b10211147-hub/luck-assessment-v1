@@ -6,11 +6,11 @@
   <meta name="theme-color" content="#8f1d2c">
   <title>線上預約｜奉母宮</title>
   <meta name="description" content="奉母宮線上選擇服務與預約時間">
-  <link rel="stylesheet" href="booking.css?v=20260803-1">
+  <link rel="stylesheet" href="booking.css?v=20260803-2">
 </head>
 <body>
   <header class="hero">
-    <div class="brand"><span>奉</span><div><b>神明仲介所｜奉母宮</b><small>ONLINE APPOINTMENT</small></div></div>
+    <div class="brand"><span id="brandMark">奉</span><div><b id="brandName">神明仲介所｜奉母宮</b><small>ONLINE APPOINTMENT</small></div></div>
     <div class="hero-copy"><p class="eyebrow">一站式線上預約</p><h1>選一段適合你的<br><em>安心時光</em></h1><p>選擇服務、日期與時間，確認資料後即可完成預約。</p></div>
   </header>
 
@@ -33,6 +33,13 @@
       <form id="bookingForm">
         <label>LINE 暱稱<span>*</span><input id="lineNickname" name="customerName" maxlength="40" readonly placeholder="連接 LINE 後自動帶入"></label>
         <label>想先告訴老師的事<textarea name="customerNote" maxlength="500" rows="4" placeholder="選填，例如：想詢問的主題或需要注意的事項"></textarea></label>
+        <aside id="bookingNotice" class="booking-notice" hidden>
+          <b>預約前須知</b>
+          <p>免費問事活動前 15 分鐘免費，後 15 分鐘費用隨喜（一次總時長最多 30 分鐘）。</p>
+          <p>為避免耽誤您的時間，問事前請提供問事本人資料及其相關人員資料：</p>
+          <p><strong>姓名＋生日，或個人照片，二擇一即可。</strong></p>
+          <p>提醒：若問題內容涉及其他相關對象，也請一併提供對方的姓名＋生日或照片，方便通靈查詢與確認連結狀態。</p>
+        </aside>
         <p id="errorMessage" class="error" hidden></p>
         <button id="submitButton" class="primary-button" type="submit" disabled>請先連接 LINE</button>
       </form>
@@ -41,13 +48,13 @@
     <section id="successCard" class="success-card" hidden>
       <div class="success-icon">✓</div><p class="eyebrow">預約已成立</p><h1>我們已為你保留時間</h1>
       <dl id="successSummary" class="summary"></dl>
-      <p class="hint">奉母宮已收到 Telegram 通知，請截圖保存預約編號。</p>
+      <p id="successHint" class="hint">奉母宮已收到 Telegram 通知，請截圖保存預約編號。</p>
       <button id="newBooking" class="primary-button" type="button">預約其他時間</button>
     </section>
 
     <a id="adminLink" class="admin-link" href="https://fengmugong-registration-api.b10211147.chatgpt.site/booking/admin">排程管理</a>
   </main>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script src="booking.js?v=20260803-8"></script>
+  <script src="booking.js?v=20260803-9"></script>
 </body>
 </html>
