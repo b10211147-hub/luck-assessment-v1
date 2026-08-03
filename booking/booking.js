@@ -1,5 +1,6 @@
 const API_BASE = "https://fengmugong-registration-api.b10211147.chatgpt.site";
 const LIFF_ID = "2010747679-nNL4BQhG";
+const LIFF_BOOKING_URL = `https://liff.line.me/${LIFF_ID}/booking/`;
 const SOURCE_CODE = new URLSearchParams(location.search).get("src")?.trim().toLowerCase() === "764catfn" ? "764catfn" : "main";
 const state = { slots: [], selectedDate: "", selectedSlot: null, lineIdToken: "", lineAccessToken: "", lineDisplayName: "" };
 const $ = (id) => document.getElementById(id);
@@ -48,9 +49,9 @@ async function initLine() {
   try {
     await liff.init({ liffId: LIFF_ID });
     if (!liff.isLoggedIn()) {
-      // The canonical LIFF URL launches the app. Actual external-browser login
-      // must use liff.login(), otherwise the LIFF entry and endpoint can loop.
-      liff.login({ redirectUri: window.location.href });
+      const target = new URL(LIFF_BOOKING_URL);
+      target.search = window.location.search;
+      window.location.replace(target);
       return;
     }
     const token = liff.getIDToken() || "";
