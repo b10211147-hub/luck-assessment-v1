@@ -1,8 +1,6 @@
 const API_BASE = "https://fengmugong-registration-api.b10211147.chatgpt.site";
 const LIFF_ID = "2010747679-nNL4BQhG";
 const SOURCE_CODE = new URLSearchParams(location.search).get("src")?.trim().toLowerCase() === "764catfn" ? "764catfn" : "main";
-const LIFF_ENTRY_URL = new URL(`https://liff.line.me/${LIFF_ID}/booking/`);
-LIFF_ENTRY_URL.searchParams.set("src", SOURCE_CODE);
 const state = { slots: [], selectedDate: "", selectedSlot: null, lineIdToken: "", lineAccessToken: "", lineDisplayName: "" };
 const $ = (id) => document.getElementById(id);
 const format = (value, options) => new Intl.DateTimeFormat("zh-TW", { timeZone: "Asia/Taipei", ...options }).format(new Date(value));
@@ -38,9 +36,9 @@ async function initLine() {
   try {
     await liff.init({ liffId: LIFF_ID });
     if (!liff.isLoggedIn()) {
-      // Always restart authentication through the canonical LIFF URL. Using the
-      // raw GitHub Pages URL as redirectUri can lose the LIFF context and fail.
-      window.location.replace(LIFF_ENTRY_URL.toString());
+      // The canonical LIFF URL launches the app. Actual external-browser login
+      // must use liff.login(), otherwise the LIFF entry and endpoint can loop.
+      liff.login({ redirectUri: window.location.href });
       return;
     }
     const token = liff.getIDToken() || "";
