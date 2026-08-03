@@ -1,7 +1,7 @@
 const $ = (selector) => document.querySelector(selector);
 const API_BASE = "https://fengmugong-registration-api.b10211147.chatgpt.site";
 const apiUrl = (path) => `${API_BASE}${path}`;
-const state = { activities: [], selected: null, lineIdToken: "", lineDisplayName: "", liffReady: false, identityStatus: "loading", sourceCode: "main" };
+const state = { activities: [], selected: null, lineIdToken: "", lineAccessToken: "", lineDisplayName: "", liffReady: false, identityStatus: "loading", sourceCode: "main" };
 const views = ["activitiesView", "formView", "successView", "ordersView"];
 let lineIdentityPromise;
 
@@ -106,7 +106,7 @@ async function submitRegistration(event) {
   }
   const button = event.submitter || form.querySelector('button[type="submit"]'); button.disabled = true; button.textContent = "資料送出中…";
   try {
-    const body = Object.fromEntries(new FormData(event.currentTarget)); body.activityId = state.selected.id; body.lineIdToken = state.lineIdToken; body.sourceCode = state.sourceCode;
+    const body = Object.fromEntries(new FormData(event.currentTarget)); body.activityId = state.selected.id; body.lineIdToken = state.lineIdToken; body.lineAccessToken = state.lineAccessToken; body.sourceCode = state.sourceCode;
     const response = await fetch(apiUrl("/api/orders"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
     const order = await response.json(); if (!response.ok) throw new Error(order.error);
     $("#orderSummary").innerHTML = `<div class="summary"><div><span>專屬報名編號</span><b>${order.id}</b></div><div><span>祈福活動</span><b>${order.activityTitle}</b></div><div><span>祈福人數</span><b>${order.people} 人</b></div><div><span>報名費用</span><strong>${order.paymentStatus}</strong></div><div><span>重要提醒</span><b>請截圖保存專屬報名編號</b></div></div>`;
@@ -152,8 +152,9 @@ async function initLineIdentity() {
       return false;
     }
     state.lineIdToken = liff.getIDToken() || "";
-    if (!state.lineIdToken) throw new Error("Missing LINE ID token");
-    const response = await fetch(apiUrl("/api/identity"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lineIdToken: state.lineIdToken }) });
+    state.lineAccessToken = liff.getAccessToken() || "";
+    if (!state.lineIdToken && !state.lineAccessToken) throw new Error("Missing LINE login token");
+    const response = await fetch(apiUrl("/api/identity"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lineIdToken: state.lineIdToken, lineAccessToken: state.lineAccessToken }) });
     const identity = await response.json();
     if (!response.ok) {
       const url = new URL(window.location.href);
@@ -175,6 +176,7 @@ async function initLineIdentity() {
     return true;
   } catch (error) {
     state.lineIdToken = "";
+    state.lineAccessToken = "";
     state.lineDisplayName = "";
     state.liffReady = false;
     state.identityStatus = "error";

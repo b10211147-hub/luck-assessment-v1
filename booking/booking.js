@@ -3,7 +3,7 @@ const LIFF_ID = "2010747679-nNL4BQhG";
 const SOURCE_CODE = new URLSearchParams(location.search).get("src")?.trim().toLowerCase() === "764catfn" ? "764catfn" : "main";
 const LIFF_ENTRY_URL = new URL(`https://liff.line.me/${LIFF_ID}/booking/`);
 LIFF_ENTRY_URL.searchParams.set("src", SOURCE_CODE);
-const state = { slots: [], selectedDate: "", selectedSlot: null, lineIdToken: "", lineDisplayName: "" };
+const state = { slots: [], selectedDate: "", selectedSlot: null, lineIdToken: "", lineAccessToken: "", lineDisplayName: "" };
 const $ = (id) => document.getElementById(id);
 const format = (value, options) => new Intl.DateTimeFormat("zh-TW", { timeZone: "Asia/Taipei", ...options }).format(new Date(value));
 const dateKey = (value) => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Taipei", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(value));
@@ -28,9 +28,9 @@ function showError(message) {
 
 function updateSubmit() {
   const button = $("submitButton");
-  const ready = Boolean(state.lineIdToken && state.selectedSlot);
+  const ready = Boolean((state.lineIdToken || state.lineAccessToken) && state.selectedSlot);
   button.disabled = !ready;
-  button.textContent = state.lineIdToken ? "確認預約" : "請先連接 LINE";
+  button.textContent = state.lineIdToken || state.lineAccessToken ? "確認預約" : "請先連接 LINE";
 }
 
 async function initLine() {
@@ -44,16 +44,19 @@ async function initLine() {
       return;
     }
     const token = liff.getIDToken() || "";
-    if (!token) throw new Error("無法取得 LINE 登入資料");
-    const response = await fetch(`${API_BASE}/api/identity`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lineIdToken: token }) });
+    const accessToken = liff.getAccessToken() || "";
+    if (!token && !accessToken) throw new Error("無法取得 LINE 登入資料");
+    const response = await fetch(`${API_BASE}/api/identity`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lineIdToken: token, lineAccessToken: accessToken }) });
     const identity = await response.json();
     if (!response.ok) throw new Error(identity.error || "LINE 身分驗證失敗");
     state.lineIdToken = token;
+    state.lineAccessToken = accessToken;
     state.lineDisplayName = identity.displayName || "LINE 使用者";
     $("lineNickname").value = state.lineDisplayName;
     setIdentity("ready", `已連接 LINE：${state.lineDisplayName}`);
   } catch (error) {
     state.lineIdToken = "";
+    state.lineAccessToken = "";
     setIdentity("error", error instanceof Error ? error.message : "LINE 身分連接失敗");
   }
 }
@@ -135,14 +138,14 @@ function selectSlot(slot) {
 
 $("bookingForm").addEventListener("submit", async (event) => {
   event.preventDefault();
-  if (!state.selectedSlot || !state.lineIdToken) return;
+  if (!state.selectedSlot || (!state.lineIdToken && !state.lineAccessToken)) return;
   const button = $("submitButton");
   const form = new FormData(event.currentTarget);
   button.disabled = true;
   button.textContent = "預約送出中…";
   showError("");
   try {
-    const response = await fetch(`${API_BASE}/api/booking/appointments`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slotId: state.selectedSlot.id, customerName: form.get("customerName"), customerNote: form.get("customerNote"), lineIdToken: state.lineIdToken, sourceCode: SOURCE_CODE }) });
+    const response = await fetch(`${API_BASE}/api/booking/appointments`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slotId: state.selectedSlot.id, customerName: form.get("customerName"), customerNote: form.get("customerNote"), lineIdToken: state.lineIdToken, lineAccessToken: state.lineAccessToken, sourceCode: SOURCE_CODE }) });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "預約失敗，請重新選擇時段");
     $("successSummary").replaceChildren(...[["預約編號", data.id], ["服務項目", data.service], ["預約時間", fullDateTime(data.startAt)], ["預約人", data.customerName], ["LINE 名稱", data.lineDisplayName || state.lineDisplayName]].map(([term, value]) => { const row = document.createElement("div"); const dt = document.createElement("dt"); const dd = document.createElement("dd"); dt.textContent = term; dd.textContent = value; row.append(dt, dd); return row; }));
