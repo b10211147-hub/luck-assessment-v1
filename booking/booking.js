@@ -1,7 +1,9 @@
 const API_BASE = "https://fengmugong-registration-api.b10211147.chatgpt.site";
 const LIFF_ID = "2010747679-nNL4BQhG";
 const LIFF_BOOKING_URL = `https://liff.line.me/${LIFF_ID}/booking/`;
-const SOURCE_CODE = new URLSearchParams(location.search).get("src")?.trim().toLowerCase() === "764catfn" ? "764catfn" : "main";
+const ENTRY_PARAMS = new URLSearchParams(location.search);
+const SOURCE_CODE = ENTRY_PARAMS.get("src")?.trim().toLowerCase() === "764catfn" ? "764catfn" : "main";
+const ENTERED_VIA_LIFF = ENTRY_PARAMS.get("via") === "liff";
 const state = { slots: [], selectedDate: "", selectedSlot: null, lineIdToken: "", lineAccessToken: "", lineDisplayName: "" };
 const $ = (id) => document.getElementById(id);
 const format = (value, options) => new Intl.DateTimeFormat("zh-TW", { timeZone: "Asia/Taipei", ...options }).format(new Date(value));
@@ -44,14 +46,19 @@ function updateSubmit() {
   button.textContent = state.lineIdToken || state.lineAccessToken ? "確認預約" : "請先連接 LINE";
 }
 
+function redirectToLiff() {
+  const target = new URL(LIFF_BOOKING_URL);
+  ENTRY_PARAMS.forEach((value, key) => target.searchParams.set(key, value));
+  target.searchParams.set("via", "liff");
+  window.location.replace(target);
+}
+
 async function initLine() {
   setIdentity("loading", "正在連接 LINE 身分");
   try {
     await liff.init({ liffId: LIFF_ID });
     if (!liff.isLoggedIn()) {
-      const target = new URL(LIFF_BOOKING_URL);
-      target.search = window.location.search;
-      window.location.replace(target);
+      liff.login({ redirectUri: window.location.href });
       return;
     }
     const token = liff.getIDToken() || "";
@@ -176,5 +183,9 @@ $("retryLine").addEventListener("click", initLine);
 $("newBooking").addEventListener("click", () => location.reload());
 if (SOURCE_CODE === "764catfn") $("adminLink").href = `${API_BASE}/booking-admin-764catfn`;
 applySourceBranding();
-loadSlots();
-initLine();
+if (ENTERED_VIA_LIFF) {
+  loadSlots();
+  initLine();
+} else {
+  redirectToLiff();
+}
