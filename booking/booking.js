@@ -1,5 +1,6 @@
 const API_BASE = "https://fengmugong-registration-api.b10211147.chatgpt.site";
 const LIFF_ID = "2010747679-nNL4BQhG";
+const SOURCE_CODE = new URLSearchParams(location.search).get("src")?.trim().toLowerCase() === "764catfn" ? "764catfn" : "main";
 const state = { slots: [], selectedDate: "", selectedSlot: null, lineIdToken: "", lineDisplayName: "" };
 const $ = (id) => document.getElementById(id);
 const format = (value, options) => new Intl.DateTimeFormat("zh-TW", { timeZone: "Asia/Taipei", ...options }).format(new Date(value));
@@ -55,7 +56,7 @@ async function initLine() {
 
 async function loadSlots() {
   try {
-    const response = await fetch(`${API_BASE}/api/booking/slots`, { cache: "no-store" });
+    const response = await fetch(`${API_BASE}/api/booking/slots?source=${encodeURIComponent(SOURCE_CODE)}`, { cache: "no-store" });
     const data = await response.json();
     if (!response.ok || !Array.isArray(data)) throw new Error("可預約時段載入失敗");
     state.slots = data;
@@ -137,8 +138,7 @@ $("bookingForm").addEventListener("submit", async (event) => {
   button.textContent = "預約送出中…";
   showError("");
   try {
-    const sourceCode = new URLSearchParams(location.search).get("src")?.trim().toLowerCase() || "main";
-    const response = await fetch(`${API_BASE}/api/booking/appointments`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slotId: state.selectedSlot.id, customerName: form.get("customerName"), customerNote: form.get("customerNote"), lineIdToken: state.lineIdToken, sourceCode }) });
+    const response = await fetch(`${API_BASE}/api/booking/appointments`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slotId: state.selectedSlot.id, customerName: form.get("customerName"), customerNote: form.get("customerNote"), lineIdToken: state.lineIdToken, sourceCode: SOURCE_CODE }) });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "預約失敗，請重新選擇時段");
     $("successSummary").replaceChildren(...[["預約編號", data.id], ["服務項目", data.service], ["預約時間", fullDateTime(data.startAt)], ["預約人", data.customerName], ["LINE 名稱", data.lineDisplayName || state.lineDisplayName]].map(([term, value]) => { const row = document.createElement("div"); const dt = document.createElement("dt"); const dd = document.createElement("dd"); dt.textContent = term; dd.textContent = value; row.append(dt, dd); return row; }));
@@ -156,5 +156,6 @@ $("bookingForm").addEventListener("submit", async (event) => {
 
 $("retryLine").addEventListener("click", initLine);
 $("newBooking").addEventListener("click", () => location.reload());
+if (SOURCE_CODE === "764catfn") $("adminLink").href = `${API_BASE}/booking/admin/764catfn`;
 loadSlots();
 initLine();
