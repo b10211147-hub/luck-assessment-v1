@@ -108,16 +108,7 @@
   </main>
   <footer><b>奉母宮</b><span>一站式線上祈福報名</span></footer>
   <div id="toast" class="toast" role="status"></div>
-  <script>
-    (() => {
-      const liffState = new URLSearchParams(window.location.search).get("liff.state");
-      if (liffState && /^\/booking(?:\/|\?|$)/.test(liffState)) {
-        const endpointBase = new URL("./", window.location.href);
-        window.location.replace(new URL(liffState.replace(/^\/+/, ""), endpointBase).toString());
-      }
-    })();
-  </script>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script src="app.js?v=20260803-2"></script>
+  <script src="app.js?v=20260803-3"></script>
 </body>
 </html>

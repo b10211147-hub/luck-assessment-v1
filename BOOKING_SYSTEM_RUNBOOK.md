@@ -56,28 +56,30 @@ LINE Login Channel ID、LIFF ID 與 Messaging API Channel ID 是不同用途，�
 
 ### 根本原因
 
-客人使用一般 GitHub Pages 網址或舊轉址進入，但頁面又重新啟動 LIFF 登入。系統無法明確判斷這次是否已從 LIFF 官方入口進入，因此可能在 Endpoint、LIFF 入口與 LINE Login 之間形成重複導向。
+客人進入帶有子路徑的 LIFF 網址後，LINE 會先把使用者送到 Endpoint 根目錄，並以 `liff.state` 保存 `/booking/` 與來源參數。舊版根頁面在 `liff.init()` 完成前自行呼叫 `window.location.replace()`，跳過 LINE 規定的 primary redirect 初始化，也可能遺失登入狀態。這會讓手機 LINE 在 Endpoint、登入頁與預約頁之間重複開啟，表現成閃退或反覆跳轉。
 
 ### 已採用修正
 
 1. 所有正式 LIFF 入口必須帶上 `via=liff`。
-2. GitHub Pages 預約頁若沒有 `via=liff`，不執行載入時段或 LINE 初始化，只保留所有參數並轉到 LIFF 官方入口一次。
-3. 進入帶有 `via=liff` 的預約頁後才執行 `liff.init()`。
-4. 完成 `liff.init()` 後若仍未登入，使用 `liff.login({ redirectUri: window.location.href })`；不可再次無條件跳回 LIFF 入口。
-5. Sites 的舊入口必須合併原查詢參數、強制加入 `via=liff`，再轉到 LIFF 官方入口。
-6. `src` 必須在全部轉址中保留，避免主官方與 `@764catfn` 來源混淆。
+2. Endpoint 根頁面收到 `liff.state` 時，不可在 `liff.init()` 完成前以 `location`、History API 或伺服器 301／302 改變網址。
+3. 根頁面必須先執行 `liff.init()`，由 LIFF SDK 將 primary redirect 正常轉成 `/booking/` 的 secondary redirect。
+4. `/booking/` secondary redirect 必須再次執行 `liff.init()`；完成後若仍未登入，才使用 `liff.login({ redirectUri: window.location.href })`。
+5. GitHub Pages 預約頁若沒有 `via=liff`，只保留所有參數並轉到 LIFF 官方入口一次。
+6. Sites 的舊入口必須合併原查詢參數、強制加入 `via=liff`，再轉到 LIFF 官方入口。
+7. `src` 必須在全部轉址中保留，避免主官方與 `@764catfn` 來源混淆。
 
 ## 5. 不可破壞的實作規則
 
 1. 不可把 GitHub Pages 原始網址當作官方帳號的主要入口。
 2. 不可移除 `via=liff`，也不可用 `target.search = ...` 覆蓋既有 LIFF 必要參數；應逐項合併參數。
-3. `src=main` 代表奉母宮主官方；`src=764catfn` 代表第二官方。
-4. LINE 身分以後端驗證為準，不信任前端自行傳入的 LINE 名稱或 User ID。
-5. 身分驗證以 ID Token 為主，Access Token Profile 驗證為備援；兩者皆失敗才回傳 401。
-6. LINE API 網路或 JSON 解析錯誤必須捕捉，不能讓 `/api/identity` 產生空白 500。
-7. LIFF Endpoint 必須維持在專案根路徑；子路徑由 `liff.state` 導回，不能用網域根目錄錯組 `/booking/`。
-8. 發布前端 JavaScript 後必須更新資源版本參數，避免手機沿用舊快取。
-9. 舊入口要維持可用，但正式宣傳一律使用第 3 節的主要 LIFF 連結。
+3. Endpoint 根頁面出現 `liff.state` 時，必須先等待 `liff.init()`；初始化完成前嚴禁自行改寫或轉址。
+4. `src=main` 代表奉母宮主官方；`src=764catfn` 代表第二官方。
+5. LINE 身分以後端驗證為準，不信任前端自行傳入的 LINE 名稱或 User ID。
+6. 身分驗證以 ID Token 為主，Access Token Profile 驗證為備援；兩者皆失敗才回傳 401。
+7. LINE API 網路或 JSON 解析錯誤必須捕捉，不能讓 `/api/identity` 產生空白 500。
+8. LIFF Endpoint 必須維持在專案根路徑；子路徑由 LIFF SDK 依 `liff.state` 導回，不能在初始化前自行拼接或改寫 `/booking/`。
+9. 發布前端 JavaScript 後必須更新資源版本參數，避免手機沿用舊快取。
+10. 舊入口要維持可用，但正式宣傳一律使用第 3 節的主要 LIFF 連結。
 
 ## 6. 主官方與第二官方的隔離
 
