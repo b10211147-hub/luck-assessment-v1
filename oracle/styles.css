@@ -427,14 +427,28 @@ footer p { margin: 4px 0; }
   letter-spacing: .12em;
   text-decoration: none;
   box-shadow: 0 8px 20px rgba(36, 18, 16, .2);
+  transition: background .18s ease, transform .18s ease;
 }
 .contact-link:hover { background: #571823; transform: translateY(-1px); }
 .contact-link:focus-visible { outline: 3px solid #d6ad63; outline-offset: 3px; }
+.header-contact {
+  position: absolute;
+  z-index: 2;
+  top: 18px;
+  right: clamp(14px, 4vw, 42px);
+  margin-top: 0;
+}
 
 [hidden] { display: none !important; }
 
 @media (max-width: 620px) {
-  .masthead { padding-top: 38px; }
+  .masthead { padding-top: 64px; }
+  .header-contact {
+    top: 12px;
+    right: 10px;
+    padding: 6px 14px;
+    font-size: .8rem;
+  }
   main { width: min(100% - 20px, 760px); }
   .draw-panel { border-radius: 22px; }
   .lot-stage {
