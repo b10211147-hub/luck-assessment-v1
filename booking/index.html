@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#8f1d2c">
   <title>線上預約｜奉母宮</title>
   <meta name="description" content="奉母宮線上選擇服務與預約時間">
-  <link rel="stylesheet" href="booking.css?v=20260803-2">
+  <link rel="stylesheet" href="booking.css?v=20260804-1">
 </head>
 <body>
   <header class="hero">
@@ -19,6 +19,17 @@
       <span id="identityIcon">•••</span>
       <div><b id="identityTitle">正在連接 LINE 身分</b><small>預約成功後，系統會將 LINE 識別資料安全地附在通知中。</small></div>
       <button id="retryLine" type="button" hidden>重新連接</button>
+    </section>
+
+    <section id="sourceBookingGuide" class="booking-card booking-guide" hidden>
+      <div class="section-title booking-guide__title"><span>須知</span><div><small>BEFORE BOOKING</small><h2>預約須知</h2></div></div>
+      <div class="booking-guide__images">
+        <img src="assets/yuxi-booking-guide-01.jpg" alt="羽曦靈性諮詢服務介紹" loading="lazy">
+        <img src="assets/yuxi-booking-guide-02.jpg" alt="奉母宮與羽曦通靈問事服務介紹" loading="lazy">
+        <img src="assets/yuxi-booking-guide-03.jpg" alt="羽曦通靈問事預約須知" loading="lazy">
+        <img src="assets/yuxi-booking-guide-04.jpg" alt="羽曦通靈問事功德服務說明" loading="lazy">
+      </div>
+      <p class="booking-guide__urgent">當日預約／緊急問事 每 20 分鐘 $800<br><small>（介意請另約日期）</small></p>
     </section>
 
     <section class="booking-card">
@@ -55,6 +66,6 @@
     <a id="adminLink" class="admin-link" href="https://fengmugong-registration-api.b10211147.chatgpt.site/booking/admin">排程管理</a>
   </main>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script src="booking.js?v=20260803-12"></script>
+  <script src="booking.js?v=20260804-1"></script>
 </body>
 </html>

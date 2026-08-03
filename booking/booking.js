@@ -22,6 +22,7 @@ function applySourceBranding() {
   document.querySelector('meta[name="description"]')?.setAttribute("content", "羽曦通靈問事線上預約服務");
   $("brandMark").textContent = "羽";
   $("brandName").textContent = "羽曦通靈問事";
+  $("sourceBookingGuide").hidden = false;
   $("bookingNotice").hidden = false;
   $("successHint").textContent = "羽曦通靈問事已收到 Telegram 通知，請截圖保存預約編號。";
 }
