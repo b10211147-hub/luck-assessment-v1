@@ -37,3 +37,14 @@
 - 增加離線 PWA。
 - 加入品牌 Logo 與自訂文案。
 - 產生單頁可分享結果圖。
+# LINE／LIFF 驗證防呆（修改與部署前必查）
+
+預約頁需要取得 LINE 暱稱時，必須遵守以下規則，避免再次出現驗證失敗或 400 Bad Request：
+
+1. 對外提供的客人入口一律使用 LIFF 官方網址：`https://liff.line.me/2010747679-nNL4BQhG/booking/`，不可直接把 GitHub Pages 原始網址當作 LINE 登入入口。
+2. 不同官方帳號以 `src` 參數分流；`@764catfn` 使用 `https://liff.line.me/2010747679-nNL4BQhG/booking/?src=764catfn`，重新導向時必須完整保留 `src`。
+3. 前端 `LIFF_ID` 必須是完整值 `2010747679-nNL4BQhG`，後端驗證用的 LINE Login Channel ID 必須對應 `2010747679`，不可混用 Messaging API 的 Channel ID。
+4. 使用者未登入時，必須重新導向官方 LIFF 網址；不可使用 GitHub Pages 或 Sites 原始網址作為 `liff.login()` 的 `redirectUri`。
+5. LIFF Console 的 Endpoint URL 必須維持 `https://b10211147-hub.github.io/luck-assessment-v1/`。若更換網域、路徑或 LIFF ID，要同時更新前端、後端與 LINE Developers Console。
+6. 每次發布後至少測試：LINE App 內開啟、手機外部瀏覽器開啟、LINE 暱稱是否取得、`/api/identity` 是否成功，以及網址是否仍保留正確的 `src`。
+7. 若出現 400 或驗證失敗，先檢查入口是否為 `liff.line.me`、LIFF ID／Channel ID 是否配對、Endpoint URL 是否正確，再檢查快取；不可先改成繞過驗證。
