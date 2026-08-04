@@ -332,6 +332,33 @@
     return y + lines.length * lineHeight;
   }
 
+  function setFittedFont(context, text, preferredSize, minimumSize, maxWidth, weight, family) {
+    let size = preferredSize;
+    do {
+      context.font = `${weight} ${size}px ${family}`;
+      if (context.measureText(text).width <= maxWidth) break;
+      size -= 2;
+    } while (size > minimumSize);
+    return size;
+  }
+
+  function drawGoldDivider(context, y) {
+    context.save();
+    context.strokeStyle = "rgba(173, 124, 50, .72)";
+    context.fillStyle = "#ad7c32";
+    context.lineWidth = 2;
+    context.beginPath();
+    context.moveTo(390, y);
+    context.lineTo(510, y);
+    context.moveTo(570, y);
+    context.lineTo(690, y);
+    context.stroke();
+    context.beginPath();
+    context.arc(540, y, 5, 0, Math.PI * 2);
+    context.fill();
+    context.restore();
+  }
+
   function drawLotCard(oracle) {
     const canvas = document.createElement("canvas");
     canvas.width = 1080;
@@ -358,61 +385,69 @@
 
     context.fillStyle = "rgba(123, 36, 50, .055)";
     context.beginPath();
-    context.arc(540, 640, 360, 0, Math.PI * 2);
+    context.arc(540, 665, 360, 0, Math.PI * 2);
     context.fill();
 
     context.textAlign = "center";
     context.fillStyle = "#7b2432";
-    context.font = `700 32px ${sansFont}`;
-    context.fillText("神明仲介所｜奉母宮", 540, 122);
+    context.font = `700 38px ${sansFont}`;
+    context.fillText("神明仲介所｜奉母宮", 540, 128);
     context.fillStyle = "#9a713c";
-    context.font = `500 22px ${sansFont}`;
-    context.fillText("今日一籤・一念誠心", 540, 164);
+    context.font = `600 27px ${sansFont}`;
+    context.fillText("今日一籤・一念誠心", 540, 176);
 
     context.fillStyle = "#7b2432";
-    roundedRect(context, 355, 202, 370, 66, 33);
+    roundedRect(context, 320, 210, 440, 76, 38);
     context.fill();
     context.fillStyle = "#fff8e9";
-    context.font = `700 28px ${sansFont}`;
-    context.fillText(`第 ${String(oracle.number).padStart(3, "0")} 籤　｜　${oracle.level}`, 540, 245);
+    context.font = `700 34px ${sansFont}`;
+    context.fillText(`第 ${String(oracle.number).padStart(3, "0")} 籤　｜　${oracle.level}`, 540, 260);
 
     context.fillStyle = "#4d2e27";
-    context.font = `700 48px ${serifFont}`;
-    context.fillText(oracle.deity, 540, 340);
+    context.font = `700 56px ${serifFont}`;
+    context.fillText(oracle.deity, 540, 372);
     context.fillStyle = "#9a713c";
-    context.font = `600 25px ${sansFont}`;
-    context.fillText(`籤題・${oracle.theme}`, 540, 388);
+    context.font = `700 29px ${sansFont}`;
+    context.fillText(`籤題・${oracle.theme}`, 540, 422);
 
     context.fillStyle = "#6f1f2c";
-    context.font = `700 62px ${serifFont}`;
-    const titleLines = splitTextIntoLines(context, oracle.title, 800).slice(0, 2);
-    titleLines.forEach((line, index) => context.fillText(line, 540, 480 + index * 78));
+    setFittedFont(context, oracle.title, 76, 56, 780, 700, serifFont);
+    context.fillText(oracle.title, 540, 520);
 
-    const poemStartY = titleLines.length > 1 ? 665 : 600;
+    drawGoldDivider(context, 568);
+
+    const poemStartY = 650;
+    context.textAlign = "center";
     context.fillStyle = "#4d4038";
-    context.font = `500 38px ${serifFont}`;
-    oracle.poem.forEach((line, index) => context.fillText(line, 540, poemStartY + index * 58));
+    context.font = `600 50px ${serifFont}`;
+    oracle.poem.forEach((line, index) => context.fillText(line, 540, poemStartY + index * 70));
 
-    const adviceBoxY = poemStartY + 4 * 58 + 52;
-    context.fillStyle = "rgba(255, 255, 255, .72)";
-    roundedRect(context, 120, adviceBoxY, 840, 224, 26);
+    const adviceBoxY = 930;
+    context.save();
+    context.shadowColor = "rgba(89, 55, 35, .10)";
+    context.shadowBlur = 22;
+    context.shadowOffsetY = 8;
+    context.fillStyle = "rgba(255, 255, 255, .82)";
+    roundedRect(context, 105, adviceBoxY, 870, 224, 28);
     context.fill();
+    context.restore();
     context.strokeStyle = "rgba(173, 124, 50, .48)";
     context.lineWidth = 2;
+    roundedRect(context, 105, adviceBoxY, 870, 224, 28);
     context.stroke();
     context.fillStyle = "#9a713c";
-    context.font = `700 25px ${sansFont}`;
-    context.fillText("今天可以怎麼做", 540, adviceBoxY + 48);
+    context.font = `700 30px ${sansFont}`;
+    context.fillText("今天可以怎麼做", 540, adviceBoxY + 51);
     context.fillStyle = "#4d4038";
-    context.font = `500 31px ${sansFont}`;
-    drawWrappedText(context, oracle.advice, 540, adviceBoxY + 98, 720, 48, 3);
+    context.font = `600 37px ${sansFont}`;
+    drawWrappedText(context, oracle.advice, 540, adviceBoxY + 108, 760, 52, 2);
 
     context.fillStyle = "#7b2432";
-    context.font = `600 23px ${sansFont}`;
-    context.fillText("把它當作整理方向的提醒，結果仍由你的選擇與行動完成", 540, 1232);
+    context.font = `700 25px ${sansFont}`;
+    context.fillText("把它當作整理方向的提醒，結果仍由你的選擇與行動完成", 540, 1228);
     context.fillStyle = "#8a7564";
-    context.font = `500 19px ${sansFont}`;
-    context.fillText("重大醫療、法律與財務決定，請尋求合格專業協助", 540, 1268);
+    context.font = `500 21px ${sansFont}`;
+    context.fillText("重大醫療、法律與財務決定，請尋求合格專業協助", 540, 1270);
 
     return canvas;
   }
@@ -481,7 +516,7 @@
     downloadCardBtn.textContent = "正在製作籤卡…";
     try {
       const canvas = drawLotCard(currentOracle);
-      await saveCanvasAsPng(canvas, `奉母宮-第${String(currentOracle.number).padStart(3, "0")}籤.png`);
+      await saveCanvasAsPng(canvas, `奉母宮-第${String(currentOracle.number).padStart(3, "0")}籤-今日籤卡.png`);
       downloadCardBtn.textContent = "已下載 PNG";
     } catch {
       downloadCardBtn.textContent = "下載失敗，請再試一次";
