@@ -19,21 +19,16 @@
   let currentOracle = null;
   let lastNumber = null;
 
-  function getVisitorId() {
-    const storageKey = "fengmuOracleVisitorId";
+  function createDrawId() {
     try {
-      const stored = localStorage.getItem(storageKey);
-      if (stored) return stored;
-      const id = crypto.randomUUID?.() ?? `${Date.now().toString(36)}_${crypto.getRandomValues(new Uint32Array(2)).join("")}`;
-      localStorage.setItem(storageKey, id);
-      return id;
+      return crypto.randomUUID?.() ?? `${Date.now().toString(36)}_${crypto.getRandomValues(new Uint32Array(2)).join("")}`;
     } catch {
       return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}_${Math.random().toString(36).slice(2)}`;
     }
   }
 
   function renderDrawCount(count) {
-    drawCount.innerHTML = `累計已有 <strong>${Number(count).toLocaleString("zh-TW")}</strong> 人完成抽籤`;
+    drawCount.innerHTML = `累計已完成 <strong>${Number(count).toLocaleString("zh-TW")}</strong> 次抽籤`;
   }
 
   async function loadDrawCount() {
@@ -43,7 +38,7 @@
       const body = await response.json();
       renderDrawCount(body.count);
     } catch {
-      drawCount.textContent = "累計抽籤人數暫時無法取得";
+      drawCount.textContent = "累計抽籤次數暫時無法取得";
     }
   }
 
@@ -52,13 +47,13 @@
       const response = await fetch(`${API_BASE}/api/oracle/draw-count`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ visitorId: getVisitorId() })
+        body: JSON.stringify({ drawId: createDrawId() })
       });
       if (!response.ok) throw new Error("count unavailable");
       const body = await response.json();
       renderDrawCount(body.count);
     } catch {
-      drawCount.textContent = "已完成抽籤・累計人數稍後更新";
+      drawCount.textContent = "已完成抽籤・累計次數稍後更新";
     }
   }
 
