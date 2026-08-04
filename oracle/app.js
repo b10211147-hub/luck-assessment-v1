@@ -1,6 +1,7 @@
 (() => {
   "use strict";
 
+  const API_BASE = "https://fengmugong-registration-api.b10211147.chatgpt.site";
   const oracles = window.FENGMU_ORACLES || [];
   const deities = window.FENGMU_DEITIES || [];
   const drawPanel = document.querySelector("#drawPanel");
@@ -8,6 +9,7 @@
   const drawBtn = document.querySelector("#drawBtn");
   const lotVisual = document.querySelector("#lotVisual");
   const stickNumber = document.querySelector("#stickNumber");
+  const drawCount = document.querySelector("#drawCount");
   const numberForm = document.querySelector("#numberForm");
   const numberInput = document.querySelector("#lotNumber");
   const numberError = document.querySelector("#numberError");
@@ -16,6 +18,49 @@
   const aspectGrid = document.querySelector("#aspectGrid");
   let currentOracle = null;
   let lastNumber = null;
+
+  function getVisitorId() {
+    const storageKey = "fengmuOracleVisitorId";
+    try {
+      const stored = localStorage.getItem(storageKey);
+      if (stored) return stored;
+      const id = crypto.randomUUID?.() ?? `${Date.now().toString(36)}_${crypto.getRandomValues(new Uint32Array(2)).join("")}`;
+      localStorage.setItem(storageKey, id);
+      return id;
+    } catch {
+      return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}_${Math.random().toString(36).slice(2)}`;
+    }
+  }
+
+  function renderDrawCount(count) {
+    drawCount.innerHTML = `累計已有 <strong>${Number(count).toLocaleString("zh-TW")}</strong> 人完成抽籤`;
+  }
+
+  async function loadDrawCount() {
+    try {
+      const response = await fetch(`${API_BASE}/api/oracle/draw-count`, { cache: "no-store" });
+      if (!response.ok) throw new Error("count unavailable");
+      const body = await response.json();
+      renderDrawCount(body.count);
+    } catch {
+      drawCount.textContent = "累計抽籤人數暫時無法取得";
+    }
+  }
+
+  async function recordCompletedDraw() {
+    try {
+      const response = await fetch(`${API_BASE}/api/oracle/draw-count`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ visitorId: getVisitorId() })
+      });
+      if (!response.ok) throw new Error("count unavailable");
+      const body = await response.json();
+      renderDrawCount(body.count);
+    } catch {
+      drawCount.textContent = "已完成抽籤・累計人數稍後更新";
+    }
+  }
 
   const fields = {
     level: document.querySelector("#resultLevel"),
@@ -280,6 +325,7 @@
       stickNumber.textContent = formattedNumber;
       void lotVisual.offsetWidth;
       lotVisual.classList.add("is-drawn");
+      void recordCompletedDraw();
       setTimeout(() => {
         drawBtn.disabled = false;
         showOracle(chosenOracle);
@@ -337,4 +383,5 @@
   if (Number.isInteger(requested) && requested >= 1 && requested <= 108) {
     showOracle(oracles.find(item => item.number === requested), false);
   }
+  void loadDrawCount();
 })();
