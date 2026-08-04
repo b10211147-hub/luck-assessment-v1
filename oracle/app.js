@@ -229,10 +229,13 @@
   }
 
   function renderAspects(oracle) {
+    const relatedAspectIndex = aspectDefinitions.findIndex(aspect => aspect.themes.includes(oracle.theme));
+    const defaultOpenIndex = relatedAspectIndex >= 0 ? relatedAspectIndex : 0;
     aspectGrid.replaceChildren(...aspectDefinitions.map((aspect, aspectIndex) => {
-      const article = document.createElement("article");
+      const article = document.createElement("details");
       article.className = "aspect-item";
-      const heading = document.createElement("div");
+      article.open = aspectIndex === defaultOpenIndex;
+      const heading = document.createElement("summary");
       heading.className = "aspect-label";
       const icon = document.createElement("span");
       icon.className = "aspect-icon";
@@ -240,6 +243,9 @@
       icon.textContent = aspect.icon;
       const title = document.createElement("strong");
       title.textContent = aspect.label;
+      const hint = document.createElement("span");
+      hint.className = "aspect-hint";
+      hint.textContent = article.open ? "收合" : "展開";
       const guidance = getAspectGuidance(oracle, aspect, aspectIndex);
       const flow = document.createElement("div");
       flow.className = "guidance-flow";
@@ -261,8 +267,15 @@
         row.append(badge, body);
         flow.append(row);
       });
-      heading.append(icon, title);
+      heading.append(icon, title, hint);
       article.append(heading, flow);
+      article.addEventListener("toggle", () => {
+        hint.textContent = article.open ? "收合" : "展開";
+        if (!article.open) return;
+        aspectGrid.querySelectorAll("details[open]").forEach(openItem => {
+          if (openItem !== article) openItem.open = false;
+        });
+      });
       return article;
     }));
   }
@@ -276,9 +289,10 @@
     fields.deity.textContent = oracle.deity;
     fields.attitude.textContent = oracle.attitude;
     fields.theme.textContent = oracle.theme;
-    fields.poem.replaceChildren(...oracle.poem.map(line => {
+    fields.poem.replaceChildren(...oracle.poem.map((line, lineIndex) => {
       const p = document.createElement("p");
       p.textContent = line;
+      p.style.setProperty("--line-index", lineIndex);
       return p;
     }));
     fields.title.textContent = oracle.title;
@@ -289,12 +303,15 @@
 
     drawPanel.hidden = true;
     resultPanel.hidden = false;
+    resultPanel.classList.remove("is-visible");
+    requestAnimationFrame(() => resultPanel.classList.add("is-visible"));
     resultPanel.scrollIntoView({ behavior: "smooth", block: "start" });
     if (updateUrl) history.replaceState(null, "", `${location.pathname}?lot=${oracle.number}`);
   }
 
   function resetDraw() {
     resultPanel.hidden = true;
+    resultPanel.classList.remove("is-visible");
     drawPanel.hidden = false;
     currentOracle = null;
     lotVisual.classList.remove("is-shaking", "is-drawn");
@@ -555,12 +572,31 @@
   againBtn.addEventListener("click", resetDraw);
 
   const deityList = document.querySelector("#deityList");
-  deities.forEach(deity => {
-    const item = document.createElement("div");
-    item.className = "deity-item";
-    item.innerHTML = `<strong>${deity.name}</strong><span>${deity.attitude}</span>`;
-    deityList.append(item);
+  const deityDetailName = document.querySelector("#deityDetailName");
+  const deityDetailAttitude = document.querySelector("#deityDetailAttitude");
+  const deityButtons = deities.map((deity, deityIndex) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.id = `deityTab${deityIndex}`;
+    button.className = "deity-tab";
+    button.setAttribute("role", "tab");
+    button.setAttribute("aria-controls", "deityDetail");
+    button.setAttribute("aria-selected", deityIndex === 0 ? "true" : "false");
+    button.textContent = deity.name;
+    button.addEventListener("click", () => {
+      deityButtons.forEach(item => item.setAttribute("aria-selected", item === button ? "true" : "false"));
+      deityDetail.setAttribute("aria-labelledby", button.id);
+      deityDetailName.textContent = deity.name;
+      deityDetailAttitude.textContent = deity.attitude;
+    });
+    return button;
   });
+  deityList.replaceChildren(...deityButtons);
+  if (deities[0]) {
+    deityDetail.setAttribute("aria-labelledby", deityButtons[0].id);
+    deityDetailName.textContent = deities[0].name;
+    deityDetailAttitude.textContent = deities[0].attitude;
+  }
 
   const requested = Number(new URLSearchParams(location.search).get("lot"));
   if (Number.isInteger(requested) && requested >= 1 && requested <= 108) {

@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#7b2432">
   <meta name="description" content="奉母宮一百零八首籤詩，靜心求籤、閱讀神明慈語與行動提醒。">
   <title>奉母宮・一百零八籤</title>
-  <link rel="stylesheet" href="styles.css?v=20260805-1">
+  <link rel="stylesheet" href="styles.css?v=20260805-3">
 </head>
 <body>
   <div class="page-shell">
@@ -20,38 +20,45 @@
     <main>
       <section id="drawPanel" class="draw-panel" aria-labelledby="drawTitle">
         <div class="seal" aria-hidden="true"><span>籤</span></div>
-        <p class="eyebrow">奉母宮籤詩</p>
-        <h2 id="drawTitle">先靜心，再問一件事</h2>
-        <p class="draw-guide">默念自己的姓名與想詢問的事情，心定之後，誠心抽取一支籤。</p>
-
-        <div id="lotVisual" class="lot-stage" aria-hidden="true">
-          <div class="lot-halo"></div>
-          <div class="lot-drawn-stick">
-            <img src="assets/fengmu-lot-vessel-engraved.png" alt="">
-            <span id="stickNumber" class="stick-number"></span>
-          </div>
-          <div class="lot-photo-wrap">
-            <img class="lot-vessel-photo" src="assets/fengmu-lot-vessel-engraved.png" alt="">
-          </div>
+        <div class="draw-heading">
+          <p class="eyebrow">奉母宮籤詩</p>
+          <h2 id="drawTitle">先靜心，再問一件事</h2>
+          <p class="draw-guide">默念姓名與想詢問的事情，心定之後，誠心抽取一支籤。</p>
         </div>
 
-        <button id="drawBtn" class="primary-action" type="button">
-          <span>誠心求籤</span>
-          <small>從 108 首籤詩中抽取</small>
-        </button>
-        <p id="drawCount" class="draw-count" aria-live="polite">累計抽籤次數讀取中…</p>
-
-        <details class="number-entry">
-          <summary>已有籤號，直接解籤</summary>
-          <form id="numberForm">
-            <label for="lotNumber">請輸入 1～108</label>
-            <div class="number-row">
-              <input id="lotNumber" name="lotNumber" type="number" inputmode="numeric" min="1" max="108" required placeholder="例如：36">
-              <button type="submit">查看籤詩</button>
+        <div class="draw-experience">
+          <div id="lotVisual" class="lot-stage" aria-hidden="true">
+            <div class="lot-halo"></div>
+            <div class="lot-drawn-stick">
+              <img src="assets/fengmu-lot-vessel-engraved.png" alt="">
+              <span id="stickNumber" class="stick-number"></span>
             </div>
-            <p id="numberError" class="form-error" role="alert"></p>
-          </form>
-        </details>
+            <div class="lot-photo-wrap">
+              <img class="lot-vessel-photo" src="assets/fengmu-lot-vessel-engraved.png" alt="">
+            </div>
+          </div>
+
+          <div class="draw-controls">
+            <p class="ritual-note">一念專注，一次一問</p>
+            <button id="drawBtn" class="primary-action" type="button">
+              <span>誠心求籤</span>
+              <small>從 108 首籤詩中抽取</small>
+            </button>
+            <p id="drawCount" class="draw-count" aria-live="polite">累計抽籤次數讀取中…</p>
+
+            <details class="number-entry">
+              <summary>已有籤號，直接解籤</summary>
+              <form id="numberForm">
+                <label for="lotNumber">請輸入 1～108</label>
+                <div class="number-row">
+                  <input id="lotNumber" name="lotNumber" type="number" inputmode="numeric" min="1" max="108" required placeholder="例如：36">
+                  <button type="submit">查看籤詩</button>
+                </div>
+                <p id="numberError" class="form-error" role="alert"></p>
+              </form>
+            </details>
+          </div>
+        </div>
       </section>
 
       <section id="resultPanel" class="result-panel" hidden aria-live="polite">
@@ -67,37 +74,57 @@
           <div id="resultPoem" class="poem-lines"></div>
         </article>
 
-        <article class="message-card">
-          <p class="card-kicker">神明慈語</p>
-          <h3 id="resultTitle"></h3>
-          <p id="resultMessage"></p>
+        <div class="interpretation-grid">
+          <article class="message-card">
+            <p class="card-kicker">神明慈語</p>
+            <h3 id="resultTitle"></h3>
+            <p id="resultMessage"></p>
+          </article>
+
+          <article class="reading-card">
+            <p class="card-kicker">整理方向</p>
+            <h3>白話解籤</h3>
+            <p id="resultReading"></p>
+          </article>
+        </div>
+
+        <article class="action-card">
+          <div>
+            <p class="card-kicker">今日行動</p>
+            <h3>現在先做一件事</h3>
+          </div>
+          <p id="resultAdvice" class="primary-guidance"></p>
         </article>
 
-        <article class="reading-card">
-          <h3>白話解籤</h3>
-          <p id="resultReading"></p>
-        </article>
+        <div class="result-actions" aria-label="籤詩操作">
+          <button id="downloadCardBtn" type="button" class="primary-action compact download-action">下載今日籤卡</button>
+          <button id="copyBtn" type="button" class="secondary-action">複製完整籤詩</button>
+          <button id="againBtn" type="button" class="secondary-action quiet-action">重新求籤</button>
+        </div>
 
         <section class="aspect-section" aria-labelledby="aspectTitle">
           <div class="aspect-heading">
-            <p class="card-kicker">七面向指引</p>
-            <h3 id="aspectTitle">現在可以怎麼做</h3>
-            <p id="resultAdvice" class="primary-guidance"></p>
+            <div>
+              <p class="card-kicker">延伸解讀</p>
+              <h3 id="aspectTitle">七面向指引</h3>
+            </div>
+            <p>先看最貼近問題的一項，其餘需要時再展開。</p>
           </div>
           <div id="aspectGrid" class="aspect-grid"></div>
         </section>
-
-        <div class="result-actions">
-          <button id="downloadCardBtn" type="button" class="secondary-action download-action">下載今日籤卡（PNG）</button>
-          <button id="copyBtn" type="button" class="secondary-action">複製籤詩</button>
-          <button id="againBtn" type="button" class="primary-action compact">重新求籤</button>
-        </div>
       </section>
 
       <section class="deity-section" aria-labelledby="deityTitle">
-        <p class="eyebrow">奉母宮主奉九尊神明・各有慈心</p>
-        <h2 id="deityTitle">每一種語氣，都是一種照顧</h2>
-        <div id="deityList" class="deity-list"></div>
+        <div class="section-heading">
+          <h2 id="deityTitle">九種指引，各有慈心</h2>
+          <p>選擇神明名稱，閱讀祂在籤詩中陪伴你的方式。</p>
+        </div>
+        <div id="deityList" class="deity-list" role="tablist" aria-label="九位神明"></div>
+        <article id="deityDetail" class="deity-detail" role="tabpanel" aria-live="polite">
+          <p class="card-kicker">神明語氣</p>
+          <h3 id="deityDetailName"></h3>
+          <p id="deityDetailAttitude"></p>
+        </article>
       </section>
     </main>
 
@@ -108,6 +135,6 @@
   </div>
 
   <script src="poems.js"></script>
-  <script src="app.js?v=20260805-2"></script>
+  <script src="app.js?v=20260805-3"></script>
 </body>
 </html>
