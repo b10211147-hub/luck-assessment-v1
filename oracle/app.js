@@ -385,86 +385,111 @@
     const sansFont = '"Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif';
 
     const background = context.createLinearGradient(0, 0, 0, canvas.height);
-    background.addColorStop(0, "#f8edda");
-    background.addColorStop(.55, "#fffaf0");
-    background.addColorStop(1, "#ead3ae");
+    background.addColorStop(0, "#fffaf0");
+    background.addColorStop(.62, "#fffdf8");
+    background.addColorStop(1, "#f1dfbe");
     context.fillStyle = background;
     context.fillRect(0, 0, canvas.width, canvas.height);
 
-    context.strokeStyle = "#8c2b38";
+    context.fillStyle = "rgba(123, 36, 50, .045)";
+    context.beginPath();
+    context.arc(540, 745, 330, 0, Math.PI * 2);
+    context.fill();
+    context.strokeStyle = "rgba(173, 124, 50, .2)";
+    context.lineWidth = 2;
+    context.beginPath();
+    context.arc(540, 745, 285, 0, Math.PI * 2);
+    context.stroke();
+
+    context.strokeStyle = "#7b2432";
     context.lineWidth = 8;
     roundedRect(context, 42, 42, 996, 1266, 34);
     context.stroke();
-    context.strokeStyle = "rgba(173, 124, 50, .72)";
+    context.strokeStyle = "rgba(173, 124, 50, .62)";
     context.lineWidth = 2;
     roundedRect(context, 62, 62, 956, 1226, 26);
     context.stroke();
 
-    context.fillStyle = "rgba(123, 36, 50, .055)";
-    context.beginPath();
-    context.arc(540, 665, 360, 0, Math.PI * 2);
+    const header = context.createLinearGradient(62, 62, 1018, 255);
+    header.addColorStop(0, "#4f1721");
+    header.addColorStop(1, "#7b2432");
+    context.fillStyle = header;
+    roundedRect(context, 62, 62, 956, 205, 26);
     context.fill();
 
     context.textAlign = "center";
-    context.fillStyle = "#7b2432";
-    context.font = `700 38px ${sansFont}`;
-    context.fillText("神明仲介所｜奉母宮", 540, 128);
-    context.fillStyle = "#9a713c";
-    context.font = `600 27px ${sansFont}`;
-    context.fillText("今日一籤・一念誠心", 540, 176);
+    context.fillStyle = "#dec38f";
+    context.font = `700 27px ${sansFont}`;
+    context.fillText("神明仲介所｜奉母宮", 540, 119);
+    context.fillStyle = "#fffaf0";
+    context.font = `700 52px ${serifFont}`;
+    context.fillText("今日一籤", 540, 194);
 
-    context.fillStyle = "#7b2432";
-    roundedRect(context, 320, 210, 440, 76, 38);
+    context.save();
+    context.shadowColor = "rgba(79, 23, 33, .22)";
+    context.shadowBlur = 18;
+    context.shadowOffsetY = 7;
+    context.fillStyle = "#dec38f";
+    roundedRect(context, 330, 226, 420, 68, 34);
     context.fill();
-    context.fillStyle = "#fff8e9";
-    context.font = `700 34px ${sansFont}`;
-    context.fillText(`第 ${String(oracle.number).padStart(3, "0")} 籤　｜　${oracle.level}`, 540, 260);
+    context.restore();
+    context.fillStyle = "#4f1721";
+    context.font = `800 30px ${sansFont}`;
+    context.fillText(`第 ${String(oracle.number).padStart(3, "0")} 籤　・　${oracle.level}`, 540, 270);
 
-    context.fillStyle = "#4d2e27";
-    context.font = `700 56px ${serifFont}`;
-    context.fillText(oracle.deity, 540, 372);
-    context.fillStyle = "#9a713c";
-    context.font = `700 29px ${sansFont}`;
-    context.fillText(`籤題・${oracle.theme}`, 540, 422);
+    context.fillStyle = "#322823";
+    context.font = `700 48px ${serifFont}`;
+    context.fillText(oracle.deity, 540, 365);
+    context.fillStyle = "#916326";
+    context.font = `800 25px ${sansFont}`;
+    context.fillText(`籤題　${oracle.theme}`, 540, 411);
 
     context.fillStyle = "#6f1f2c";
-    setFittedFont(context, oracle.title, 76, 56, 780, 700, serifFont);
-    context.fillText(oracle.title, 540, 520);
+    setFittedFont(context, oracle.title, 70, 48, 820, 700, serifFont);
+    context.fillText(oracle.title, 540, 505);
 
-    drawGoldDivider(context, 568);
+    drawGoldDivider(context, 558);
 
     const poemStartY = 650;
     context.textAlign = "center";
-    context.fillStyle = "#4d4038";
-    context.font = `600 50px ${serifFont}`;
-    oracle.poem.forEach((line, index) => context.fillText(line, 540, poemStartY + index * 70));
+    context.fillStyle = "#3f342e";
+    context.font = `600 56px ${serifFont}`;
+    oracle.poem.forEach((line, index) => context.fillText(line, 540, poemStartY + index * 74));
 
-    const adviceBoxY = 930;
+    const adviceBoxY = 936;
     context.save();
-    context.shadowColor = "rgba(89, 55, 35, .10)";
-    context.shadowBlur = 22;
-    context.shadowOffsetY = 8;
-    context.fillStyle = "rgba(255, 255, 255, .82)";
-    roundedRect(context, 105, adviceBoxY, 870, 224, 28);
+    context.shadowColor = "rgba(79, 23, 33, .13)";
+    context.shadowBlur = 24;
+    context.shadowOffsetY = 10;
+    context.fillStyle = "rgba(255, 253, 248, .94)";
+    roundedRect(context, 96, adviceBoxY, 888, 230, 22);
     context.fill();
     context.restore();
-    context.strokeStyle = "rgba(173, 124, 50, .48)";
+    context.strokeStyle = "rgba(173, 124, 50, .42)";
     context.lineWidth = 2;
-    roundedRect(context, 105, adviceBoxY, 870, 224, 28);
+    roundedRect(context, 96, adviceBoxY, 888, 230, 22);
     context.stroke();
-    context.fillStyle = "#9a713c";
-    context.font = `700 30px ${sansFont}`;
-    context.fillText("今天可以怎麼做", 540, adviceBoxY + 51);
-    context.fillStyle = "#4d4038";
-    context.font = `600 37px ${sansFont}`;
-    drawWrappedText(context, oracle.advice, 540, adviceBoxY + 108, 760, 52, 2);
 
+    context.textAlign = "left";
     context.fillStyle = "#7b2432";
-    context.font = `700 25px ${sansFont}`;
-    context.fillText("把它當作整理方向的提醒，結果仍由你的選擇與行動完成", 540, 1228);
-    context.fillStyle = "#8a7564";
-    context.font = `500 21px ${sansFont}`;
-    context.fillText("重大醫療、法律與財務決定，請尋求合格專業協助", 540, 1270);
+    roundedRect(context, 132, adviceBoxY + 28, 150, 43, 21);
+    context.fill();
+    context.fillStyle = "#fffaf0";
+    context.font = `800 23px ${sansFont}`;
+    context.fillText("今日行動", 155, adviceBoxY + 58);
+    context.fillStyle = "#3f342e";
+    context.font = `700 36px ${sansFont}`;
+    drawWrappedText(context, oracle.advice, 132, adviceBoxY + 122, 816, 48, 3);
+
+    context.textAlign = "center";
+    context.fillStyle = "#7b2432";
+    context.font = `800 23px ${sansFont}`;
+    context.fillText("一念誠心・一項行動・一步一步完成", 540, 1218);
+    context.fillStyle = "#7a6a5f";
+    context.font = `500 20px ${sansFont}`;
+    context.fillText("籤詩是整理方向的提醒，結果仍由你的選擇與行動完成", 540, 1253);
+    context.font = `500 18px ${sansFont}`;
+    context.fillText("重大醫療、法律與財務決定，請尋求合格專業協助", 540, 1278);
 
     return canvas;
   }
