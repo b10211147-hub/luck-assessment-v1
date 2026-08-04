@@ -13,6 +13,7 @@
   const numberForm = document.querySelector("#numberForm");
   const numberInput = document.querySelector("#lotNumber");
   const numberError = document.querySelector("#numberError");
+  const downloadCardBtn = document.querySelector("#downloadCardBtn");
   const copyBtn = document.querySelector("#copyBtn");
   const againBtn = document.querySelector("#againBtn");
   const aspectGrid = document.querySelector("#aspectGrid");
@@ -303,6 +304,139 @@
     drawPanel.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  function roundedRect(context, x, y, width, height, radius) {
+    context.beginPath();
+    context.roundRect(x, y, width, height, radius);
+    context.closePath();
+  }
+
+  function splitTextIntoLines(context, text, maxWidth) {
+    const lines = [];
+    let currentLine = "";
+    for (const character of text) {
+      const candidate = currentLine + character;
+      if (currentLine && context.measureText(candidate).width > maxWidth) {
+        lines.push(currentLine);
+        currentLine = character;
+      } else {
+        currentLine = candidate;
+      }
+    }
+    if (currentLine) lines.push(currentLine);
+    return lines;
+  }
+
+  function drawWrappedText(context, text, x, y, maxWidth, lineHeight, maxLines = Infinity) {
+    const lines = splitTextIntoLines(context, text, maxWidth).slice(0, maxLines);
+    lines.forEach((line, index) => context.fillText(line, x, y + index * lineHeight));
+    return y + lines.length * lineHeight;
+  }
+
+  function drawLotCard(oracle) {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1080;
+    canvas.height = 1350;
+    const context = canvas.getContext("2d");
+    const serifFont = '"Noto Serif TC", "Songti TC", "PMingLiU", serif';
+    const sansFont = '"Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif';
+
+    const background = context.createLinearGradient(0, 0, 0, canvas.height);
+    background.addColorStop(0, "#f8edda");
+    background.addColorStop(.55, "#fffaf0");
+    background.addColorStop(1, "#ead3ae");
+    context.fillStyle = background;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    context.strokeStyle = "#8c2b38";
+    context.lineWidth = 8;
+    roundedRect(context, 42, 42, 996, 1266, 34);
+    context.stroke();
+    context.strokeStyle = "rgba(173, 124, 50, .72)";
+    context.lineWidth = 2;
+    roundedRect(context, 62, 62, 956, 1226, 26);
+    context.stroke();
+
+    context.fillStyle = "rgba(123, 36, 50, .055)";
+    context.beginPath();
+    context.arc(540, 640, 360, 0, Math.PI * 2);
+    context.fill();
+
+    context.textAlign = "center";
+    context.fillStyle = "#7b2432";
+    context.font = `700 32px ${sansFont}`;
+    context.fillText("神明仲介所｜奉母宮", 540, 122);
+    context.fillStyle = "#9a713c";
+    context.font = `500 22px ${sansFont}`;
+    context.fillText("今日一籤・一念誠心", 540, 164);
+
+    context.fillStyle = "#7b2432";
+    roundedRect(context, 355, 202, 370, 66, 33);
+    context.fill();
+    context.fillStyle = "#fff8e9";
+    context.font = `700 28px ${sansFont}`;
+    context.fillText(`第 ${String(oracle.number).padStart(3, "0")} 籤　｜　${oracle.level}`, 540, 245);
+
+    context.fillStyle = "#4d2e27";
+    context.font = `700 48px ${serifFont}`;
+    context.fillText(oracle.deity, 540, 340);
+    context.fillStyle = "#9a713c";
+    context.font = `600 25px ${sansFont}`;
+    context.fillText(`籤題・${oracle.theme}`, 540, 388);
+
+    context.fillStyle = "#6f1f2c";
+    context.font = `700 62px ${serifFont}`;
+    const titleLines = splitTextIntoLines(context, oracle.title, 800).slice(0, 2);
+    titleLines.forEach((line, index) => context.fillText(line, 540, 480 + index * 78));
+
+    const poemStartY = titleLines.length > 1 ? 665 : 600;
+    context.fillStyle = "#4d4038";
+    context.font = `500 38px ${serifFont}`;
+    oracle.poem.forEach((line, index) => context.fillText(line, 540, poemStartY + index * 58));
+
+    const adviceBoxY = poemStartY + 4 * 58 + 52;
+    context.fillStyle = "rgba(255, 255, 255, .72)";
+    roundedRect(context, 120, adviceBoxY, 840, 224, 26);
+    context.fill();
+    context.strokeStyle = "rgba(173, 124, 50, .48)";
+    context.lineWidth = 2;
+    context.stroke();
+    context.fillStyle = "#9a713c";
+    context.font = `700 25px ${sansFont}`;
+    context.fillText("今天可以怎麼做", 540, adviceBoxY + 48);
+    context.fillStyle = "#4d4038";
+    context.font = `500 31px ${sansFont}`;
+    drawWrappedText(context, oracle.advice, 540, adviceBoxY + 98, 720, 48, 3);
+
+    context.fillStyle = "#7b2432";
+    context.font = `600 23px ${sansFont}`;
+    context.fillText("把它當作整理方向的提醒，結果仍由你的選擇與行動完成", 540, 1232);
+    context.fillStyle = "#8a7564";
+    context.font = `500 19px ${sansFont}`;
+    context.fillText("重大醫療、法律與財務決定，請尋求合格專業協助", 540, 1268);
+
+    return canvas;
+  }
+
+  function saveCanvasAsPng(canvas, filename) {
+    return new Promise((resolve, reject) => {
+      canvas.toBlob(blob => {
+        if (!blob) {
+          reject(new Error("PNG unavailable"));
+          return;
+        }
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = filename;
+        document.body.append(anchor);
+        anchor.click();
+        anchor.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        resolve();
+      }, "image/png");
+    });
+  }
+
   drawBtn.addEventListener("click", () => {
     if (oracles.length !== 108) {
       numberError.textContent = "籤詩資料尚未完整，請通知管理者。";
@@ -338,6 +472,25 @@
     }
     numberError.textContent = "";
     showOracle(oracles.find(item => item.number === number));
+  });
+
+  downloadCardBtn.addEventListener("click", async () => {
+    if (!currentOracle) return;
+    const originalLabel = downloadCardBtn.textContent;
+    downloadCardBtn.disabled = true;
+    downloadCardBtn.textContent = "正在製作籤卡…";
+    try {
+      const canvas = drawLotCard(currentOracle);
+      await saveCanvasAsPng(canvas, `奉母宮-第${String(currentOracle.number).padStart(3, "0")}籤.png`);
+      downloadCardBtn.textContent = "已下載 PNG";
+    } catch {
+      downloadCardBtn.textContent = "下載失敗，請再試一次";
+    } finally {
+      setTimeout(() => {
+        downloadCardBtn.disabled = false;
+        downloadCardBtn.textContent = originalLabel;
+      }, 1800);
+    }
   });
 
   copyBtn.addEventListener("click", async () => {
