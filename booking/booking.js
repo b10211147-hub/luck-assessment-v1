@@ -70,8 +70,19 @@ async function initLine() {
     const accessToken = liff.getAccessToken() || "";
     if (!token && !accessToken) throw new Error("無法取得 LINE 登入資料");
     const response = await fetch(`${API_BASE}/api/identity`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lineIdToken: token, lineAccessToken: accessToken }) });
-    const identity = await response.json();
-    if (!response.ok) throw new Error(identity.error || "LINE 身分驗證失敗");
+    const identity = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const currentUrl = new URL(window.location.href);
+      if (response.status === 401 && !currentUrl.searchParams.has("_line_refresh")) {
+        currentUrl.searchParams.set("_line_refresh", "1");
+        liff.logout();
+        liff.login({ redirectUri: currentUrl.toString() });
+        return;
+      }
+      throw new Error(identity.error || "LINE 身分驗證失敗，請重新開啟預約頁。");
+    }
+    const cleanUrl = new URL(window.location.href);
+    if (cleanUrl.searchParams.delete("_line_refresh")) window.history.replaceState({}, "", cleanUrl);
     state.lineIdToken = token;
     state.lineAccessToken = accessToken;
     state.lineDisplayName = identity.displayName || "LINE 使用者";
@@ -210,7 +221,17 @@ $("bookingForm").addEventListener("submit", async (event) => {
   }
 });
 
-$("retryLine").addEventListener("click", initLine);
+$("retryLine").addEventListener("click", async () => {
+  const currentUrl = new URL(window.location.href);
+  currentUrl.searchParams.set("_line_refresh", Date.now().toString());
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    if (liff.isLoggedIn()) liff.logout();
+    liff.login({ redirectUri: currentUrl.toString() });
+  } catch {
+    window.location.replace(currentUrl);
+  }
+});
 $("newBooking").addEventListener("click", () => location.reload());
 if (SOURCE_CODE === "764catfn") $("adminLink").href = `${API_BASE}/booking-admin-764catfn`;
 applySourceBranding();
