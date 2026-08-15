@@ -53,6 +53,63 @@ const positionMeanings = [
   "居於核心位置，影響力較強，宜看能否得時得位。",
   "事情發展至末段，重點在收尾、轉向或避免過度。"
 ];
+const yaoPlainRules = [
+  {match:/勿逐|不逐/,meaning:"眼前即使有所失，也不要急著追回或強求；先穩住局面，事情反而較可能自然回復。"},
+  {match:/征凶|往凶/,meaning:"現在不適合硬闖、催促或擴大行動，越急著推進，越容易把問題放大。"},
+  {match:/利有攸往|往有尚|征吉/,meaning:"方向大致可行，準備清楚後可以主動推進，行動比原地等待更有利。"},
+  {match:/利涉大川/,meaning:"可以處理較大的事情或跨過目前障礙，但前提是準備充分，不能只靠一時衝動。"},
+  {match:/有孚|孚乃|誠信/,meaning:"成敗關鍵在真誠與信任；把話說清楚、承諾做到，比技巧或強勢更有效。"},
+  {match:/遲|徐徐|七日|三年|待|終/,meaning:"這件事需要時間醞釀，短期看不出結果不代表沒有進展，不宜因焦急而亂改方向。"},
+  {match:/喪|失|亡|不見/,meaning:"目前可能出現失去、落空或聯繫中斷；先接受暫時缺口，再判斷是否值得挽回。"},
+  {match:/得|獲|有慶|有譽|受福/,meaning:"有取得資源、成果或他人認可的機會；重點是接得住，也要避免得意後鬆懈。"},
+  {match:/困|蹇|險|厲|危/,meaning:"當下確有阻力或風險，先處理限制條件與安全問題，比勉強求快更重要。"},
+  {match:/婚|歸妹|妻|夫|娣|媾/,meaning:"此爻也涉及關係中的位置、承諾與配合；要先確認彼此角色是否對等、心意是否一致。"},
+  {match:/言|鳴|號|告|疑/,meaning:"溝通與消息是關鍵，容易因猜測或表達不清產生誤會，宜直接確認而非自行推論。"},
+  {match:/酒|食|宴|樂|兌/,meaning:"眼前的舒適或喜悅未必是壞事，但不可只顧享受而忽略真正要處理的問題。"},
+  {match:/升|進|登|躋|上/,meaning:"事情有往上發展的趨勢，但每一步都要站穩；位置提升後，責任與風險也會增加。"},
+  {match:/止|艮|不出|居貞/,meaning:"此時更適合停一下、守住界線或維持現況；不動不是退縮，而是避免在錯誤時機出手。"},
+  {match:/雲|雨/,meaning:"條件正在累積，但尚未完全成熟；先補足欠缺的條件，等待真正能落實的時點。"},
+  {match:/井|泉|汲/,meaning:"現成資源其實存在，問題在於是否整理好、能否被正確使用，以及有沒有讓需要的人取得。"},
+  {match:/鼎|甕|瓶/,meaning:"要先檢查承載事情的基礎是否穩固；能力、制度或工具若有缺口，再好的資源也可能流失。"},
+  {match:/車|輪|足|趾|腓|行/,meaning:"這是在提醒行動方式與基礎：先確認腳步、工具和方向，再決定是否繼續前進。"},
+  {match:/門|戶|庭|宮|家/,meaning:"事情與界線、內外關係或家庭環境有關；哪些事該進、哪些人該隔開，需要分清楚。"}
+];
+
+function plainYaoAnalysis(record,yao,row) {
+  const source=`${yao.text} ${yao.translation}`;
+  const matched=yaoPlainRules.filter(rule=>rule.match.test(source)).slice(0,2).map(rule=>rule.meaning);
+  const outcome=/無攸利/.test(source)
+    ? "整體不利，暫時沒有適合強求的方向。"
+    : /無不利/.test(source)
+      ? "整體條件相當順，依正道處理多半能有所進展。"
+      : /大吉|元吉/.test(source)
+        ? "這是明顯偏吉的訊號，表示條件與方向較能互相配合。"
+        : /凶/.test(source)
+          ? "這是偏凶的警示，表示照目前方式繼續，很可能出現損失或反效果。"
+          : /吉/.test(source)
+            ? "結果偏吉，只要做法不偏離原則，事情有機會往好的方向發展。"
+            : /無咎/.test(source)
+              ? "重點不是保證順利，而是照此提醒調整後，可以避免把責任或問題擴大。"
+              : /悔亡/.test(source)
+                ? "原有的困擾仍有改善空間，及時修正做法，就能逐漸減少後悔。"
+                : /吝/.test(source)
+                  ? "進展會有卡頓或不舒服之處，需要收斂並修正，不能當作完全順利。"
+                  : /厲/.test(source)
+                    ? "局面帶有風險，可以處理，但必須提高警覺並預留退路。"
+                    : "此爻沒有單純判成吉或凶，需配合用神、旺衰、世應與動變決定實際結果。";
+  const guaContext=(record?.vernacularExplanation||"").split(/[。！？]/).filter(Boolean).slice(0,1).join("");
+  const core=matched.length?matched.join(""):positionMeanings[row.position-1];
+  const advice=/凶|厲|吝|無攸利/.test(source)
+    ? `${positionMeanings[row.position-1]}先降低風險、釐清問題，再決定是否繼續。`
+    : /吉|無咎|悔亡|無不利/.test(source)
+      ? `${positionMeanings[row.position-1]}可依正確方法推進，但仍要留意過度與鬆懈。`
+      : positionMeanings[row.position-1];
+  return {
+    literal:yao.translation,
+    summary:`${guaContext?`放在「${guaContext}」的卦意下，` : ""}${core}${outcome}`,
+    advice
+  };
+}
 let password = sessionStorage.getItem("teacherPassword") || "";
 let currentResult = null;
 
@@ -127,8 +184,9 @@ async function renderMovingLines(result) {
   const record=hexagramTextRecord(data,result.hex.name);
   $("#movingAnalysis").innerHTML=`<ul>${moving.map(row=>{
     const yao=record?.yaoTexts?.[row.position-1];
-    if(yao){row.yaoText=yao.text;row.yaoTranslation=yao.translation;}
-    return `<li><strong>${row.position}爻・${row.lineTitle}</strong>：${row.relative}${row.stem}${row.branch}${row.element}，變 ${row.changedNaJia.stem}${row.changedNaJia.branch}${row.changedNaJia.element}${row.changeTags.length?`，判為<strong>${row.changeTags.join("、")}</strong>`:""}。<div class="line-reading">${yao?`<b>爻辭：</b>${yao.text}<br><b>白話：</b>${yao.translation}`:`<b>白話提示：</b>${positionMeanings[row.position-1]} 此爻由${row.yang?"陽":"陰"}轉${row.changedYang?"陽":"陰"}。`}</div></li>`;
+    const plain=yao?plainYaoAnalysis(record,yao,row):null;
+    if(yao){row.yaoText=yao.text;row.yaoTranslation=`${plain.summary} 行動建議：${plain.advice}`;}
+    return `<li><strong>${row.position}爻・${row.lineTitle}</strong>：${row.relative}${row.stem}${row.branch}${row.element}，變 ${row.changedNaJia.stem}${row.changedNaJia.branch}${row.changedNaJia.element}${row.changeTags.length?`，判為<strong>${row.changeTags.join("、")}</strong>`:""}。<div class="line-reading">${yao?`<p><b>原爻辭：</b>${yao.text}</p><p><b>字面翻譯：</b>${plain.literal}</p><p><b>白話解析：</b>${plain.summary}</p><p><b>行動建議：</b>${plain.advice}</p>`:`<p><b>白話解析：</b>${positionMeanings[row.position-1]} 此爻由${row.yang?"陽":"陰"}轉${row.changedYang?"陽":"陰"}。</p>`}</div></li>`;
   }).join("")}</ul>`;
 }
 
@@ -553,7 +611,7 @@ function resultText(result) {
   [...result.rows].reverse().forEach(r=>lines.push(`${r.god}　${r.relative}　${r.stem}${r.branch}${r.element}　${r.strength}　${r.shiYing||"　"}　${r.yang?"━━━":"━ ━"}${r.moving?` ${r.value===9?"○":"×"} → ${r.changedNaJia.stem}${r.changedNaJia.branch}${r.changedNaJia.element}${r.changeTags.length?`（${r.changeTags.join("、")}）`:""}`:""}${r.fushen.length?`　伏神：${r.fushen.map(f=>`${f.relative}${f.stem}${f.branch}${f.element}`).join("、")}／飛神：${r.relative}${r.stem}${r.branch}${r.element}`:""}　判別：${allJudgments(result,r).map(item=>item.label).join("、")||"無"}`));
   lines.push("",`用神順序：${getUseGods(result.input).map((god,index)=>`${index+1}.${god}`).join(" → ")||"未指定"}`,"【五步分析流程】",...analysisFlowSteps(result).flatMap((step,index)=>[`${index+1}. ${step.title}：${step.body}`,`   ${step.extra}`]));
   const moving=result.rows.filter(row=>row.moving);
-  if(moving.length) lines.push("","【動爻爻辭白話】",...moving.map(row=>`${row.position}爻・${row.lineTitle}：${row.yaoText?`${row.yaoText}｜${row.yaoTranslation}`:positionMeanings[row.position-1]}`));
+  if(moving.length) lines.push("","【動爻白話解析】",...moving.map(row=>`${row.position}爻・${row.lineTitle}：${row.yaoText?`${row.yaoText}｜${row.yaoTranslation}`:positionMeanings[row.position-1]}`));
   lines.push("","【逐爻判別白話】",...[...result.rows].reverse().flatMap(row=>allJudgments(result,row).map(item=>`${row.position}爻 ${item.label}：${item.text}`)),...harmonyFindings(result).map(item=>`${item.label}：${item.text}`));
   const primaryTarget=mainTimingTarget(result);
   if(primaryTarget){const primary=primaryTimingForTarget(result,primaryTarget);lines.push("","【第一優先應期】",`${primary.title}：${primary.html.replace(/<[^>]+>/g,"")}`);}
