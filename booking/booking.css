@@ -9,3 +9,5 @@
 @media(max-width:520px){.calendar-weekdays,.calendar-grid{gap:3px}.calendar-grid button,.calendar-blank{min-height:58px;border-radius:8px}.calendar-grid button{padding:5px 2px}.calendar-grid button strong{font-size:14px}.calendar-grid button small{font-size:8px}.event-dot{top:4px;right:4px}.public-event-list>div{align-items:flex-start;flex-direction:column;gap:3px}}
 
 .calendar-hint .available-dot{background:#8f1d2c}.calendar-hint .full-dot{margin-left:7px;background:#9a8f88}.calendar-grid .full:not(.active){border-color:#e1d8d2;background:#f3efec;color:#7e746e}.calendar-grid .full small{color:#a14350;font-weight:900}.calendar-grid .active.full small{color:#ffe5e8}.source-764catfn .calendar-hint .available-dot{background:#9b5792}.source-764catfn .calendar-hint .full-dot{background:#9a8f88}
+
+.time-grid .booked-time,.time-grid .booked-time:disabled{cursor:not-allowed;border-color:#e2d9d3;background:#f2efed;box-shadow:none;opacity:1}.time-grid .booked-time span{color:#8e847e}.time-grid .booked-time small{color:#a14350;font-weight:900}.source-764catfn .time-grid .booked-time span{color:#8e847e}.source-764catfn .time-grid .booked-time small{color:#925087}

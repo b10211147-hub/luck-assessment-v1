@@ -109,7 +109,8 @@ async function loadSlots() {
     state.slots = slotData;
     state.availability = availabilityData;
     state.publicEvents = eventData;
-    const firstDate = slotData.length ? dateKey(slotData[0].startAt) : availabilityData.length ? availabilityData[0].date : eventData.length ? dateKey(eventData[0].startAt) : dateKey(new Date());
+    const firstAvailableSlot = slotData.find((slot) => slot.displayStatus === "available");
+    const firstDate = firstAvailableSlot ? dateKey(firstAvailableSlot.startAt) : availabilityData.length ? availabilityData[0].date : eventData.length ? dateKey(eventData[0].startAt) : dateKey(new Date());
     state.selectedDate = firstDate;
     state.calendarMonth = firstDate.slice(0, 7);
     renderCalendar();
@@ -140,7 +141,7 @@ function renderCalendar() {
   for (let index = 0; index < firstWeekday; index += 1) area.append(Object.assign(document.createElement("span"), { className: "calendar-blank" }));
   for (let day = 1; day <= days; day += 1) {
     const key = `${state.calendarMonth}-${String(day).padStart(2, "0")}`;
-    const count = state.slots.filter((slot) => dateKey(slot.startAt) === key).length;
+    const count = state.slots.filter((slot) => dateKey(slot.startAt) === key && slot.displayStatus === "available").length;
     const availability = availabilityOnDate(key);
     const isFull = Boolean(availability?.isFull);
     const publicEvents = eventsOnDate(key);
@@ -177,13 +178,16 @@ function renderTimes() {
   visible.forEach((slot) => {
     const button = document.createElement("button");
     button.type = "button";
+    const booked = slot.displayStatus === "booked";
+    button.disabled = booked;
+    if (booked) button.className = "booked-time";
     if (state.selectedSlot?.id === slot.id) button.className = "active";
     const time = document.createElement("span");
     const description = document.createElement("small");
     time.textContent = timeLabel(slot.startAt);
-    description.textContent = `${slot.service}・${slot.durationMinutes} 分鐘`;
+    description.textContent = booked ? "已被預約" : `${slot.service}・${slot.durationMinutes} 分鐘`;
     button.append(time, description);
-    button.addEventListener("click", () => selectSlot(slot));
+    if (!booked) button.addEventListener("click", () => selectSlot(slot));
     grid.append(button);
   });
 }
