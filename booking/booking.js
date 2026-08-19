@@ -5,7 +5,7 @@ const LIFF_FLOW_VERSION = "20260803b";
 const ENTRY_PARAMS = new URLSearchParams(location.search);
 const SOURCE_CODE = ENTRY_PARAMS.get("src")?.trim().toLowerCase() === "764catfn" ? "764catfn" : "main";
 const ENTERED_VIA_LIFF = ENTRY_PARAMS.get("via") === "liff";
-const state = { slots: [], publicEvents: [], selectedDate: "", selectedSlot: null, calendarMonth: "", lineIdToken: "", lineAccessToken: "", lineDisplayName: "" };
+const state = { slots: [], availability: [], publicEvents: [], selectedDate: "", selectedSlot: null, calendarMonth: "", lineIdToken: "", lineAccessToken: "", lineDisplayName: "" };
 const $ = (id) => document.getElementById(id);
 const format = (value, options) => new Intl.DateTimeFormat("zh-TW", { timeZone: "Asia/Taipei", ...options }).format(new Date(value));
 const dateKey = (value) => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Taipei", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(value));
@@ -97,16 +97,19 @@ async function initLine() {
 
 async function loadSlots() {
   try {
-    const [slotResponse, eventResponse] = await Promise.all([
+    const [slotResponse, availabilityResponse, eventResponse] = await Promise.all([
       fetch(`${API_BASE}/api/booking/slots?source=${encodeURIComponent(SOURCE_CODE)}`, { cache: "no-store" }),
+      fetch(`${API_BASE}/api/booking/availability?source=${encodeURIComponent(SOURCE_CODE)}`, { cache: "no-store" }),
       fetch(`${API_BASE}/api/booking/events?public=1&source=${encodeURIComponent(SOURCE_CODE)}`, { cache: "no-store" }),
     ]);
-    const [slotData, eventData] = await Promise.all([slotResponse.json(), eventResponse.json()]);
+    const [slotData, availabilityData, eventData] = await Promise.all([slotResponse.json(), availabilityResponse.json(), eventResponse.json()]);
     if (!slotResponse.ok || !Array.isArray(slotData)) throw new Error("可預約時段載入失敗");
+    if (!availabilityResponse.ok || !Array.isArray(availabilityData)) throw new Error("預約狀態載入失敗");
     if (!eventResponse.ok || !Array.isArray(eventData)) throw new Error("公開行程載入失敗");
     state.slots = slotData;
+    state.availability = availabilityData;
     state.publicEvents = eventData;
-    const firstDate = slotData.length ? dateKey(slotData[0].startAt) : eventData.length ? dateKey(eventData[0].startAt) : dateKey(new Date());
+    const firstDate = slotData.length ? dateKey(slotData[0].startAt) : availabilityData.length ? availabilityData[0].date : eventData.length ? dateKey(eventData[0].startAt) : dateKey(new Date());
     state.selectedDate = firstDate;
     state.calendarMonth = firstDate.slice(0, 7);
     renderCalendar();
@@ -122,6 +125,10 @@ function eventsOnDate(date) {
   return state.publicEvents.filter((item) => Date.parse(item.startAt) < dayEnd && Date.parse(item.endAt) > dayStart);
 }
 
+function availabilityOnDate(date) {
+  return state.availability.find((item) => item.date === date);
+}
+
 function renderCalendar() {
   const area = $("dateArea");
   area.replaceChildren();
@@ -134,15 +141,17 @@ function renderCalendar() {
   for (let day = 1; day <= days; day += 1) {
     const key = `${state.calendarMonth}-${String(day).padStart(2, "0")}`;
     const count = state.slots.filter((slot) => dateKey(slot.startAt) === key).length;
+    const availability = availabilityOnDate(key);
+    const isFull = Boolean(availability?.isFull);
     const publicEvents = eventsOnDate(key);
     const button = document.createElement("button");
     button.type = "button";
-    button.disabled = count === 0 && publicEvents.length === 0;
-    if (key === state.selectedDate) button.className = "active";
+    button.disabled = !availability && publicEvents.length === 0;
+    button.className = `${key === state.selectedDate ? "active" : ""} ${isFull ? "full" : ""}`.trim();
     const strong = document.createElement("strong");
     const small = document.createElement("small");
     strong.textContent = String(day);
-    small.textContent = count ? `${count} 個時段` : publicEvents.length ? "有公告" : "";
+    small.textContent = isFull ? "預約已滿" : count ? `${count} 個時段` : publicEvents.length ? "有公告" : "";
     button.append(strong, small);
     if (publicEvents.length) button.append(Object.assign(document.createElement("i"), { className: "event-dot", title: "公開行程" }));
     button.addEventListener("click", () => { state.selectedDate = key; state.selectedSlot = null; $("detailsCard").hidden = true; renderCalendar(); });
@@ -155,8 +164,10 @@ function renderTimes() {
   const grid = $("timeGrid");
   grid.replaceChildren();
   const visible = state.slots.filter((slot) => dateKey(slot.startAt) === state.selectedDate);
+  const isFull = Boolean(availabilityOnDate(state.selectedDate)?.isFull);
   grid.hidden = !visible.length;
   $("timeEmpty").hidden = Boolean(visible.length);
+  $("timeEmpty").textContent = isFull ? "本日預約已滿，請選擇其他日期。" : "這一天目前沒有可預約時間。";
   $("selectedDateLabel").hidden = !state.selectedDate;
   $("selectedDateLabel").textContent = state.selectedDate ? `${state.selectedDate.replaceAll("-", "/")} 可預約時間` : "";
   const publicEvents = eventsOnDate(state.selectedDate);
