@@ -17,6 +17,7 @@
     .reading-list{margin:0;padding-left:20px}.reading-list li+li{margin-top:7px}.reading-note{padding:9px 11px;border-left:3px solid var(--gold);background:#fffaf0}
     .line-reading{margin-top:8px;padding:12px 14px;border-radius:10px;background:#fff;color:#534a3d;font-weight:400;line-height:1.75}
     .line-reading p{margin:0}.line-reading p+p{margin-top:7px;padding-top:7px;border-top:1px solid #eee5d6}.line-reading b{color:#153f34}
+    .holding-summary{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}.holding-summary span{padding:6px 10px;border-radius:999px;background:#efe2bd;color:#6b4b18;font-size:13px;font-weight:800}.holding-reading{padding:14px;border-radius:12px;background:#fff}.holding-reading h4{margin:12px 0 4px;color:var(--green)}.holding-reading h4:first-child{margin-top:0}.holding-reading p,.holding-reading ul{margin:0}.holding-reading ul{padding-left:20px}.holding-reading li+li{margin-top:6px}.holding-reference{margin-top:12px;border:1px solid var(--line);border-radius:10px;background:#fff}.holding-reference summary{padding:12px 14px;color:var(--green);font-weight:800;cursor:pointer}.holding-reference section{padding:0 14px 12px}.holding-reference section+section{padding-top:12px;border-top:1px solid #eee5d6}.holding-reference h4,.holding-reference p{margin:0}.holding-reference h4{margin-bottom:4px;color:#7b252e}
     td small{display:block;margin-top:4px;color:#746d63;font-size:11px;font-weight:400;white-space:nowrap}
     tr.moving td small{color:#8b5b60}
     .judgment-tags{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;min-width:125px}
@@ -121,6 +122,7 @@
           </div>
           <div class="analysis-grid">
             <article><h3>用神提示</h3><div id="useGodAnalysis"></div></article>
+            <article class="wide"><h3>六親持世・分類判讀</h3><div id="holdingShiAnalysis"></div></article>
             <article class="wide"><h3>主用神 → 世爻 → 動爻 → 應爻 → 應期</h3><div id="simpleReading"></div></article>
             <article class="wide"><h3>應期候選（依優先順序）</h3><div id="timingAnalysis"></div></article>
             <article id="yearlyTimelineCard" class="wide" hidden><h3>流年流月時間軸</h3><div id="yearlyTimeline"></div></article>
@@ -143,6 +145,6 @@
   <script src="assets/lunar.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="teacher.js?v=20260816-1"></script>
+  <script src="teacher.js?v=20260821-1"></script>
 </body>
 </html>

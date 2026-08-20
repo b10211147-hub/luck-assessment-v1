@@ -53,6 +53,107 @@ const positionMeanings = [
   "居於核心位置，影響力較強，宜看能否得時得位。",
   "事情發展至末段，重點在收尾、轉向或避免過度。"
 ];
+const holdingTopicOrder=["一般／其他","財運","工作事業","感情婚姻","健康疾病","考試學業","官司訴訟","出行","失物","家宅"];
+const holdingBaseMeanings={
+  妻財:"妻財持世，表示求占者把重心放在金錢、資源、成果、交易或實際關係上。它不一定直接等於有財或有伴侶，仍要看旺衰與生剋。",
+  官鬼:"官鬼持世，表示責任、職位、壓力、規範、疾病或憂患落在自己身上。問事業可成為權責，問健康與官非則要提高警覺。",
+  父母:"父母持世，表示文書、契約、知識、制度、長輩、房屋或照顧責任成為主軸，也常代表操心、辛勞與保守。",
+  兄弟:"兄弟持世，表示同輩、競爭、合作、分配或自我立場突出。它能代表助力與團隊，也可能分財、爭利或增加消耗。",
+  子孫:"子孫持世，表示放鬆、福氣、才華、表達、享受、晚輩或解憂之力在自己身上。它能制官鬼，但過旺也可能不願受約束。"
+};
+const holdingStrengthMeanings={
+  旺:"持世之六親當令而旺，這個主題最明顯、推動力也強；若所代表的是壓力或病憂，負面感受也會同步放大。",
+  相:"持世之六親得到月令生扶，力量穩定且有後援，事情較有條件運作，但仍須看日辰與動變是否破壞。",
+  休:"持世之六親目前退氣休息，主題雖存在，實際推動力不足。宜先整理、等待助力，不宜只憑表面現象判吉。",
+  囚:"持世之六親受月令牽制，容易有想法卻受環境、條件或他人限制，需先找出被卡住的環節。",
+  死:"持世之六親在當月力量最低，短期難主動成事，宜保守、補條件或另候時機；若代表病憂，弱也可能表示威脅有限。"
+};
+const holdingTopicMeanings={
+  妻財:{
+    "一般／其他":"事情重點偏向實際利益、資源交換與能否落袋。旺相較能掌握成果；休囚死則常見有目標但資源不足。",
+    財運:"財爻持世與求財主題相符，表示本人積極求財、在意收入與成果。旺相且受生扶較利進財；休囚空破則可能財源弱、到手慢或守不住。",
+    工作事業:"重視薪資、業績、客戶與可見成果，適合業務或經營取向；但妻財剋父母，仍要留意合約、流程、證照與長期規劃。",
+    感情婚姻:"感情重點落在伴侶、現實條件與付出回報。男性問伴侶時妻財常可取為對方；其他情況不能直接把持世妻財等同對方，仍須另取用神。",
+    健康疾病:"需留意飲食、體力消耗、血氣及因金錢或照顧責任造成的壓力；妻財持世本身不直接定病，要再看官鬼與子孫。",
+    考試學業:"容易把心力放在結果、工作或現實收益；妻財剋父母，可能分散讀書與文書準備，需建立明確進度避免被雜務拖走。",
+    官司訴訟:"爭點可能與金錢、賠償、財產或和解條件有關。財旺可談資源，財弱則須防成本壓力，並另看父母證據與官鬼。",
+    出行:"行程多為求財、工作、採買或會見實際對象。財旺受生較有收穫；休囚空破則防花費超支、交易落空。",
+    失物:"失物多與財物本身、交易場所、女性或日常用品有關。持世表示本人仍緊抓此事；能否找回須看財爻是否空破、入墓及應期。",
+    家宅:"關注家庭收支、物資、女性家人或居住成本。財旺可改善生活資源；受剋空破則防支出、物品損耗或現實壓力。"
+  },
+  官鬼:{
+    "一般／其他":"事情帶有責任、規範、壓力或風險，本人難以置身事外。旺相可能能承權任事，也可能壓力更重。",
+    財運:"求財同時伴隨成本、債務、法規、風險或管理責任。官鬼旺未必無財，但表示先處理風險與義務，不能只看收益。",
+    工作事業:"官鬼為職位、權責與事業規範，持世與問事業相符。旺相受生有承擔職務、升遷或掌權機會；休囚空破則職位不穩或壓力大於實權。",
+    感情婚姻:"女性問伴侶時官鬼常可取為對方；也可能代表關係壓力、名分或疑慮。男性或其他情況不能只憑官鬼持世斷有第三者。",
+    健康疾病:"官鬼持世時病憂落身，應優先看官鬼旺衰、日月生剋及子孫能否制鬼。旺動受生要慎重；休囚受制則病勢相對較易緩解。",
+    考試學業:"代表考核、名次、錄取制度與壓力。旺相且父母有力，較有取得名位的條件；過旺剋世或空破，則防焦慮、規則失誤。",
+    官司訴訟:"官鬼持世表示本人被官非、規範或責任纏住，是重要警訊。旺動受生時壓力明顯；休囚受制、逢空則可能減輕，但仍須看父母證據。",
+    出行:"可能為公務、責任或不得不走，也要注意規章、交通風險與身心壓力。官鬼旺動受剋沖時不宜勉強。",
+    失物:"要留意被藏、被拿、受管制或因疏忽造成的損失。官鬼持世也可能只是本人過度擔心，仍應以財爻及線索爻定位。",
+    家宅:"家中可能有壓力、病憂、修繕、規範或不安因素。官鬼旺動宜查明實際來源；受子孫制或休囚則較易處理。"
+  },
+  父母:{
+    "一般／其他":"事情繞著資料、規則、保護、長輩或既有制度運作，宜靠查證與完整程序，不宜只憑感覺。",
+    財運:"財務受合約、帳務、房產、設備或長輩因素影響。父母旺能保護制度，卻也可能因文書與固定成本壓住求財速度。",
+    工作事業:"適合處理行政、專業、文書、教育、證照與制度性工作。旺相利規劃與靠山；休囚空破則文件、流程或上級支持不足。",
+    感情婚姻:"關係受家庭意見、承諾、名分、距離或理性考量影響，感受表達可能較含蓄。父母過旺也可能讓關係顯得拘謹或操心。",
+    健康疾病:"重點常在照護、休養、醫療資料、藥物或長期疲勞。父母可代表保護，也可代表操勞，須與官鬼、子孫同看。",
+    考試學業:"父母為知識、教材、文章與成績文件，持世與考試相符。旺相受生日通常利學習與文書；空破休囚則須補基礎、避免漏題漏件。",
+    官司訴訟:"證據、契約、文件與法條是勝負關鍵。父母旺實有利提出依據；空破受剋則防證據不足、程序錯誤或文書失效。",
+    出行:"要注意證件、票券、交通工具、住宿與長輩安排。父母旺相利行程規劃；空破則務必重查文件與交通資訊。",
+    失物:"線索多與文件、書籍、衣物、車輛、房間或收納處有關。父母持世表示應從既有紀錄與固定位置回查。",
+    家宅:"父母直接關聯房屋、土地、長輩與居住保護。旺相多主基礎尚穩；空破受沖則留意修繕、契約及長輩狀況。"
+  },
+  兄弟:{
+    "一般／其他":"本人立場、同輩與競爭關係突出。事情常不是單獨決定，而涉及分配、協作或彼此消耗。",
+    財運:"兄弟有分財、競爭與開銷之象。旺動時防支出、分潤或同行搶利；若得良性合作，也可藉團隊成事，但須先講清分配。",
+    工作事業:"同事、夥伴、同業競爭是重點。旺相利組隊與執行，過旺則爭功、內耗；休囚則人脈與團隊支援不足。",
+    感情婚姻:"容易以自我立場、朋友同輩或競爭者介入關係。兄弟持世不等於必有第三者，應再看財官用神及世應生合。",
+    健康疾病:"可能因勞累、同儕活動、情緒較勁或資源消耗影響身體。不是直接病星，仍以官鬼為病、子孫為解。",
+    考試學業:"競爭意識與同儕比較明顯。旺相可互相切磋，過旺則分心或爭強；休囚時宜減少比較、回到自己的進度。",
+    官司訴訟:"雙方爭執、利益分配與同夥關係突出。兄弟旺動往往衝突難退，宜防口舌與共同成本擴大。",
+    出行:"多與朋友、同事或團體同行有關。旺相可互助，但須先談妥費用與責任；受沖剋則防臨時拆夥。",
+    失物:"可能經過多人之手、放在共用空間，或被同輩移動。兄弟旺動時先問同行者與同事，不宜只靠自己回想。",
+    家宅:"家庭成員、手足、室友或共有資源是重點。旺動容易因分配與立場爭執；得合生則可共同處理家務。"
+  },
+  子孫:{
+    "一般／其他":"事情偏向解壓、自由發揮、享受成果或以較輕鬆方式解決。子孫能制官鬼，但也可能削弱紀律與責任感。",
+    財運:"子孫為生財之源，常代表產品、創意、客源與持續產出。旺相有利開源；但仍要見妻財承接，否則可能有點子卻未落袋。",
+    工作事業:"適合創作、服務、表達與自由度高的工作。子孫制官鬼，若問升遷或正式職位，過旺可能抗拒規範；若問創業則可成為產出力。",
+    感情婚姻:"重視相處愉快、自在與吸引力，也可代表子女因素。過旺時可能只求開心、不願承諾；女性問婚姻時還要看是否制夫星官鬼。",
+    健康疾病:"子孫為解憂、醫藥與制病之力，旺相通常有利緩解和恢復；休囚空破則療效、體力或照護力量不足。",
+    考試學業:"思路、表達與臨場發揮較活，適合創意型任務；但過度放鬆會削弱紀律，正式考試仍需父母爻承接知識與文書。",
+    官司訴訟:"子孫能制官鬼，常有減壓、和解或脫離官非之意。旺相發動較有利化解；空破受制則解決力量不足。",
+    出行:"心情與行程通常較輕鬆，也有遊樂、晚輩或休閒目的。旺相多利平安；受沖剋時防玩樂過度或臨時變動。",
+    失物:"可能在休閒、兒童、寵物、娛樂或隨手放置處。子孫旺動表示可透過新線索找到，但仍要看財爻是否可回。",
+    家宅:"家中晚輩、寵物、休閒空間與和樂氣氛突出。旺相有助化解家宅不安；過旺則可能疏於規矩或支出在享樂。"
+  }
+};
+
+function holdingShiAnalysis(result){
+  const shi=result.rows[result.palace.shi-1],topic=holdingTopicOrder.includes(result.input.topic)?result.input.topic:"一般／其他";
+  const judgments=allJudgments(result,shi),labels=judgments.map(item=>item.label),adjustments=[];
+  if(labels.some(x=>["臨月建","得月令","月生","臨日辰","日辰同氣","日生"].includes(x)))adjustments.push("月日對世爻有生扶或同氣，持世所代表的主題較能發揮。 ");
+  if(labels.some(x=>["月剋","日剋","月破","日破"].includes(x)))adjustments.push("世爻受剋或逢破，外在阻力明顯；即使持世六親本義有利，也要先扣除這層力量。 ");
+  if(labels.includes("空亡"))adjustments.push("世爻空亡，常見心裡在意但暫時落不到實處，需等填實、沖空或其他動爻引發。 ");
+  if(labels.some(x=>["合月","合日"].includes(x)))adjustments.push("世爻逢合，可能得到連結與合作，也可能被事情牽住；要分辨是合助還是合絆。 ");
+  if(labels.some(x=>["日沖","暗動"].includes(x)))adjustments.push("世爻受沖或暗動，表面雖未必主動，實際上已被環境推著改變。 ");
+  if(shi.moving){
+    adjustments.push("世爻發動，表示求占者本人會採取行動、改變想法或直接承受事件變化。 ");
+    if(shi.changeTags.includes("回頭生"))adjustments.push("世爻化回頭生，後續力量回來支持自己，通常越做越有底氣。 ");
+    if(shi.changeTags.includes("回頭剋"))adjustments.push("世爻化回頭剋，行動後反而形成壓力或反噬，需調整做法並保留退路。 ");
+    if(shi.changeTags.includes("化進"))adjustments.push("世爻化進，事情有持續加強、擴張或向前推進的傾向。 ");
+    if(shi.changeTags.includes("化退"))adjustments.push("世爻化退，後勢容易減弱、退讓或改變原先投入程度。 ");
+  }
+  if(!adjustments.length)adjustments.push("目前世爻未見特殊月日或動變標記，先以六親持世與旺衰為主，再配合用神、應爻判斷。 ");
+  return {shi,topic,base:holdingBaseMeanings[shi.relative],strength:holdingStrengthMeanings[shi.strength],topicText:holdingTopicMeanings[shi.relative]?.[topic]||holdingTopicMeanings[shi.relative]["一般／其他"],adjustments,judgments};
+}
+
+function renderHoldingShi(result){
+  const reading=holdingShiAnalysis(result),otherTopics=holdingTopicOrder.filter(topic=>topic!==reading.topic);
+  $("#holdingShiAnalysis").innerHTML=`<div class="holding-summary"><span>${reading.shi.relative}持世</span><span>${reading.shi.strength}</span><span>${reading.topic}</span><span>${reading.shi.moving?"世爻發動":"世爻安靜"}</span></div><section class="holding-reading"><h4>持世本義</h4><p>${reading.base}</p><h4>旺衰修正</h4><p>${reading.strength}</p><h4>問${reading.topic}</h4><p>${reading.topicText}</p><h4>本卦附加條件</h4><ul>${reading.adjustments.map(text=>`<li>${text}</li>`).join("")}</ul></section><details class="holding-reference"><summary>查看同一持世六親的其他占問速查</summary>${otherTopics.map(topic=>`<section><h4>${topic}</h4><p>${holdingTopicMeanings[reading.shi.relative][topic]}</p></section>`).join("")}</details><p class="reading-note">持世只說明「求占者目前以哪一種六親狀態承接事情」，不能單獨定吉凶；最後仍以用神、世應、生剋、動變與空破合看。</p>`;
+}
 const yaoPlainRules = [
   {match:/勿逐|不逐/,meaning:"眼前即使有所失，也不要急著追回或強求；先穩住局面，事情反而較可能自然回復。"},
   {match:/征凶|往凶/,meaning:"現在不適合硬闖、催促或擴大行動，越急著推進，越容易把問題放大。"},
@@ -591,6 +692,7 @@ function renderResult(result) {
   $("#useGodAnalysis").innerHTML=useGods.length
     ? `<ol class="reading-list">${useGods.map((god,index)=>`<li><strong>${god}${index===0?"（主要）":""}</strong>：${useGodDetails(result,god)}</li>`).join("")}</ol>`
     : "<p>尚未指定用神。請依占問類別與實際取象，由老師選定後再看旺衰、生剋與動變。</p>";
+  renderHoldingShi(result);
   $("#simpleReading").innerHTML=`<div class="analysis-flow">${analysisFlowSteps(result).map((step,index)=>`<section class="flow-step"><span class="flow-number">${index+1}</span><div><h4>${step.title}</h4><p>${step.body}</p><p class="flow-tags">${step.extra}</p></div></section>`).join("")}</div><p class="reading-note">固定依主用神、世爻、動爻、應爻、應期逐步閱讀；這是整理流程，不直接取代老師斷卦。</p>`;
   const primaryTarget=mainTimingTarget(result),primaryTiming=primaryTarget?primaryTimingForTarget(result,primaryTarget):null;
   $("#timingAnalysis").innerHTML=primaryTarget&&primaryTiming
@@ -610,6 +712,8 @@ function resultText(result) {
   const lines=[`【奉母宮六爻排盤】`,`排盤模式：${result.input.readingMode||"單次占問"}`,`應期條件：${timingRuleLabels[result.input.timingRule||"auto"]}`,`占問：${result.input.question}`,`求占者：${result.input.clientName||"未填"}`,`起卦：${result.input.castTime.replace("T"," ")}`,`月建：${result.input.monthBranch}　日辰：${result.input.dayStem}${result.input.dayBranch}　旬空：${result.input.voidBranches||"未填"}`,`本卦：${result.hex.name}　→　變卦：${result.changedHex.name}`,`${result.palace.palace}宮・${result.palace.stage}　世${result.palace.shi} 應${result.palace.ying}`,``];
   [...result.rows].reverse().forEach(r=>lines.push(`${r.god}　${r.relative}　${r.stem}${r.branch}${r.element}　${r.strength}　${r.shiYing||"　"}　${r.yang?"━━━":"━ ━"}${r.moving?` ${r.value===9?"○":"×"} → ${r.changedNaJia.stem}${r.changedNaJia.branch}${r.changedNaJia.element}${r.changeTags.length?`（${r.changeTags.join("、")}）`:""}`:""}${r.fushen.length?`　伏神：${r.fushen.map(f=>`${f.relative}${f.stem}${f.branch}${f.element}`).join("、")}／飛神：${r.relative}${r.stem}${r.branch}${r.element}`:""}　判別：${allJudgments(result,r).map(item=>item.label).join("、")||"無"}`));
   lines.push("",`用神順序：${getUseGods(result.input).map((god,index)=>`${index+1}.${god}`).join(" → ")||"未指定"}`,"【五步分析流程】",...analysisFlowSteps(result).flatMap((step,index)=>[`${index+1}. ${step.title}：${step.body}`,`   ${step.extra}`]));
+  const holding=holdingShiAnalysis(result);
+  lines.push("",`【${holding.shi.relative}持世・${holding.topic}】`,holding.base,`旺衰：${holding.strength}`,`分類判讀：${holding.topicText}`,`附加條件：${holding.adjustments.join("")}`);
   const moving=result.rows.filter(row=>row.moving);
   if(moving.length) lines.push("","【動爻白話解析】",...moving.map(row=>`${row.position}爻・${row.lineTitle}：${row.yaoText?`${row.yaoText}｜${row.yaoTranslation}`:positionMeanings[row.position-1]}`));
   lines.push("","【逐爻判別白話】",...[...result.rows].reverse().flatMap(row=>allJudgments(result,row).map(item=>`${row.position}爻 ${item.label}：${item.text}`)),...harmonyFindings(result).map(item=>`${item.label}：${item.text}`));
