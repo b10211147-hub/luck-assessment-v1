@@ -1,0 +1,260 @@
+"use strict";
+
+const TEACHER_PASSWORD = "getoutmyway84";
+const CASES_KEY = "fengmugong.ziwei.cases.v1";
+const $ = (selector) => document.querySelector(selector);
+const STAR_HINTS = {
+  紫微: "重視主導、整合與秩序，可觀察承擔責任時是否也願意授權。",
+  天機: "偏向思考、規劃與調整，可觀察變通是否轉成穩定行動。",
+  太陽: "偏向公開、付出與責任，可觀察熱心投入後是否仍照顧自己的界線。",
+  武曲: "重視效率、執行與成果，可觀察做決策時是否過度只看實際得失。",
+  天同: "重視和氣、舒適與協調，可觀察遇到壓力時是化解還是延後面對。",
+  廉貞: "在意原則、關係界線與自我要求，可觀察企圖心如何被合宜地運用。",
+  天府: "重視穩定、承接與資源管理，可觀察守成與主動開展之間的平衡。",
+  太陰: "偏向內在感受、細節與累積，可觀察敏感度是否成為洞察而非負擔。",
+  貪狼: "重視體驗、人際與多元可能，可觀察興趣能否聚焦成可持續的方向。",
+  巨門: "重視辨析、表達與追問，可觀察清楚說明與反覆質疑之間的分寸。",
+  天相: "重視協調、公平與角色分工，可觀察照顧整體時是否保留自己的立場。",
+  天梁: "重視原則、保護與經驗，可觀察提供建議時是否也允許他人自己選擇。",
+  七殺: "偏向決斷、承壓與開創，可觀察快速推進前是否留有風險檢查。",
+  破軍: "偏向重整、突破與汰舊，可觀察改變之前是否先保留必要的基礎。"
+};
+const chartAreas = { 3: "si", 4: "wu", 5: "wei", 6: "shen", 2: "chen", 7: "you", 1: "mao", 8: "xu", 0: "yin", 11: "chou", 10: "zi", 9: "hai" };
+let currentResult = null;
+let toastTimer = null;
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char]));
+}
+
+function showToast(message) {
+  const toast = $("#toast");
+  toast.textContent = message;
+  toast.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove("show"), 2600);
+}
+
+function getCases() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(CASES_KEY) || "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function setCases(cases) {
+  localStorage.setItem(CASES_KEY, JSON.stringify(cases));
+}
+
+function starNames(palace) {
+  return palace.stars.length ? palace.stars.map((star) => star.name).join("、") : "無十四主星";
+}
+
+function renderPalace(palace) {
+  const flags = [palace.isSoul ? "命宮" : "", palace.isBody ? "身宮" : ""].filter(Boolean);
+  return `<article class="palace${palace.isSoul ? " is-soul" : ""}${palace.isBody ? " is-body" : ""}" style="grid-area:${chartAreas[palace.index]}">
+    <div><header><h4>${palace.name}</h4><span class="ganzhi">${palace.heavenlyStem}${palace.earthlyBranch}</span></header>${flags.length ? `<div class="flags">${flags.map((flag) => `<span class="flag">${flag}</span>`).join("")}</div>` : ""}</div>
+    ${palace.stars.length ? `<div class="star-list">${palace.stars.map((star) => `<span class="star"><b>${star.name}</b>${star.transformation ? `<small class="mutagen">${star.transformation}</small>` : ""}</span>`).join("")}</div>` : '<p class="empty-star">本宮無十四主星</p>'}
+  </article>`;
+}
+
+function renderResult(result) {
+  currentResult = result;
+  const lifePalace = result.palaces[result.soulIndex];
+  const bodyPalace = result.palaces[result.bodyIndex];
+  const client = result.input.clientName || "未填姓名";
+  $("#resultMeta").textContent = `${client}・${result.input.gender}・${result.input.solarDate || result.input.birthDate}・${result.input.timeLabel}`;
+  $("#resultTitle").textContent = `${result.calendar.yearGanZhi}年・${result.fiveElementsClass.name}・命宮${result.lifeStem}${result.lifeBranch}`;
+  $("#factSummary").innerHTML = [
+    `農曆 ${result.calendar.display}`,
+    `命宮 ${lifePalace.name.replace("宮", "")}・${result.lifeStem}${result.lifeBranch}`,
+    `身宮在${bodyPalace.name}`,
+    result.fiveElementsClass.name,
+    `${result.input.birthPlace}・${result.input.timezone}`
+  ].map((item) => `<span>${escapeHtml(item)}</span>`).join("");
+
+  const center = `<div class="chart-center"><div><span class="seal" aria-hidden="true">紫</span><strong>${escapeHtml(client)}</strong><p>${result.calendar.yearGanZhi}年・${result.fiveElementsClass.name}<br>命宮 ${result.lifeStem}${result.lifeBranch}・身宮 ${bodyPalace.name}</p></div></div>`;
+  $("#palaceChart").innerHTML = result.palaces.map(renderPalace).join("") + center;
+  $("#lifeStars").innerHTML = `<p><strong>${escapeHtml(starNames(lifePalace))}</strong></p><p>${lifePalace.stars.length ? "以上為命宮內的十四主星。" : "命宮為空宮；第一版只陳列事實，解讀時可再人工參考對宮及三方。"}</p>`;
+  $("#bodyPalace").innerHTML = `<p><strong>${bodyPalace.name}・${bodyPalace.heavenlyStem}${bodyPalace.earthlyBranch}</strong></p><p>宮內十四主星：${escapeHtml(starNames(bodyPalace))}</p>`;
+  $("#fourTransformations").innerHTML = result.fourTransformations.map((item) => `<div class="transformation-item"><b>${item.label}・${item.star}</b>${item.status === "calculated" ? `<span>${item.palaceName}</span>` : '<span class="pending">第一版暫未計算該輔星宮位</span>'}</div>`).join("");
+  $("#triadPalaces").innerHTML = result.triadIndexes.map((index, position) => {
+    const palace = result.palaces[index];
+    const relation = position === 0 ? "本宮" : position === 3 ? "對宮" : "三合宮";
+    return `<div class="triad-item"><b>${relation}・${palace.name}</b><span>${palace.heavenlyStem}${palace.earthlyBranch}・${escapeHtml(starNames(palace))}</span></div>`;
+  }).join("");
+
+  const readingStars = lifePalace.stars.length ? lifePalace.stars : result.palaces[result.triadIndexes[3]].stars;
+  const readingIntro = lifePalace.stars.length
+    ? `命宮見${starNames(lifePalace)}，可先從下列方向提問：`
+    : `命宮無十四主星；以下暫借對宮${result.palaces[result.triadIndexes[3]].name}的${starNames(result.palaces[result.triadIndexes[3]])}作為訪談線索，不等同直接落命：`;
+  $("#plainReading").innerHTML = `<p>${escapeHtml(readingIntro)}</p><ul class="interpretation-list">${readingStars.length ? readingStars.map((star) => `<li><strong>${star.name}</strong>：${STAR_HINTS[star.name]}</li>`).join("") : "<li>本宮與對宮都未見十四主星，第一版不自動產生主星解讀，請人工合看三方四正。</li>"}<li><strong>身宮在${bodyPalace.name}</strong>：後天投入與行動焦點可優先從此宮主題觀察，但仍需結合實際人生階段。</li><li><strong>三方四正</strong>：命、財帛、官祿與遷移四個面向應連動觀察，不宜只用命宮單點下結論。</li></ul>`;
+  $("#limitationsList").innerHTML = result.limitations.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+  $("#resultView").hidden = false;
+  $("#resultView").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+}
+
+function resultText(result) {
+  const lifePalace = result.palaces[result.soulIndex];
+  const bodyPalace = result.palaces[result.bodyIndex];
+  const lines = [
+    "【奉母宮紫微斗數命盤・第一版】",
+    `姓名／代稱：${result.input.clientName || "未填"}`,
+    `性別：${result.input.gender}`,
+    `出生：${result.input.birthDate}　${result.input.timeLabel}`,
+    `出生地／時區：${result.input.birthPlace}／${result.input.timezone}`,
+    `農曆：${result.calendar.display}`,
+    `命宮：${result.lifeStem}${result.lifeBranch}　主星：${starNames(lifePalace)}`,
+    `身宮：${bodyPalace.name}（${bodyPalace.heavenlyStem}${bodyPalace.earthlyBranch}）`,
+    `五行局：${result.fiveElementsClass.name}`,
+    "",
+    "【排盤事實・十二宮】"
+  ];
+  result.palaces.forEach((palace) => lines.push(`${palace.name} ${palace.heavenlyStem}${palace.earthlyBranch}${palace.isBody ? "［身宮］" : ""}：${palace.stars.length ? palace.stars.map((star) => `${star.name}${star.transformation ? `（${star.transformation}）` : ""}`).join("、") : "無十四主星"}`));
+  lines.push("", "【生年四化】", ...result.fourTransformations.map((item) => `${item.label}・${item.star}：${item.palaceName || "第一版暫未計算該輔星宮位"}`));
+  lines.push("", "【命宮三方四正】", ...result.triadIndexes.map((index, position) => {
+    const palace = result.palaces[index];
+    return `${position === 0 ? "本宮" : position === 3 ? "對宮" : "三合宮"}・${palace.name} ${palace.heavenlyStem}${palace.earthlyBranch}：${starNames(palace)}`;
+  }));
+  const readingPalace = lifePalace.stars.length ? lifePalace : result.palaces[result.triadIndexes[3]];
+  lines.push("", "【解讀提示】", ...(readingPalace.stars.length
+    ? readingPalace.stars.map((star) => `${star.name}：${STAR_HINTS[star.name]}`)
+    : ["命宮與對宮都未見十四主星，第一版不自動產生主星解讀，請人工合看三方四正。"]));
+  lines.push(`身宮在${bodyPalace.name}：後天投入與行動焦點可優先從此宮主題觀察，但仍需結合實際人生階段。`);
+  lines.push("", "【第一版限制】", ...result.limitations.map((item) => `・${item}`));
+  return lines.join("\n");
+}
+
+async function copyResult() {
+  if (!currentResult) return;
+  const text = resultText(currentResult);
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand("copy");
+    textarea.remove();
+  }
+  showToast("命盤已複製");
+}
+
+async function downloadPdf() {
+  if (!currentResult) return;
+  if (typeof html2canvas === "undefined" || !window.jspdf) return showToast("PDF 元件尚未載入，請重新整理後再試");
+  const capture = $("#pdfCaptureArea");
+  showToast("正在產生 PDF，請稍候…");
+  capture.classList.add("pdf-export");
+  try {
+    const canvas = await html2canvas(capture, { scale: 1.35, useCORS: true, backgroundColor: "#ffffff", windowWidth: 1180, scrollX: 0, scrollY: 0 });
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4", compress: true });
+    const margin = 7, pageWidth = 297, pageHeight = 210, printWidth = pageWidth - margin * 2, printHeight = pageHeight - margin * 2;
+    const imageHeight = canvas.height * printWidth / canvas.width;
+    const image = canvas.toDataURL("image/jpeg", .92);
+    for (let offset = 0, page = 0; offset < imageHeight; offset += printHeight, page += 1) {
+      if (page) pdf.addPage("a4", "landscape");
+      pdf.addImage(image, "JPEG", margin, margin - offset, printWidth, imageHeight, undefined, "FAST");
+    }
+    const safeName = (currentResult.input.clientName || "紫微命盤").replace(/[\\/:*?"<>|]/g, "_").slice(0, 35);
+    pdf.save(`${safeName}-${currentResult.input.birthDate}.pdf`);
+    showToast("PDF 已下載");
+  } catch (error) {
+    console.error(error);
+    showToast("PDF 產生失敗，請重新整理後再試");
+  } finally {
+    capture.classList.remove("pdf-export");
+  }
+}
+
+function saveCurrentCase() {
+  if (!currentResult) return;
+  const cases = getCases();
+  const stored = JSON.parse(JSON.stringify(currentResult));
+  stored.id = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `ziwei-${Date.now()}`;
+  stored.savedAt = new Date().toISOString();
+  cases.unshift(stored);
+  setCases(cases.slice(0, 100));
+  renderCases();
+  showToast("紫微案例已儲存在這台裝置");
+}
+
+function populateForm(result) {
+  const form = $("#ziweiForm");
+  ["clientName", "gender", "birthDate", "timeIndex", "birthPlace"].forEach((name) => {
+    if (form.elements[name]) form.elements[name].value = result.input[name] ?? "";
+  });
+}
+
+function renderCases() {
+  const cases = getCases();
+  $("#caseList").innerHTML = cases.length ? cases.map((item) => `<article class="case-card"><div><h3>${escapeHtml(item.input.clientName || "未填姓名")}</h3><p>${item.input.birthDate}・${item.input.timeLabel}<br>${item.fiveElementsClass.name}・命宮${item.lifeStem}${item.lifeBranch}・${escapeHtml(starNames(item.palaces[item.soulIndex]))}</p></div><div class="case-actions"><button class="ghost" data-open-case="${item.id}" type="button">開啟</button><button class="ghost delete" data-delete-case="${item.id}" type="button">刪除</button></div></article>`).join("") : '<div class="empty">尚未儲存任何紫微案例</div>';
+}
+
+function showTool() {
+  sessionStorage.setItem("teacherPassword", TEACHER_PASSWORD);
+  $("#loginView").hidden = true;
+  $("#toolView").hidden = false;
+  $("#logoutBtn").hidden = false;
+  renderCases();
+}
+
+$("#loginForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const password = new FormData(event.currentTarget).get("password");
+  if (password !== TEACHER_PASSWORD) {
+    $("#loginError").textContent = "老師密碼不正確";
+    return;
+  }
+  $("#loginError").textContent = "";
+  showTool();
+});
+
+$("#logoutBtn").addEventListener("click", () => {
+  sessionStorage.removeItem("teacherPassword");
+  location.reload();
+});
+
+document.querySelectorAll(".tool-tabs button").forEach((button) => button.addEventListener("click", () => {
+  document.querySelectorAll(".tool-tabs button").forEach((item) => item.classList.toggle("active", item === button));
+  ["castingPanel", "historyPanel"].forEach((id) => $("#" + id).hidden = id !== button.dataset.panel);
+  if (button.dataset.panel === "historyPanel") renderCases();
+}));
+
+$("#ziweiForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  try {
+    const input = Object.fromEntries(new FormData(event.currentTarget));
+    renderResult(ZiweiCore.calculate(input));
+  } catch (error) {
+    showToast(error.message || "排盤資料有誤");
+  }
+});
+
+$("#copyBtn").addEventListener("click", copyResult);
+$("#pdfBtn").addEventListener("click", downloadPdf);
+$("#saveBtn").addEventListener("click", saveCurrentCase);
+$("#caseList").addEventListener("click", (event) => {
+  const openButton = event.target.closest("[data-open-case]");
+  const deleteButton = event.target.closest("[data-delete-case]");
+  if (openButton) {
+    const item = getCases().find((candidate) => candidate.id === openButton.dataset.openCase);
+    if (!item) return;
+    populateForm(item);
+    document.querySelector('[data-panel="castingPanel"]').click();
+    renderResult(item);
+  }
+  if (deleteButton) {
+    const item = getCases().find((candidate) => candidate.id === deleteButton.dataset.deleteCase);
+    if (!item || !confirm(`確定刪除「${item.input.clientName || "未填姓名"}」的紫微案例？`)) return;
+    setCases(getCases().filter((candidate) => candidate.id !== item.id));
+    renderCases();
+    showToast("案例已刪除");
+  }
+});
+
+if (sessionStorage.getItem("teacherPassword") === TEACHER_PASSWORD) showTool();

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#183c32">
+  <meta name="description" content="奉母宮老師專用紫微斗數排盤工具第一版">
+  <title>奉母宮｜紫微斗數老師工具</title>
+  <link rel="stylesheet" href="ziwei.css?v=20260822-1">
+</head>
+<body>
+  <main>
+    <header class="tool-header">
+      <div><small>奉母宮・老師專用</small><h1>紫微斗數排盤</h1></div>
+      <div class="header-actions"><a class="ghost" href="teacher.html">六爻工具</a><button id="logoutBtn" class="ghost" hidden>登出</button></div>
+    </header>
+
+    <section id="loginView" class="login-card">
+      <span class="seal" aria-hidden="true">紫</span>
+      <h2>老師工具登入</h2>
+      <p>與六爻工具使用相同老師密碼。紫微案例只保存在這台裝置，不會寫入六爻案例。</p>
+      <form id="loginForm">
+        <label class="sr-only" for="teacherPassword">老師密碼</label>
+        <input id="teacherPassword" name="password" type="password" autocomplete="current-password" placeholder="老師密碼" required>
+        <button class="primary" type="submit">登入工具</button>
+      </form>
+      <p id="loginError" class="error" role="alert"></p>
+    </section>
+
+    <section id="toolView" hidden>
+      <nav class="tool-tabs" aria-label="工具分頁">
+        <button class="active" data-panel="castingPanel">建立命盤</button>
+        <button data-panel="historyPanel">本機案例</button>
+      </nav>
+
+      <section id="castingPanel" class="panel">
+        <form id="ziweiForm" class="casting-form">
+          <div class="section-title"><span>01</span><div><small>出生資料</small><h2>建立紫微命盤</h2></div></div>
+          <div class="grid two">
+            <label>姓名／代稱<input name="clientName" maxlength="40" placeholder="例如：王小姐"></label>
+            <label>性別<select name="gender" required><option value="女">女</option><option value="男">男</option></select></label>
+            <label>國曆出生日期<input name="birthDate" type="date" min="1900-01-01" max="2100-12-31" required></label>
+            <label>出生時辰<select name="timeIndex" required>
+              <option value="">請選擇時辰</option>
+              <option value="0">早子時 00:00–00:59</option><option value="1">丑時 01:00–02:59</option>
+              <option value="2">寅時 03:00–04:59</option><option value="3">卯時 05:00–06:59</option>
+              <option value="4">辰時 07:00–08:59</option><option value="5">巳時 09:00–10:59</option>
+              <option value="6">午時 11:00–12:59</option><option value="7">未時 13:00–14:59</option>
+              <option value="8">申時 15:00–16:59</option><option value="9">酉時 17:00–18:59</option>
+              <option value="10">戌時 19:00–20:59</option><option value="11">亥時 21:00–22:59</option>
+              <option value="12">晚子時 23:00–23:59</option>
+            </select></label>
+            <label>出生地<input name="birthPlace" value="台灣" maxlength="80" placeholder="例如：台北市"></label>
+            <label>時區<input value="Asia/Taipei（UTC+8）" disabled></label>
+          </div>
+          <aside class="limit-note"><strong>第一版時間限制</strong><p>目前以 Asia/Taipei 民用標準時間排盤，尚未依出生地經緯度校正真太陽時。若出生時間接近時辰交界，請先人工確認後再使用。</p></aside>
+          <button class="primary large" type="submit">立即排出命盤</button>
+        </form>
+
+        <section id="resultView" class="result" hidden>
+          <div id="pdfCaptureArea">
+            <div class="result-head">
+              <div><small id="resultMeta"></small><h2 id="resultTitle"></h2></div>
+              <div class="actions"><button id="pdfBtn" class="ghost" type="button">下載 PDF</button><button id="copyBtn" class="ghost" type="button">複製命盤</button><button id="saveBtn" class="primary" type="button">儲存案例</button></div>
+            </div>
+            <div id="factSummary" class="summary-strip"></div>
+            <section class="chart-section" aria-labelledby="chartTitle">
+              <div class="reading-label"><span>排盤事實</span><h3 id="chartTitle">十二宮命盤</h3></div>
+              <div id="palaceChart" class="palace-chart"></div>
+            </section>
+            <section class="facts-grid">
+              <article><h3>命宮主星</h3><div id="lifeStars"></div></article>
+              <article><h3>身宮落宮</h3><div id="bodyPalace"></div></article>
+              <article class="wide"><h3>生年四化</h3><div id="fourTransformations" class="transformation-list"></div></article>
+              <article class="wide"><h3>命宮三方四正</h3><div id="triadPalaces" class="triad-list"></div></article>
+            </section>
+            <section class="interpretation">
+              <div class="reading-label hint"><span>解讀提示</span><h3>簡易白話判讀</h3></div>
+              <div id="plainReading"></div>
+              <p class="reading-disclaimer">以下只整理主星可能代表的觀察方向，不是吉凶定論；老師仍需合看輔煞、四化、宮位互動與當事人實際處境。</p>
+            </section>
+            <details class="limitations" open><summary>第一版計算口徑與暫未納入項目</summary><ul id="limitationsList"></ul></details>
+            <p class="method-note">本頁安星規則依《紫微斗數全書》常見排法整理，並以 <a href="https://github.com/SylarLong/iztro" target="_blank" rel="noopener">iztro 開源排盤實作</a>交叉核對。不同門派對歲首、閏月、晚子時及四化可能有不同口徑，使用前請以本頁列出的計算口徑為準。</p>
+          </div>
+        </section>
+      </section>
+
+      <section id="historyPanel" class="panel" hidden>
+        <div class="section-title"><span>歷</span><div><small>僅存在此裝置</small><h2>紫微歷史案例</h2></div></div>
+        <p class="history-note">使用獨立的本機儲存空間，不會讀取、覆蓋或刪除六爻案例。</p>
+        <div id="caseList" class="case-list"></div>
+      </section>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="assets/lunar.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="ziwei-core.js?v=20260822-1"></script>
+  <script src="ziwei.js?v=20260822-1"></script>
+</body>
+</html>
