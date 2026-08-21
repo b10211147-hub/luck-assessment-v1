@@ -1,6 +1,7 @@
 "use strict";
 
-const TEACHER_PASSWORD = "getoutmyway84";
+const TEACHER_PASSWORD = "138668";
+const AUTH_KEY = "fengmugong.ziwei.auth.v1";
 const CASES_KEY = "fengmugong.ziwei.cases.v1";
 const $ = (selector) => document.querySelector(selector);
 const STAR_HINTS = {
@@ -228,7 +229,7 @@ function renderCases() {
 }
 
 function showTool() {
-  sessionStorage.setItem("teacherPassword", TEACHER_PASSWORD);
+  sessionStorage.setItem(AUTH_KEY, "1");
   $("#loginView").hidden = true;
   $("#toolView").hidden = false;
   $("#logoutBtn").hidden = false;
@@ -247,7 +248,7 @@ $("#loginForm").addEventListener("submit", (event) => {
 });
 
 $("#logoutBtn").addEventListener("click", () => {
-  sessionStorage.removeItem("teacherPassword");
+  sessionStorage.removeItem(AUTH_KEY);
   location.reload();
 });
 
@@ -289,4 +290,4 @@ $("#caseList").addEventListener("click", (event) => {
   }
 });
 
-if (sessionStorage.getItem("teacherPassword") === TEACHER_PASSWORD) showTool();
+if (sessionStorage.getItem(AUTH_KEY) === "1") showTool();
