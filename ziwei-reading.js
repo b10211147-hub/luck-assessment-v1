@@ -77,10 +77,14 @@
     return palace.minorStars && palace.minorStars.length ? palace.minorStars.map((star) => star.name).join("、") : "無十四輔星落宮";
   }
 
+  function starsWithBrightness(stars, emptyText) {
+    return stars.length ? stars.map((star) => `${star.name}${star.brightness ? `（${star.brightness}）` : ""}`).join("、") : emptyText;
+  }
+
   function palaceReading(palace, result) {
     const guide = PALACE_GUIDES[palace.name];
     const opposite = result.palaces[(palace.index + 6) % 12];
-    const facts = `${palace.name}在${palace.heavenlyStem}${palace.earthlyBranch}，十四主星為${starsText(palace)}，輔星為${minorStarsText(palace)}，大限為虛歲${palace.decadal.range[0]}–${palace.decadal.range[1]}歲${palace.isBody ? "，同時也是身宮" : ""}。`;
+    const facts = `${palace.name}在${palace.heavenlyStem}${palace.earthlyBranch}，十四主星為${starsWithBrightness(palace.stars, "無十四主星")}，輔星為${starsWithBrightness(palace.minorStars, "無輔星")}；長生十二神${palace.changsheng12}、博士十二神${palace.boshi12}、歲前${palace.suiqian12}、將前${palace.jiangqian12}；雜曜為${palace.adjectiveStars.map((star) => star.name).join("、") || "無"}；大限為虛歲${palace.decadal.range[0]}–${palace.decadal.range[1]}歲${palace.isBody ? "，同時也是身宮" : ""}。`;
     let hint;
     if (palace.stars.length) {
       hint = palace.stars.map((star) => `${star.name}把「${STAR_GUIDES[star.name].core}」的基調帶入${palace.name}`).join("；") + "。";
@@ -118,7 +122,7 @@
     const triadText = triad.map((palace) => `${palace.name}見${starsText(palace)}`).join("；");
     const lifeMinor = minorStarsText(life);
     const toughInLife = (life.minorStars || []).filter((star) => star.type === "tough");
-    const auxiliaryHint = `命宮輔星為${lifeMinor}。輔星用來調整主星的表現情境，不取代主星；${toughInLife.length ? `其中${toughInLife.map((star) => star.name).join("、")}提示壓力與反應方式，需配合實際事件核對。` : "本宮未見煞曜，不代表人生沒有壓力，仍需合看三方四正。"}`;
+    const auxiliaryHint = `命宮輔星為${starsWithBrightness(life.minorStars, "無輔星")}。輔星用來調整主星的表現情境，不取代主星；${toughInLife.length ? `其中${toughInLife.map((star) => star.name).join("、")}提示壓力與反應方式，需配合實際事件核對。` : "本宮未見煞曜，不代表人生沒有壓力，仍需合看三方四正。"}`;
     const firstDecadal = life.decadal;
 
     return {
@@ -140,21 +144,25 @@
           fact: `命主為${result.soulRuler}，依命宮地支${result.lifeBranch}而定；身主為${result.bodyRuler}，依生年地支${result.calendar.yearBranch}而定。`,
           hint: "命主可作先天反應的補充線索，身主可作後天實踐方式的補充線索；兩者權重低於命宮主星、身宮及三方四正。"
         },
-        auxiliaries: { fact: `本盤已安十四輔星；${auxiliaryHint}`, hint: "吉曜不等於必然順利，煞曜也不等於災禍。應觀察它們落在哪一宮、是否與主星及四化同宮，再轉成可驗證的提問。" },
+        auxiliaries: { fact: `本盤已安十四輔星並列出可用旺廟；${auxiliaryHint}`, hint: "旺廟只描述星曜在該地支的傳統強弱語彙，不等於吉凶分數。吉曜不保證順利，煞曜也不等於災禍。" },
+        advanced: {
+          fact: `十二宮均已列出長生十二神、博士十二神、歲前十二神、將前十二神，以及共${result.palaces.flatMap((palace) => palace.adjectiveStars).length}顆雜曜。`,
+          hint: "十二神與雜曜用於補充事件語境和觀察細節，權重低於主星、命身宮、三方四正與四化；不宜用單顆神煞直接下結論。"
+        },
         decadals: {
           fact: `大限採${result.decadalDirection}，由${result.fiveElementsClass.name}的虛歲${firstDecadal.range[0]}歲起限，每十年移一宮。`,
-          hint: "目前只標示本命盤上的大限宮位與虛歲區間，用於建立人生階段順序；尚未加入大限四化與流年，因此不自動斷定某十年的吉凶事件。",
+          hint: "大限宮位與虛歲區間建立人生階段順序；本版另列大限四化與流曜，但仍需合看本命和流年，不自動斷定某十年的吉凶事件。",
           items: result.palaces.map((palace) => ({ palace, range: palace.decadal.range }))
         }
       },
       method: [
-        "先確認出生資料、時辰交界與第一版時間限制。",
+        "先確認出生資料、時辰交界與本頁時間口徑。",
         "先讀命宮主星；空宮時只借對宮作線索，不直接移星。",
         "再讀身宮，分辨先天基調與後天實際投入。",
         "合看命宮、財帛、官祿、遷移四個三方四正宮位。",
-        "加入十四輔星，先看同宮如何調整主星，再分辨助力、移動、資源與壓力訊號。",
+        "加入主輔星旺廟、十四輔星與雜曜神煞；旺廟不是分數，單顆神煞不直接定吉凶。",
         "再加入生年四化；祿權科忌都需與星曜本質及落宮一起解釋。",
-        "大限先確認順逆與虛歲區間；未加入大限四化與流年以前，不用它直接預測事件。",
+        "依序疊入大限、流年、流月、流日、流時，逐層核對命宮、四化與流曜，不跨層單斷。",
         "用當事人的實際經驗驗證，保留門派差異與未計算項目的空白。"
       ]
     };
