@@ -12,6 +12,25 @@ function starMatrix(result) {
   ]);
   assert.equal(result.fiveElementsClass.name, "水二局");
   assert.deepEqual(result.fourTransformations.map((item) => `${item.label}:${item.star}`), ["化祿:破軍", "化權:巨門", "化科:太陰", "化忌:貪狼"]);
+  assert.equal(result.version, "1.1.0");
+  assert.equal(result.soulRuler, "巨門");
+  assert.equal(result.bodyRuler, "天同");
+  assert.equal(result.decadalDirection, "順行");
+}
+
+{
+  const result = ZiweiCore.calculate({ birthDate: "2023-03-06", timeIndex: 2, gender: "女", birthPlace: "台北市" });
+  const minorPositions = Object.fromEntries(result.palaces.flatMap((palace) => palace.minorStars.map((star) => [star.name, palace.index])));
+  assert.deepEqual(minorPositions, {
+    天魁: 1, 左輔: 3, 天鉞: 3, 天馬: 3, 文曲: 4, 文昌: 6, 右弼: 7, 地空: 7,
+    祿存: 10, 鈴星: 10, 擎羊: 11, 地劫: 11, 陀羅: 9, 火星: 9
+  });
+  assert.equal(result.palaces[result.soulIndex].decadal.range[0], result.fiveElementsClass.value);
+  assert.ok(result.fourTransformations.every((item) => item.status === "calculated"));
+
+  const male = ZiweiCore.calculate({ birthDate: "2023-03-06", timeIndex: 2, gender: "男", birthPlace: "台北市" });
+  assert.equal(male.decadalDirection, "逆行");
+  assert.equal(male.palaces[(male.soulIndex + 11) % 12].decadal.range[0], male.fiveElementsClass.value + 10);
 }
 
 {
@@ -21,6 +40,9 @@ function starMatrix(result) {
     const result = ZiweiCore.calculate({ birthDate: "2023-08-01", timeIndex, gender: "男", birthPlace: "台灣" });
     assert.equal(result.ziweiIndex, expectedZiwei[timeIndex]);
     assert.equal(result.tianfuIndex, expectedTianfu[timeIndex]);
+    const minorStars = result.palaces.flatMap((palace) => palace.minorStars);
+    assert.equal(minorStars.length, 14);
+    assert.equal(new Set(minorStars.map((star) => star.name)).size, 14);
   }
 }
 

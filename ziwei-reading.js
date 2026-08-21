@@ -1,4 +1,4 @@
-/* 奉母宮紫微斗數第一版解讀層：只解讀已可靠計算的十四主星、生年四化與宮位關係。 */
+/* 奉母宮紫微斗數第一版解讀層：解讀已可靠計算的主輔星、生年四化、命身主與宮位關係。 */
 (function (root, factory) {
   if (typeof module !== "undefined" && module.exports) module.exports = factory();
   else root.ZiweiReading = factory();
@@ -20,6 +20,22 @@
     天梁: { core: "原則、保護、經驗與提醒", strength: "重視長期影響，願意提供照顧與建議", watch: "站在保護者位置太久，容易替別人承擔過多", question: "這次是需要給建議，還是陪對方自己做決定？" },
     七殺: { core: "決斷、承壓、開創與風險", strength: "在壓力與不確定中仍能快速採取行動", watch: "速度過快時，可能忽略緩衝、細節與他人節奏", question: "行動前最少要完成哪一項風險檢查，才能放心推進？" },
     破軍: { core: "重整、突破、汰舊與重新開始", strength: "能切開僵局，處理需要大幅改變的情況", watch: "只看見必須改變時，可能一併捨棄仍有價值的基礎", question: "真正需要淘汰的是什麼？有哪些基礎應該先保留下來？" }
+  };
+  const MINOR_STAR_GUIDES = {
+    左輔: { core: "協助、組織與同儕支援" },
+    右弼: { core: "協調、人情與合作支援" },
+    文昌: { core: "條理、文書、表達與學習" },
+    文曲: { core: "感受、才藝、交流與修飾" },
+    天魁: { core: "制度內的提攜與明顯助力" },
+    天鉞: { core: "關係中的照應與隱性助力" },
+    祿存: { core: "資源、累積與守成" },
+    天馬: { core: "移動、變化與外部機會" },
+    擎羊: { core: "直接、突破與摩擦壓力" },
+    陀羅: { core: "延宕、反覆與耐力考驗" },
+    火星: { core: "急速、爆發與立即反應" },
+    鈴星: { core: "緊繃、敏銳與內在壓力" },
+    地空: { core: "抽離、落差與重新理解價值" },
+    地劫: { core: "變動、耗損與資源重整" }
   };
 
   const PALACE_GUIDES = {
@@ -57,17 +73,21 @@
     return palace.stars.length ? palace.stars.map((star) => star.name).join("、") : "無十四主星";
   }
 
+  function minorStarsText(palace) {
+    return palace.minorStars && palace.minorStars.length ? palace.minorStars.map((star) => star.name).join("、") : "無十四輔星落宮";
+  }
+
   function palaceReading(palace, result) {
     const guide = PALACE_GUIDES[palace.name];
     const opposite = result.palaces[(palace.index + 6) % 12];
-    const facts = `${palace.name}在${palace.heavenlyStem}${palace.earthlyBranch}，十四主星為${starsText(palace)}${palace.isBody ? "，同時也是身宮" : ""}。`;
+    const facts = `${palace.name}在${palace.heavenlyStem}${palace.earthlyBranch}，十四主星為${starsText(palace)}，輔星為${minorStarsText(palace)}，大限為虛歲${palace.decadal.range[0]}–${palace.decadal.range[1]}歲${palace.isBody ? "，同時也是身宮" : ""}。`;
     let hint;
     if (palace.stars.length) {
       hint = palace.stars.map((star) => `${star.name}把「${STAR_GUIDES[star.name].core}」的基調帶入${palace.name}`).join("；") + "。";
     } else {
       hint = `本宮無十四主星，不代表這個面向不存在或一定較弱。第一版可先借對宮${opposite.name}的${starsText(opposite)}作為訪談線索，但不能直接視為同宮落星。`;
     }
-    const mutagens = palace.stars.filter((star) => star.transformation);
+    const mutagens = [...palace.stars, ...(palace.minorStars || [])].filter((star) => star.transformation);
     if (mutagens.length) hint += ` 本宮另見${mutagens.map((star) => `${star.name}${star.transformation}`).join("、")}，相關特質會成為較明顯的投入或關注點。`;
     return { palace, guide, facts, hint, question: guide.question, caution: guide.caution || "" };
   }
@@ -78,7 +98,7 @@
       return { ...item, force: guide.force, text: `${item.star}${item.label}已依生年天干確定；但第一版尚未排出${item.star}宮位，因此不能進一步判斷落在哪個生活面向。`, caution: guide.caution };
     }
     const palace = result.palaces[item.palaceIndex];
-    const starGuide = STAR_GUIDES[item.star];
+    const starGuide = STAR_GUIDES[item.star] || MINOR_STAR_GUIDES[item.star];
     return { ...item, force: guide.force, text: `${item.star}的「${starGuide.core}」在${palace.name}呈現${guide.force}的傾向。`, caution: guide.caution };
   }
 
@@ -96,11 +116,15 @@
       : `身宮落在${body.name}，後天行動較容易把心力投入「${PALACE_GUIDES[body.name].domain}」。`;
     const triad = result.triadIndexes.map((index) => result.palaces[index]);
     const triadText = triad.map((palace) => `${palace.name}見${starsText(palace)}`).join("；");
+    const lifeMinor = minorStarsText(life);
+    const toughInLife = (life.minorStars || []).filter((star) => star.type === "tough");
+    const auxiliaryHint = `命宮輔星為${lifeMinor}。輔星用來調整主星的表現情境，不取代主星；${toughInLife.length ? `其中${toughInLife.map((star) => star.name).join("、")}提示壓力與反應方式，需配合實際事件核對。` : "本宮未見煞曜，不代表人生沒有壓力，仍需合看三方四正。"}`;
+    const firstDecadal = life.decadal;
 
     return {
       core: {
-        fact: `命宮在${life.heavenlyStem}${life.earthlyBranch}，主星為${starsText(life)}；身宮落${body.name}；五行局為${result.fiveElementsClass.name}。`,
-        hint: `${coreIntro}${bodyText}`,
+        fact: `命宮在${life.heavenlyStem}${life.earthlyBranch}，主星為${starsText(life)}；身宮落${body.name}；命主${result.soulRuler}、身主${result.bodyRuler}；五行局為${result.fiveElementsClass.name}。`,
+        hint: `${coreIntro}${bodyText}命主與身主只作輔助觀察，不應取代命宮、身宮與三方四正。`,
         starGuides: lifeSource.stars.map((star) => ({ name: star.name, ...STAR_GUIDES[star.name], borrowed: !life.stars.length })),
         note: "五行局在第一版用於起紫微星與排盤，不單獨把五行局當成性格結論。"
       },
@@ -111,16 +135,30 @@
       },
       transformations: result.fourTransformations.map((item) => transformationReading(item, result)),
       palaces: result.palaces.map((palace) => palaceReading(palace, result)),
+      extension: {
+        rulers: {
+          fact: `命主為${result.soulRuler}，依命宮地支${result.lifeBranch}而定；身主為${result.bodyRuler}，依生年地支${result.calendar.yearBranch}而定。`,
+          hint: "命主可作先天反應的補充線索，身主可作後天實踐方式的補充線索；兩者權重低於命宮主星、身宮及三方四正。"
+        },
+        auxiliaries: { fact: `本盤已安十四輔星；${auxiliaryHint}`, hint: "吉曜不等於必然順利，煞曜也不等於災禍。應觀察它們落在哪一宮、是否與主星及四化同宮，再轉成可驗證的提問。" },
+        decadals: {
+          fact: `大限採${result.decadalDirection}，由${result.fiveElementsClass.name}的虛歲${firstDecadal.range[0]}歲起限，每十年移一宮。`,
+          hint: "目前只標示本命盤上的大限宮位與虛歲區間，用於建立人生階段順序；尚未加入大限四化與流年，因此不自動斷定某十年的吉凶事件。",
+          items: result.palaces.map((palace) => ({ palace, range: palace.decadal.range }))
+        }
+      },
       method: [
         "先確認出生資料、時辰交界與第一版時間限制。",
         "先讀命宮主星；空宮時只借對宮作線索，不直接移星。",
         "再讀身宮，分辨先天基調與後天實際投入。",
         "合看命宮、財帛、官祿、遷移四個三方四正宮位。",
-        "最後加入生年四化；祿權科忌都需與星曜本質及落宮一起解釋。",
+        "加入十四輔星，先看同宮如何調整主星，再分辨助力、移動、資源與壓力訊號。",
+        "再加入生年四化；祿權科忌都需與星曜本質及落宮一起解釋。",
+        "大限先確認順逆與虛歲區間；未加入大限四化與流年以前，不用它直接預測事件。",
         "用當事人的實際經驗驗證，保留門派差異與未計算項目的空白。"
       ]
     };
   }
 
-  return { build, STAR_GUIDES, PALACE_GUIDES, MUTAGEN_GUIDES, BODY_GUIDES };
+  return { build, STAR_GUIDES, MINOR_STAR_GUIDES, PALACE_GUIDES, MUTAGEN_GUIDES, BODY_GUIDES };
 });

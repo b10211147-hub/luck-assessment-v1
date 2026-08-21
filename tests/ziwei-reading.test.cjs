@@ -11,6 +11,9 @@ const ZiweiReading = require("../ziwei-reading.js");
   assert.ok(reading.core.fact.includes("命宮"));
   assert.ok(reading.core.hint.includes("身宮"));
   assert.ok(reading.method.length >= 6);
+  assert.equal(reading.extension.decadals.items.length, 12);
+  assert.ok(reading.extension.rulers.fact.includes("命主"));
+  assert.ok(reading.extension.auxiliaries.fact.includes("十四輔星"));
   assert.ok(reading.palaces.every((item) => item.facts && item.hint && item.question));
   assert.ok(reading.palaces.find((item) => item.palace.name === "疾厄宮").caution.includes("醫療診斷"));
 }
@@ -18,9 +21,10 @@ const ZiweiReading = require("../ziwei-reading.js");
 {
   const chart = ZiweiCore.calculate({ birthDate: "2026-08-22", timeIndex: 6, gender: "男", birthPlace: "台灣" });
   const reading = ZiweiReading.build(chart);
-  const pending = reading.transformations.find((item) => item.star === "文昌");
-  assert.equal(pending.status, "first-version-pending");
-  assert.ok(pending.text.includes("不能進一步判斷"));
+  const wenchang = reading.transformations.find((item) => item.star === "文昌");
+  assert.equal(wenchang.status, "calculated");
+  assert.ok(wenchang.palaceName);
+  assert.ok(wenchang.text.includes("文昌"));
 }
 
 {

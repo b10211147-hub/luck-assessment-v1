@@ -54,11 +54,16 @@ function starNames(palace) {
   return palace.stars.length ? palace.stars.map((star) => star.name).join("、") : "無十四主星";
 }
 
+function minorStarNames(palace) {
+  return palace.minorStars.length ? palace.minorStars.map((star) => star.name).join("、") : "無十四輔星落宮";
+}
+
 function renderPalace(palace) {
   const flags = [palace.isSoul ? "命宮" : "", palace.isBody ? "身宮" : ""].filter(Boolean);
   return `<article class="palace${palace.isSoul ? " is-soul" : ""}${palace.isBody ? " is-body" : ""}" style="grid-area:${chartAreas[palace.index]}">
     <div><header><h4>${palace.name}</h4><span class="ganzhi">${palace.heavenlyStem}${palace.earthlyBranch}</span></header>${flags.length ? `<div class="flags">${flags.map((flag) => `<span class="flag">${flag}</span>`).join("")}</div>` : ""}</div>
-    ${palace.stars.length ? `<div class="star-list">${palace.stars.map((star) => `<span class="star"><b>${star.name}</b>${star.transformation ? `<small class="mutagen">${star.transformation}</small>` : ""}</span>`).join("")}</div>` : '<p class="empty-star">本宮無十四主星</p>'}
+    <div>${palace.stars.length ? `<div class="star-list">${palace.stars.map((star) => `<span class="star"><b>${star.name}</b>${star.transformation ? `<small class="mutagen">${star.transformation}</small>` : ""}</span>`).join("")}</div>` : '<p class="empty-star">本宮無十四主星</p>'}
+    <div class="minor-star-list">${palace.minorStars.map((star) => `<span class="minor-star ${star.type}">${star.name}${star.transformation ? `<small class="mutagen">${star.transformation}</small>` : ""}</span>`).join("") || '<span class="minor-star">無輔星</span>'}</div><small class="decadal-range">大限・虛歲 ${palace.decadal.range[0]}–${palace.decadal.range[1]}</small></div>
   </article>`;
 }
 
@@ -73,10 +78,12 @@ function renderDetailedReading(result) {
   $("#mutagenReadingContent").innerHTML = `<div class="mutagen-reading-list">${reading.transformations.map((item) => `<section><header><b>${item.label}・${item.star}</b><span>${item.palaceName || "宮位暫未計算"}</span></header><p>${escapeHtml(item.text)}</p><small>判讀界線：${escapeHtml(item.caution)}</small></section>`).join("")}</div>`;
   const palaceReadings = [...reading.palaces].sort((a, b) => PALACE_DISPLAY_ORDER.indexOf(a.palace.name) - PALACE_DISPLAY_ORDER.indexOf(b.palace.name));
   $("#palaceReadingContent").innerHTML = palaceReadings.map((item) => `<details class="palace-reading" ${item.palace.isSoul ? "open" : ""}><summary><span>${item.palace.name}${item.palace.isBody ? "・身宮" : ""}</span><small>${escapeHtml(starNames(item.palace))}</small></summary><div class="palace-reading-body"><p class="palace-domain"><b>這一宮看什麼：</b>${escapeHtml(item.guide.domain)}。${escapeHtml(item.guide.focus)}。</p>${factHint(item.facts, item.hint)}<p class="teacher-question"><b>老師可追問：</b>${escapeHtml(item.question)}</p>${item.caution ? `<p class="health-caution">${escapeHtml(item.caution)}</p>` : ""}</div></details>`).join("");
+  $("#extensionReadingContent").innerHTML = `<div class="extension-reading"><section class="extension-section"><h5>命主與身主</h5>${factHint(reading.extension.rulers.fact, reading.extension.rulers.hint)}</section><section class="extension-section"><h5>十四輔星</h5>${factHint(reading.extension.auxiliaries.fact, reading.extension.auxiliaries.hint)}</section><section class="extension-section"><h5>十二宮大限</h5>${factHint(reading.extension.decadals.fact, reading.extension.decadals.hint)}<div class="decadal-grid">${reading.extension.decadals.items.sort((a, b) => a.range[0] - b.range[0]).map((item) => `<div class="decadal-item"><b>虛歲 ${item.range[0]}–${item.range[1]}</b><span>${item.palace.name}・${item.palace.heavenlyStem}${item.palace.earthlyBranch}</span></div>`).join("")}</div></section></div>`;
   $("#methodReadingContent").innerHTML = reading.method.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
 }
 
 function renderResult(result) {
+  if (!result || result.version !== "1.1.0") result = ZiweiCore.calculate(result.input || result);
   currentResult = result;
   const lifePalace = result.palaces[result.soulIndex];
   const bodyPalace = result.palaces[result.bodyIndex];
@@ -87,14 +94,19 @@ function renderResult(result) {
     `農曆 ${result.calendar.display}`,
     `命宮 ${lifePalace.name.replace("宮", "")}・${result.lifeStem}${result.lifeBranch}`,
     `身宮在${bodyPalace.name}`,
+    `命主${result.soulRuler}・身主${result.bodyRuler}`,
+    `大限${result.decadalDirection}`,
     result.fiveElementsClass.name,
     `${result.input.birthPlace}・${result.input.timezone}`
   ].map((item) => `<span>${escapeHtml(item)}</span>`).join("");
 
-  const center = `<div class="chart-center"><div><span class="seal" aria-hidden="true">紫</span><strong>${escapeHtml(client)}</strong><p>${result.calendar.yearGanZhi}年・${result.fiveElementsClass.name}<br>命宮 ${result.lifeStem}${result.lifeBranch}・身宮 ${bodyPalace.name}</p></div></div>`;
+  const center = `<div class="chart-center"><div><span class="seal" aria-hidden="true">紫</span><strong>${escapeHtml(client)}</strong><p>${result.calendar.yearGanZhi}年・${result.fiveElementsClass.name}<br>命宮 ${result.lifeStem}${result.lifeBranch}・身宮 ${bodyPalace.name}<br>命主 ${result.soulRuler}・身主 ${result.bodyRuler}</p></div></div>`;
   $("#palaceChart").innerHTML = result.palaces.map(renderPalace).join("") + center;
   $("#lifeStars").innerHTML = `<p><strong>${escapeHtml(starNames(lifePalace))}</strong></p><p>${lifePalace.stars.length ? "以上為命宮內的十四主星。" : "命宮為空宮；第一版只陳列事實，解讀時可再人工參考對宮及三方。"}</p>`;
   $("#bodyPalace").innerHTML = `<p><strong>${bodyPalace.name}・${bodyPalace.heavenlyStem}${bodyPalace.earthlyBranch}</strong></p><p>宮內十四主星：${escapeHtml(starNames(bodyPalace))}</p>`;
+  $("#rulers").innerHTML = `<p><strong>命主 ${result.soulRuler}・身主 ${result.bodyRuler}</strong></p><p>命主依命宮地支，身主依生年地支而定；作為命身宮的補充線索。</p>`;
+  $("#decadalDirection").innerHTML = `<p><strong>${result.decadalDirection}・${result.fiveElementsClass.value}歲起限</strong></p><p>採虛歲區間，每十年移一宮；目前不含大限四化與流年。</p>`;
+  $("#auxiliaryStars").innerHTML = result.palaces.filter((palace) => palace.minorStars.length).map((palace) => `<div class="auxiliary-item"><b>${palace.name}・${palace.heavenlyStem}${palace.earthlyBranch}</b><span>${escapeHtml(minorStarNames(palace))}</span></div>`).join("");
   $("#fourTransformations").innerHTML = result.fourTransformations.map((item) => `<div class="transformation-item"><b>${item.label}・${item.star}</b>${item.status === "calculated" ? `<span>${item.palaceName}</span>` : '<span class="pending">第一版暫未計算該輔星宮位</span>'}</div>`).join("");
   $("#triadPalaces").innerHTML = result.triadIndexes.map((index, position) => {
     const palace = result.palaces[index];
@@ -106,7 +118,7 @@ function renderResult(result) {
   const readingIntro = lifePalace.stars.length
     ? `命宮見${starNames(lifePalace)}，可先從下列方向提問：`
     : `命宮無十四主星；以下暫借對宮${result.palaces[result.triadIndexes[3]].name}的${starNames(result.palaces[result.triadIndexes[3]])}作為訪談線索，不等同直接落命：`;
-  $("#plainReading").innerHTML = `<p>${escapeHtml(readingIntro)}</p><ul class="interpretation-list">${readingStars.length ? readingStars.map((star) => `<li><strong>${star.name}</strong>：${STAR_HINTS[star.name]}</li>`).join("") : "<li>本宮與對宮都未見十四主星，第一版不自動產生主星解讀，請人工合看三方四正。</li>"}<li><strong>身宮在${bodyPalace.name}</strong>：後天投入與行動焦點可優先從此宮主題觀察，但仍需結合實際人生階段。</li><li><strong>三方四正</strong>：命、財帛、官祿與遷移四個面向應連動觀察，不宜只用命宮單點下結論。</li></ul>`;
+  $("#plainReading").innerHTML = `<p>${escapeHtml(readingIntro)}</p><ul class="interpretation-list">${readingStars.length ? readingStars.map((star) => `<li><strong>${star.name}</strong>：${STAR_HINTS[star.name]}</li>`).join("") : "<li>本宮與對宮都未見十四主星，第一版不自動產生主星解讀，請人工合看三方四正。</li>"}<li><strong>身宮在${bodyPalace.name}</strong>：後天投入與行動焦點可優先從此宮主題觀察，但仍需結合實際人生階段。</li><li><strong>命主／身主</strong>：${result.soulRuler}與${result.bodyRuler}只作補充線索，不取代命身宮。</li><li><strong>大限${result.decadalDirection}</strong>：從虛歲${result.fiveElementsClass.value}歲起限，目前只讀人生階段，不直接預測吉凶事件。</li><li><strong>三方四正</strong>：命、財帛、官祿與遷移四個面向應連動觀察，不宜只用命宮單點下結論。</li></ul>`;
   renderDetailedReading(result);
   $("#limitationsList").innerHTML = result.limitations.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
   $("#resultView").hidden = false;
@@ -126,12 +138,15 @@ function resultText(result) {
     `農曆：${result.calendar.display}`,
     `命宮：${result.lifeStem}${result.lifeBranch}　主星：${starNames(lifePalace)}`,
     `身宮：${bodyPalace.name}（${bodyPalace.heavenlyStem}${bodyPalace.earthlyBranch}）`,
+    `命主／身主：${result.soulRuler}／${result.bodyRuler}`,
     `五行局：${result.fiveElementsClass.name}`,
+    `大限：${result.decadalDirection}，虛歲${result.fiveElementsClass.value}歲起限`,
     "",
     "【排盤事實・十二宮】"
   ];
-  result.palaces.forEach((palace) => lines.push(`${palace.name} ${palace.heavenlyStem}${palace.earthlyBranch}${palace.isBody ? "［身宮］" : ""}：${palace.stars.length ? palace.stars.map((star) => `${star.name}${star.transformation ? `（${star.transformation}）` : ""}`).join("、") : "無十四主星"}`));
-  lines.push("", "【生年四化】", ...result.fourTransformations.map((item) => `${item.label}・${item.star}：${item.palaceName || "第一版暫未計算該輔星宮位"}`));
+  result.palaces.forEach((palace) => lines.push(`${palace.name} ${palace.heavenlyStem}${palace.earthlyBranch}${palace.isBody ? "［身宮］" : ""}｜大限虛歲${palace.decadal.range[0]}–${palace.decadal.range[1]}：主星 ${palace.stars.length ? palace.stars.map((star) => `${star.name}${star.transformation ? `（${star.transformation}）` : ""}`).join("、") : "無十四主星"}；輔星 ${minorStarNames(palace)}`));
+  lines.push("", "【生年四化】", ...result.fourTransformations.map((item) => `${item.label}・${item.star}：${item.palaceName || "宮位暫未計算"}`));
+  lines.push("", "【命主身主・十四輔星・大限】", `命主 ${result.soulRuler}；身主 ${result.bodyRuler}`, ...result.palaces.filter((palace) => palace.minorStars.length).map((palace) => `${palace.name}：${minorStarNames(palace)}`), ...result.palaces.slice().sort((a, b) => a.decadal.range[0] - b.decadal.range[0]).map((palace) => `虛歲${palace.decadal.range[0]}–${palace.decadal.range[1]}：${palace.name} ${palace.heavenlyStem}${palace.earthlyBranch}`));
   lines.push("", "【命宮三方四正】", ...result.triadIndexes.map((index, position) => {
     const palace = result.palaces[index];
     return `${position === 0 ? "本宮" : position === 3 ? "對宮" : "三合宮"}・${palace.name} ${palace.heavenlyStem}${palace.earthlyBranch}：${starNames(palace)}`;
@@ -150,6 +165,7 @@ function resultText(result) {
     lines.push(`${item.palace.name}${item.palace.isBody ? "［身宮］" : ""}`, `這一宮看什麼：${item.guide.domain}。${item.guide.focus}。`, `排盤事實：${item.facts}`, `解讀提示：${item.hint}`, `老師可追問：${item.question}`);
     if (item.caution) lines.push(item.caution);
   });
+  lines.push("", "【完整解讀・輔星與大限】", `排盤事實：${detailed.extension.rulers.fact}`, `解讀提示：${detailed.extension.rulers.hint}`, `排盤事實：${detailed.extension.auxiliaries.fact}`, `解讀提示：${detailed.extension.auxiliaries.hint}`, `排盤事實：${detailed.extension.decadals.fact}`, `解讀提示：${detailed.extension.decadals.hint}`);
   lines.push("", "【老師解讀順序】", ...detailed.method.map((item, index) => `${index + 1}. ${item}`));
   lines.push("", "【第一版限制】", ...result.limitations.map((item) => `・${item}`));
   return lines.join("\n");
