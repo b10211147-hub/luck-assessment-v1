@@ -20,6 +20,7 @@ const STAR_HINTS = {
   破軍: "偏向重整、突破與汰舊，可觀察改變之前是否先保留必要的基礎。"
 };
 const chartAreas = { 3: "si", 4: "wu", 5: "wei", 6: "shen", 2: "chen", 7: "you", 1: "mao", 8: "xu", 0: "yin", 11: "chou", 10: "zi", 9: "hai" };
+const PALACE_DISPLAY_ORDER = ["命宮", "兄弟宮", "夫妻宮", "子女宮", "財帛宮", "疾厄宮", "遷移宮", "僕役宮", "官祿宮", "田宅宮", "福德宮", "父母宮"];
 let currentResult = null;
 let toastTimer = null;
 
@@ -60,6 +61,20 @@ function renderPalace(palace) {
   </article>`;
 }
 
+function factHint(fact, hint) {
+  return `<div class="fact-hint"><section class="reading-fact"><b>排盤事實</b><p>${escapeHtml(fact)}</p></section><section class="reading-hint-box"><b>解讀提示</b><p>${escapeHtml(hint)}</p></section></div>`;
+}
+
+function renderDetailedReading(result) {
+  const reading = ZiweiReading.build(result);
+  $("#coreReadingContent").innerHTML = factHint(reading.core.fact, reading.core.hint) + `<div class="star-guide-list">${reading.core.starGuides.length ? reading.core.starGuides.map((guide) => `<section class="star-guide"><h5>${guide.name}${guide.borrowed ? "（借對宮參考）" : ""}</h5><p><b>核心基調：</b>${guide.core}</p><p><b>可發揮：</b>${guide.strength}</p><p><b>需留意：</b>${guide.watch}</p><p class="teacher-question"><b>可追問：</b>${guide.question}</p></section>`).join("") : '<p class="pending-copy">命宮與對宮都沒有十四主星，第一版不產生主星性格稿。</p>'}</div><p class="reading-note">${reading.core.note}</p>`;
+  $("#triadReadingContent").innerHTML = factHint(reading.triad.fact, reading.triad.hint) + `<div class="triad-reading-list">${reading.triad.items.map((item) => `<section><b>${item.relation}・${item.palace.name}</b><span>${escapeHtml(item.domain)}</span><p>${escapeHtml(starNames(item.palace))}</p></section>`).join("")}</div>`;
+  $("#mutagenReadingContent").innerHTML = `<div class="mutagen-reading-list">${reading.transformations.map((item) => `<section><header><b>${item.label}・${item.star}</b><span>${item.palaceName || "宮位暫未計算"}</span></header><p>${escapeHtml(item.text)}</p><small>判讀界線：${escapeHtml(item.caution)}</small></section>`).join("")}</div>`;
+  const palaceReadings = [...reading.palaces].sort((a, b) => PALACE_DISPLAY_ORDER.indexOf(a.palace.name) - PALACE_DISPLAY_ORDER.indexOf(b.palace.name));
+  $("#palaceReadingContent").innerHTML = palaceReadings.map((item) => `<details class="palace-reading" ${item.palace.isSoul ? "open" : ""}><summary><span>${item.palace.name}${item.palace.isBody ? "・身宮" : ""}</span><small>${escapeHtml(starNames(item.palace))}</small></summary><div class="palace-reading-body"><p class="palace-domain"><b>這一宮看什麼：</b>${escapeHtml(item.guide.domain)}。${escapeHtml(item.guide.focus)}。</p>${factHint(item.facts, item.hint)}<p class="teacher-question"><b>老師可追問：</b>${escapeHtml(item.question)}</p>${item.caution ? `<p class="health-caution">${escapeHtml(item.caution)}</p>` : ""}</div></details>`).join("");
+  $("#methodReadingContent").innerHTML = reading.method.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+}
+
 function renderResult(result) {
   currentResult = result;
   const lifePalace = result.palaces[result.soulIndex];
@@ -91,6 +106,7 @@ function renderResult(result) {
     ? `命宮見${starNames(lifePalace)}，可先從下列方向提問：`
     : `命宮無十四主星；以下暫借對宮${result.palaces[result.triadIndexes[3]].name}的${starNames(result.palaces[result.triadIndexes[3]])}作為訪談線索，不等同直接落命：`;
   $("#plainReading").innerHTML = `<p>${escapeHtml(readingIntro)}</p><ul class="interpretation-list">${readingStars.length ? readingStars.map((star) => `<li><strong>${star.name}</strong>：${STAR_HINTS[star.name]}</li>`).join("") : "<li>本宮與對宮都未見十四主星，第一版不自動產生主星解讀，請人工合看三方四正。</li>"}<li><strong>身宮在${bodyPalace.name}</strong>：後天投入與行動焦點可優先從此宮主題觀察，但仍需結合實際人生階段。</li><li><strong>三方四正</strong>：命、財帛、官祿與遷移四個面向應連動觀察，不宜只用命宮單點下結論。</li></ul>`;
+  renderDetailedReading(result);
   $("#limitationsList").innerHTML = result.limitations.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
   $("#resultView").hidden = false;
   $("#resultView").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
@@ -99,6 +115,7 @@ function renderResult(result) {
 function resultText(result) {
   const lifePalace = result.palaces[result.soulIndex];
   const bodyPalace = result.palaces[result.bodyIndex];
+  const detailed = ZiweiReading.build(result);
   const lines = [
     "【奉母宮紫微斗數命盤・第一版】",
     `姓名／代稱：${result.input.clientName || "未填"}`,
@@ -123,6 +140,16 @@ function resultText(result) {
     ? readingPalace.stars.map((star) => `${star.name}：${STAR_HINTS[star.name]}`)
     : ["命宮與對宮都未見十四主星，第一版不自動產生主星解讀，請人工合看三方四正。"]));
   lines.push(`身宮在${bodyPalace.name}：後天投入與行動焦點可優先從此宮主題觀察，但仍需結合實際人生階段。`);
+  lines.push("", "【完整解讀・核心輪廓】", `排盤事實：${detailed.core.fact}`, `解讀提示：${detailed.core.hint}`);
+  detailed.core.starGuides.forEach((guide) => lines.push(`${guide.name}${guide.borrowed ? "（借對宮參考）" : ""}：${guide.core}。可發揮：${guide.strength}。需留意：${guide.watch}。可追問：${guide.question}`));
+  lines.push("", "【完整解讀・三方四正】", `排盤事實：${detailed.triad.fact}`, `解讀提示：${detailed.triad.hint}`);
+  lines.push("", "【完整解讀・生年四化】", ...detailed.transformations.flatMap((item) => [`${item.label}・${item.star}${item.palaceName ? `（${item.palaceName}）` : "（宮位暫未計算）"}：${item.text}`, `判讀界線：${item.caution}`]));
+  lines.push("", "【完整解讀・十二宮】");
+  [...detailed.palaces].sort((a, b) => PALACE_DISPLAY_ORDER.indexOf(a.palace.name) - PALACE_DISPLAY_ORDER.indexOf(b.palace.name)).forEach((item) => {
+    lines.push(`${item.palace.name}${item.palace.isBody ? "［身宮］" : ""}`, `這一宮看什麼：${item.guide.domain}。${item.guide.focus}。`, `排盤事實：${item.facts}`, `解讀提示：${item.hint}`, `老師可追問：${item.question}`);
+    if (item.caution) lines.push(item.caution);
+  });
+  lines.push("", "【老師解讀順序】", ...detailed.method.map((item, index) => `${index + 1}. ${item}`));
   lines.push("", "【第一版限制】", ...result.limitations.map((item) => `・${item}`));
   return lines.join("\n");
 }
@@ -147,9 +174,13 @@ async function downloadPdf() {
   if (!currentResult) return;
   if (typeof html2canvas === "undefined" || !window.jspdf) return showToast("PDF 元件尚未載入，請重新整理後再試");
   const capture = $("#pdfCaptureArea");
+  const readingDetails = [...capture.querySelectorAll(".palace-reading")];
+  const detailStates = readingDetails.map((detail) => detail.open);
   showToast("正在產生 PDF，請稍候…");
   capture.classList.add("pdf-export");
+  readingDetails.forEach((detail) => detail.open = true);
   try {
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     const canvas = await html2canvas(capture, { scale: 1.35, useCORS: true, backgroundColor: "#ffffff", windowWidth: 1180, scrollX: 0, scrollY: 0 });
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4", compress: true });
@@ -167,6 +198,7 @@ async function downloadPdf() {
     console.error(error);
     showToast("PDF 產生失敗，請重新整理後再試");
   } finally {
+    readingDetails.forEach((detail, index) => detail.open = detailStates[index]);
     capture.classList.remove("pdf-export");
   }
 }

@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#183c32">
-  <meta name="description" content="奉母宮老師專用紫微斗數排盤工具第一版">
+  <meta name="description" content="奉母宮老師專用紫微斗數排盤、解說與解讀工具">
   <title>奉母宮｜紫微斗數老師工具</title>
-  <link rel="stylesheet" href="ziwei.css?v=20260822-1">
+  <link rel="stylesheet" href="ziwei.css?v=20260822-2">
 </head>
 <body>
   <main>
@@ -61,7 +61,7 @@
           <div id="pdfCaptureArea">
             <div class="result-head">
               <div><small id="resultMeta"></small><h2 id="resultTitle"></h2></div>
-              <div class="actions"><button id="pdfBtn" class="ghost" type="button">下載 PDF</button><button id="copyBtn" class="ghost" type="button">複製命盤</button><button id="saveBtn" class="primary" type="button">儲存案例</button></div>
+              <div class="actions"><button id="pdfBtn" class="ghost" type="button">下載完整解讀 PDF</button><button id="copyBtn" class="ghost" type="button">複製完整解讀</button><button id="saveBtn" class="primary" type="button">儲存案例</button></div>
             </div>
             <div id="factSummary" class="summary-strip"></div>
             <section class="chart-section" aria-labelledby="chartTitle">
@@ -75,12 +75,22 @@
               <article class="wide"><h3>命宮三方四正</h3><div id="triadPalaces" class="triad-list"></div></article>
             </section>
             <section class="interpretation">
-              <div class="reading-label hint"><span>解讀提示</span><h3>簡易白話判讀</h3></div>
+              <div class="reading-label hint"><span>解讀提示</span><h3>核心解讀摘要</h3></div>
               <div id="plainReading"></div>
               <p class="reading-disclaimer">以下只整理主星可能代表的觀察方向，不是吉凶定論；老師仍需合看輔煞、四化、宮位互動與當事人實際處境。</p>
             </section>
+            <section class="full-reading" aria-labelledby="fullReadingTitle">
+              <div class="reading-label hint"><span>解說解讀版</span><h3 id="fullReadingTitle">完整老師解讀稿</h3></div>
+              <p class="reading-lead">依「核心輪廓 → 三方四正 → 生年四化 → 十二宮」展開；每一段都分開列出盤面事實與解讀提示。</p>
+              <nav class="reading-jump" aria-label="解讀段落"><a href="#coreReading">核心輪廓</a><a href="#triadReading">三方四正</a><a href="#mutagenReading">生年四化</a><a href="#palaceReading">十二宮</a><a href="#methodReading">老師解讀順序</a></nav>
+              <article id="coreReading" class="reading-block"><h4>一、核心輪廓</h4><div id="coreReadingContent"></div></article>
+              <article id="triadReading" class="reading-block"><h4>二、命宮三方四正整合</h4><div id="triadReadingContent"></div></article>
+              <article id="mutagenReading" class="reading-block"><h4>三、生年四化詳解</h4><div id="mutagenReadingContent"></div></article>
+              <article id="palaceReading" class="reading-block"><h4>四、十二宮逐宮解說</h4><p class="block-intro">點開宮位可查看該宮掌管範圍、盤面事實、解讀方向與老師可追問問題。</p><div id="palaceReadingContent" class="palace-reading-list"></div></article>
+              <article id="methodReading" class="reading-block"><h4>五、老師解讀順序</h4><ol id="methodReadingContent" class="method-list"></ol></article>
+            </section>
             <details class="limitations" open><summary>第一版計算口徑與暫未納入項目</summary><ul id="limitationsList"></ul></details>
-            <p class="method-note">本頁安星規則依《紫微斗數全書》常見排法整理，並以 <a href="https://github.com/SylarLong/iztro" target="_blank" rel="noopener">iztro 開源排盤實作</a>交叉核對。不同門派對歲首、閏月、晚子時及四化可能有不同口徑，使用前請以本頁列出的計算口徑為準。</p>
+            <p class="method-note">本頁安星規則依《紫微斗數全書》常見排法整理，並以 <a href="https://github.com/SylarLong/iztro" target="_blank" rel="noopener">iztro 開源排盤實作</a>交叉核對；解說層另參考其<a href="https://docs.iztro.com/zh_TW/learn/major-star" target="_blank" rel="noopener">十四主星</a>與<a href="https://docs.iztro.com/zh_TW/learn/mutagen" target="_blank" rel="noopener">四化</a>知識文件。不同門派對歲首、閏月、晚子時及四化可能有不同口徑，使用前請以本頁列出的計算口徑為準。</p>
           </div>
         </section>
       </section>
@@ -97,6 +107,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="ziwei-core.js?v=20260822-1"></script>
-  <script src="ziwei.js?v=20260822-1"></script>
+  <script src="ziwei-reading.js?v=20260822-1"></script>
+  <script src="ziwei.js?v=20260822-2"></script>
 </body>
 </html>
