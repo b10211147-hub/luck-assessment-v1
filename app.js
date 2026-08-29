@@ -35,7 +35,7 @@ function renderActivities() {
   $("#activityList").innerHTML = state.activities.map((item) => `
     <article class="activity-card">
       <div class="activity-card__top"><h3>${item.title}</h3></div>
-      <div class="activity-card__body"><p>${[...item.description].slice(0, 50).join("")}</p>${item.details ? `<button class="read-more" data-register="${item.id}" ${locked ? "disabled" : ""}>閱讀更多</button>` : ""}<div class="meta"><div><small>報名費用</small><strong>${item.price ? money(item.price) : "隨喜"}</strong></div><span class="registered">已報名 ${item.registered} 名</span></div><button class="primary-btn" data-register="${item.id}" ${locked ? "disabled" : ""}>${locked ? "連接 LINE 中…" : "立即報名"}</button></div>
+      <div class="activity-card__body"><p>${[...item.description].slice(0, 50).join("")}</p>${item.details ? `<button class="read-more" data-register="${item.id}" ${locked ? "disabled" : ""}>閱讀更多</button>` : ""}<div class="meta"><div><small>報名費用</small><strong>${item.price ? money(item.price) : "老師評估"}</strong></div><span class="registered">已報名 ${item.registered} 名</span></div><button class="primary-btn" data-register="${item.id}" ${locked ? "disabled" : ""}>${locked ? "連接 LINE 中…" : "立即報名"}</button></div>
     </article>`).join("");
 }
 
@@ -74,7 +74,7 @@ function openRegistration(id) {
   updateTotal(); showView("formView");
 }
 
-function updateTotal() { $("#totalPrice").textContent = state.selected?.price ? money(state.selected.price) : "隨喜"; }
+function updateTotal() { $("#totalPrice").textContent = state.selected?.price ? money(state.selected.price) : "老師評估"; }
 
 async function submitRegistration(event) {
   event.preventDefault();
