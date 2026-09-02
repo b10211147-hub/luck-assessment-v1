@@ -63,7 +63,6 @@
     number: document.querySelector("#resultNumber"),
     deity: document.querySelector("#resultDeity"),
     attitude: document.querySelector("#resultAttitude"),
-    theme: document.querySelector("#resultTheme"),
     poem: document.querySelector("#resultPoem"),
     title: document.querySelector("#resultTitle"),
     message: document.querySelector("#resultMessage"),
@@ -89,35 +88,35 @@
   }
 
   const aspectDefinitions = [
-    {
-      key: "career", label: "事業", icon: "業",
-      themes: ["工作", "事業", "財運", "合作", "格局", "名聲", "謀略", "根基"]
-    },
-    {
-      key: "wealth", label: "財運走勢", icon: "財",
-      themes: ["財運", "事業", "工作", "合作", "格局", "根基", "福德", "厚德"]
-    },
-    {
-      key: "love", label: "感情", icon: "緣",
-      themes: ["感情", "情緣", "放下"]
-    },
-    {
-      key: "people", label: "人際", icon: "和",
-      themes: ["人際", "朋友", "合作", "官非", "化解", "品德"]
-    },
-    {
-      key: "exam", label: "考試", icon: "學",
-      themes: ["學習", "學業", "考驗", "洞察"]
-    },
-    {
-      key: "family", label: "家庭", icon: "家",
-      themes: ["家庭", "家運", "居所", "日常", "根基"]
-    },
-    {
-      key: "health", label: "健康", icon: "安",
-      themes: ["身心", "苦心", "日常", "復原"]
-    }
+    { key: "career", label: "事業", icon: "業" },
+    { key: "wealth", label: "財運走勢", icon: "財" },
+    { key: "love", label: "感情", icon: "緣" },
+    { key: "people", label: "人際", icon: "和" },
+    { key: "exam", label: "考試", icon: "學" },
+    { key: "family", label: "家庭", icon: "家" },
+    { key: "health", label: "健康", icon: "安" }
   ];
+
+  const universalBanks = {
+    positive: {
+      title: ["順勢而行，答案會逐漸清楚", "好機正在靠近，仍需真心經營", "前路有光，穩穩把握眼前", "可以向前，也要保持清醒"],
+      message: ["這支籤帶有開展的氣息。無論你問的是哪一件事，都可以留意正在回應你的人、消息與機會。", "眼前已有轉好的條件，但好結果仍需要你主動承接，不必只在原地等待。", "事情正慢慢走向明朗。守住真誠與分寸，適合你的方向會更容易被看見。", "籤意鼓勵你往前一步，同時看清現實條件，讓希望與行動彼此配合。"],
+      reading: ["整體籤勢偏向順遂與開展，但不限定在感情、事業或財運其中一項。請依你心中所問，從下方選擇相應面向。", "這首籤呈現的是機會逐漸成形。放在不同問題中，會分別對應靠近、成長、改善或重新開始。", "目前較有推進與改善的空間。真正的落點要依你詢問的事情判斷，而不是被詩句表面的用詞限制。", "籤勢提供正向條件，但仍需配合現況與實際行動。請選擇所問面向，查看更貼近問題的解讀。"],
+      advice: ["先展開你真正詢問的面向，從其中的「行動」選一件今天能完成的事。", "只聚焦這次所問的一件事，選擇相應面向後，先做最具體的一小步。", "把希望落在行動上：選擇所問面向，完成其中一項可驗證的調整。", "先確認自己真正想問什麼，再依該面向行動，不必同時套用所有解讀。"]
+    },
+    steady: {
+      title: ["先穩住，再看清下一步", "答案不在急迫裡", "把眼前理順，方向自然浮現", "慢一點，反而能走得更準"],
+      message: ["這支籤提醒你先回到穩定。事情未必不好，只是現在更需要時間、觀察與清楚的步驟。", "目前適合整理而不是催促結果。無論所問何事，先分清事實、感受與真正需要。", "局勢仍在累積，太快下結論容易忽略重要細節。穩住節奏，答案會逐步顯現。", "這不是停滯，而是整頓期。把能掌握的部分做好，後續變化會更容易判斷。"],
+      reading: ["整體籤勢偏向守成與觀察，不限定任何單一主題。請依你所問的面向，分別理解其中的等待、整理與累積。", "此刻的關鍵是穩定與釐清。同一首詩放在感情、工作或家庭，會呈現不同的現況與做法。", "籤意提醒先處理基礎，再談結果。詩句只是象徵，真正的解讀要回到你這次詢問的事情。", "事情仍有調整空間，但需要耐心與次序。請從下方選擇面向，查看更具體的落點。"],
+      advice: ["先展開你正在詢問的面向，把其中最需要整理的一件事寫下來。", "暫時不急著定論，選擇所問面向後，先完成一項能讓情況更清楚的行動。", "只處理這次所問的核心問題，照該面向的「行動」逐步調整。", "先把節奏穩住，再依所問面向做一個具體、可持續的小改變。"]
+    },
+    caution: {
+      title: ["先停一下，確認清楚再前進", "眼前宜慎，不宜急斷", "看清風險，才能保護自己", "別讓焦慮替你做決定"],
+      message: ["這支籤提醒你先留意資訊不清、情緒放大或界線混亂的地方。謹慎不是悲觀，而是替自己保留選擇。", "目前不宜只憑一時感受下結論。無論所問何事，都要先確認事實、責任與可能的後果。", "籤意要你看見警訊，但不是斷定結果。先減少衝動與猜測，情況仍可能因正確處理而改善。", "眼前容易因急切而看錯重點。先守住安全與分寸，再決定是否繼續、調整或暫停。"],
+      reading: ["整體籤勢偏向提醒與防範，但不代表每個面向都會發生壞事。請依所問事項查看具體風險與可行做法。", "此籤的作用是提醒你避免盲點，不限定在財、情或工作。詩句放進不同問題時，警示的內容也會不同。", "現在最重要的是查明與保留餘地。不要被詩句表面的名詞綁住，請回到你真正詢問的面向。", "籤勢顯示需要多一分謹慎，結果仍會受你的選擇與行動影響。請從下方面向取得具體提醒。"],
+      advice: ["先選擇所問面向，停止一項最可能擴大風險的行動，再補齊必要資訊。", "今天不急著做重大決定；先依所問面向確認一個尚未查清的事實。", "把猜測與事實分開寫下來，再依該面向的「行動」處理。", "先保護自己的安全、界線與資源，再從所問面向找出下一步。"]
+    }
+  };
 
   const aspectBanks = {
     career: {
@@ -211,30 +210,37 @@
     return list[Math.abs(seed) % list.length];
   }
 
+  function getUniversalGuidance(oracle) {
+    const tone = guidanceTone(oracle.level);
+    const bank = universalBanks[tone];
+    const seed = oracle.number * 13;
+    return {
+      title: pick(bank.title, seed),
+      message: pick(bank.message, seed + 1),
+      reading: pick(bank.reading, seed + 2),
+      advice: pick(bank.advice, seed + 3)
+    };
+  }
+
   function getAspectGuidance(oracle, aspect, aspectIndex = 0) {
     const tone = guidanceTone(oracle.level);
     const bank = aspectBanks[aspect.key];
     const seed = oracle.number * 7 + aspectIndex * 11;
-    const related = aspect.themes.includes(oracle.theme);
     const quotedLine = oracle.poem[(oracle.number + aspectIndex) % oracle.poem.length];
     const lens = deityLenses[oracle.deity][aspect.key];
-    const turn = related ? `依「${oracle.title}」落在${aspect.label}的提醒，${oracle.advice}` : `${pick(bank.turn, seed + 1)}；把「${oracle.title}」的提醒落實成今天能完成的一步。`;
     const healthNote = aspect.key === "health" ? " 此項僅供信仰與生活整理參考，不能取代醫療診斷。" : "";
     return {
-      rise: `籤題「${oracle.title}」映照到${aspect.label}，${pick(bank[tone], seed)}。`,
-      carry: `詩中「${quotedLine}」點出關鍵：${lens}；本籤的主軸仍在「${oracle.theme}」。`,
-      turn: `${turn}${healthNote}`,
-      close: `循此而行，${pick(bank.outcome, seed + 2)}；守住「${oracle.title}」所示的${oracle.theme}功課，結果仍要靠你的選擇與持續行動來完成。`
+      rise: `若你問的是${aspect.label}，${pick(bank[tone], seed)}。`,
+      carry: `詩中「${quotedLine}」放在${aspect.label}來看，取的是其中的時機、取捨與行動含義：${lens}。`,
+      turn: `此面向可先這樣做：${pick(bank.turn, seed + 1)}。${healthNote}`,
+      close: `循此而行，${pick(bank.outcome, seed + 2)}；籤意提供的是方向，結果仍要配合現況與持續行動來完成。`
     };
   }
 
   function renderAspects(oracle) {
-    const relatedAspectIndex = aspectDefinitions.findIndex(aspect => aspect.themes.includes(oracle.theme));
-    const defaultOpenIndex = relatedAspectIndex >= 0 ? relatedAspectIndex : 0;
     aspectGrid.replaceChildren(...aspectDefinitions.map((aspect, aspectIndex) => {
       const article = document.createElement("details");
       article.className = "aspect-item";
-      article.open = aspectIndex === defaultOpenIndex;
       const heading = document.createElement("summary");
       heading.className = "aspect-label";
       const icon = document.createElement("span");
@@ -282,23 +288,23 @@
 
   function showOracle(oracle, updateUrl = true) {
     if (!oracle) return;
+    const universal = getUniversalGuidance(oracle);
     currentOracle = oracle;
     lastNumber = oracle.number;
     fields.level.textContent = oracle.level;
     fields.number.textContent = `第 ${String(oracle.number).padStart(3, "0")} 籤`;
     fields.deity.textContent = oracle.deity;
     fields.attitude.textContent = oracle.attitude;
-    fields.theme.textContent = oracle.theme;
     fields.poem.replaceChildren(...oracle.poem.map((line, lineIndex) => {
       const p = document.createElement("p");
       p.textContent = line;
       p.style.setProperty("--line-index", lineIndex);
       return p;
     }));
-    fields.title.textContent = oracle.title;
-    fields.message.textContent = oracle.message;
-    fields.reading.textContent = oracle.reading;
-    fields.advice.textContent = oracle.advice;
+    fields.title.textContent = universal.title;
+    fields.message.textContent = universal.message;
+    fields.reading.textContent = universal.reading;
+    fields.advice.textContent = universal.advice;
     renderAspects(oracle);
 
     drawPanel.hidden = true;
@@ -377,6 +383,7 @@
   }
 
   function drawLotCard(oracle) {
+    const universal = getUniversalGuidance(oracle);
     const canvas = document.createElement("canvas");
     canvas.width = 1080;
     canvas.height = 1350;
@@ -442,11 +449,11 @@
     context.fillText(oracle.deity, 540, 365);
     context.fillStyle = "#916326";
     context.font = `800 25px ${sansFont}`;
-    context.fillText(`籤題　${oracle.theme}`, 540, 411);
+    context.fillText("一籤多解・依所問而看", 540, 411);
 
     context.fillStyle = "#6f1f2c";
-    setFittedFont(context, oracle.title, 70, 48, 820, 700, serifFont);
-    context.fillText(oracle.title, 540, 505);
+    setFittedFont(context, universal.title, 70, 48, 820, 700, serifFont);
+    context.fillText(universal.title, 540, 505);
 
     drawGoldDivider(context, 558);
 
@@ -479,7 +486,7 @@
     context.fillText("今日行動", 155, adviceBoxY + 58);
     context.fillStyle = "#3f342e";
     context.font = `700 36px ${sansFont}`;
-    drawWrappedText(context, oracle.advice, 132, adviceBoxY + 122, 816, 48, 3);
+    drawWrappedText(context, universal.advice, 132, adviceBoxY + 122, 816, 48, 3);
 
     context.textAlign = "center";
     context.fillStyle = "#7b2432";
@@ -572,14 +579,15 @@
 
   copyBtn.addEventListener("click", async () => {
     if (!currentOracle) return;
+    const universal = getUniversalGuidance(currentOracle);
     const text = [
       `奉母宮・第 ${currentOracle.number} 籤｜${currentOracle.level}`,
       currentOracle.deity,
       currentOracle.poem.join("\n"),
-      `\n神明慈語｜${currentOracle.title}`,
-      currentOracle.message,
-      `\n白話解籤｜${currentOracle.reading}`,
-      `行動提醒｜${currentOracle.advice}`,
+      `\n神明慈語｜${universal.title}`,
+      universal.message,
+      `\n白話解籤｜${universal.reading}`,
+      `行動提醒｜${universal.advice}`,
       ...aspectDefinitions.map((aspect, aspectIndex) => {
         const guidance = getAspectGuidance(currentOracle, aspect, aspectIndex);
         return `\n${aspect.label}\n起・現況｜${guidance.rise}\n承・關鍵｜${guidance.carry}\n轉・行動｜${guidance.turn}\n合・走向｜${guidance.close}`;
