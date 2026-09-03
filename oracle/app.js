@@ -190,6 +190,181 @@
     }
   };
 
+  const aspectContexts = {
+    career: {
+      subject: "工作與發展", foundation: "專業、流程與信用", skill: "能力與執行力",
+      resource: "時間、精力與職場資源", relationship: "主管、同事或合作對象的互動",
+      boundary: "責任、權限與期限", rhythm: "工作節奏與休息", method: "工作方法與優先順序",
+      change: "職位、跑道或做法的調整", signal: "回饋、成果與機會是否明朗",
+      risk: "最常卡住進度的核心問題", principle: "誠信、責任與長期價值"
+    },
+    wealth: {
+      subject: "財務與收入", foundation: "收支秩序與安全準備", skill: "財務判斷與開源能力",
+      resource: "現金流、時間與可承擔資本", relationship: "交易、合約與金錢承諾",
+      boundary: "預算、風險與借貸界線", rhythm: "進財、支出與儲蓄節奏", method: "記帳、配置與決策方法",
+      change: "收入結構或資金用途的調整", signal: "現金流、負債與收入穩定度",
+      risk: "最容易造成耗財的漏洞", principle: "正當來源、量力而為與守信"
+    },
+    love: {
+      subject: "感情與緣分", foundation: "自我價值、信任與安全感", skill: "表達、傾聽與相處能力",
+      resource: "時間、真心與情感投入", relationship: "彼此的互動與承諾",
+      boundary: "尊重、忠誠與個人界線", rhythm: "靠近、觀察與回應的節奏", method: "溝通與處理分歧的方法",
+      change: "相處模式或關係定位的調整", signal: "言行是否一致、關係是否明朗",
+      risk: "反覆造成受傷或猜疑的問題", principle: "真誠、尊重與不勉強彼此"
+    },
+    people: {
+      subject: "人際與合作", foundation: "信用、界線與互相尊重", skill: "溝通、協調與辨人能力",
+      resource: "時間、信任與人情往來", relationship: "朋友、同事與合作夥伴的互動",
+      boundary: "承諾、責任與往來分寸", rhythm: "聯繫、互助與保留距離的節奏", method: "確認資訊與處理誤會的方法",
+      change: "交友圈或合作方式的調整", signal: "對方是否可靠、互動是否對等",
+      risk: "最容易引發口舌或消耗的環節", principle: "誠實、互惠與不傳未證實之言"
+    },
+    exam: {
+      subject: "學習與考試", foundation: "基本功、作息與穩定練習", skill: "理解、記憶與解題能力",
+      resource: "時間、專注力與學習資源", relationship: "與老師、同學及競爭壓力的互動",
+      boundary: "讀書、休息與其他責任的界線", rhythm: "複習、練習與休息節奏", method: "理解、整理與訂正方法",
+      change: "讀書策略或應試方式的調整", signal: "錯題率、完成度與模擬成績",
+      risk: "最常失分或逃避的弱項", principle: "誠實面對程度、規律與不投機"
+    },
+    family: {
+      subject: "家庭與家運", foundation: "安全、秩序與彼此照顧", skill: "傾聽、協調與共同生活能力",
+      resource: "時間、金錢與照顧心力", relationship: "家人之間的互動與支持",
+      boundary: "家務、金錢與照顧責任", rhythm: "相處、溝通與休息的節奏", method: "討論家務與化解衝突的方法",
+      change: "家庭分工或相處方式的調整", signal: "爭執是否減少、合作是否增加",
+      risk: "反覆引發衝突的核心舊題", principle: "尊重、分擔與不把付出視為理所當然"
+    },
+    health: {
+      subject: "身心健康", foundation: "睡眠、飲食、活動與必要檢查", skill: "察覺身體訊號與自我照顧能力",
+      resource: "體力、時間與可用的醫療支持", relationship: "身體感受、情緒與生活壓力的互動",
+      boundary: "工作、休息與就醫的界線", rhythm: "作息、恢復與活動節奏", method: "記錄症狀與調整生活的方法",
+      change: "生活習慣或照顧安排的調整", signal: "症狀、睡眠與精神狀態的變化",
+      risk: "持續不適或最耗損身心的來源", principle: "安全、規律與及時尋求專業協助"
+    }
+  };
+
+  const readingFacets = [
+    v => ({
+      meaning: `先穩住${v.foundation}，${v.subject}才不會被一時焦慮帶偏`,
+      situation: `${v.subject}裡的雜訊可能比真正問題更大，需要分清可控制與只能觀察的部分`,
+      action: `列出${v.subject}最需要安定的一點，先完成能鞏固${v.foundation}的小事`,
+      outcome: `把${v.subject}從混亂收回到可掌握範圍，重新看見原本忽略的選擇`
+    }),
+    v => ({
+      meaning: `${v.skill}要靠準備承接，穩定累積比急著證明更重要`,
+      situation: `${v.subject}的落差多半在準備程度，而不是機會完全不存在`,
+      action: `找出最影響${v.subject}結果的一項能力，訂出七天內可以驗收的練習`,
+      outcome: `讓${v.skill}逐漸跟上目標，遇到機會時不再因準備不足而退縮`
+    }),
+    v => ({
+      meaning: `${v.resource}不只要取得，也要懂得分配、保留與長久運用`,
+      situation: `眼前容易只看${v.subject}得到多少，卻忽略${v.resource}正在何處流失`,
+      action: `盤點正在投入${v.subject}的三項資源，停止一項沒有實際回應的耗損`,
+      outcome: `把${v.resource}留給真正重要之處，使後續累積更穩、更有餘裕`
+    }),
+    v => ({
+      meaning: `${v.relationship}要靠長期一致的行動確認，不能只用想像補足答案`,
+      situation: `${v.subject}裡的感受與事實可能混在一起，需要觀察承諾是否真的做到`,
+      action: `針對${v.relationship}做一次直接確認，不預設答案並觀察後續行動`,
+      outcome: `讓${v.relationship}逐漸明朗，值得維持的會更穩，不合適的也較能放下`
+    }),
+    v => ({
+      meaning: `${v.subject}反覆不順的背後，常藏著${v.boundary}沒有說清楚`,
+      situation: `${v.boundary}若一直不明，小問題就容易反覆累積並影響判斷`,
+      action: `把${v.boundary}具體區分，這次先處理最需要釐清的一項`,
+      outcome: `減少${v.subject}因界線不明造成的反覆，使事情回到可以調整的位置`
+    }),
+    v => ({
+      meaning: `${v.rhythm}失衡時，先恢復穩定比繼續硬撐更能保住長期進展`,
+      situation: `疲憊或壓力正在影響${v.subject}的判斷，需要先辨認真正的耗損來源`,
+      action: `刪減一項非必要負擔，替${v.rhythm}留下固定而能持續的時間`,
+      outcome: `讓${v.subject}的節奏逐步回穩，也更能分辨什麼值得繼續投入`
+    }),
+    v => ({
+      meaning: `${v.method}若正確並能持續，會比偶爾用力或反覆換方向有效`,
+      situation: `${v.subject}的問題未必是能力不足，而是缺少可長久執行的方法`,
+      action: `把${v.subject}目標拆成三步，先完成最常卡住或最容易失誤的一步`,
+      outcome: `讓${v.subject}從碰運氣轉成有方法地前進，成果也更容易重現`
+    }),
+    v => ({
+      meaning: `${v.relationship}需要清楚安排與實際配合，不能只靠期待維持`,
+      situation: `${v.subject}現在要看各部分是否互相配合，而非一直由單一環節補位`,
+      action: `釐清${v.relationship}中每一部分的作用與時間順序，先用一項小調整檢驗效果`,
+      outcome: `讓${v.relationship}形成互相支持的作用，降低模糊或失衡造成的消耗`
+    }),
+    v => ({
+      meaning: `${v.change}能帶來新視角，但開始之前仍要確認必要條件與退路`,
+      situation: `${v.subject}原有做法可能已看不見新答案，需要換角度並控制風險`,
+      action: `提出兩種${v.change}方案，先試行成本較低且能回頭的一種`,
+      outcome: `讓${v.subject}從原地反覆轉為看見替代路徑與新的突破口`
+    }),
+    v => ({
+      meaning: `${v.subject}的時機不是被動等待，而是知道條件成熟時如何承接`,
+      situation: `${v.signal}仍差一項關鍵條件，過度催促或無限等待都可能失去分寸`,
+      action: `寫下${v.signal}達標時的行動與截止日，等待期間先補齊準備`,
+      outcome: `在${v.subject}條件到位時果斷前進，久候無果時也能及時轉向`
+    }),
+    v => ({
+      meaning: `${v.risk}即使棘手也不是終點，找出核心並修正，${v.subject}就有重新開始的空間`,
+      situation: `${v.subject}看似有多個問題，往往是${v.risk}持續牽動`,
+      action: `直接處理${v.risk}，先做一項可以驗證的補救而不再逃避`,
+      outcome: `把${v.subject}的失誤化成可修正的經驗，逐步收回選擇權`
+    }),
+    v => ({
+      meaning: `${v.principle}若能守住，${v.subject}的長期結果才經得起考驗`,
+      situation: `${v.subject}的短期方便與長期安心正在拉扯，需要重新確認底線`,
+      action: `依「${v.principle}」選擇能公開說明且願意長期承擔的做法`,
+      outcome: `使${v.subject}累積更可靠的信任，即使進展較慢也能安穩長久`
+    })
+  ];
+
+  const deityGuidanceStyles = {
+    "無極老母娘": {
+      situation: "先安住心緒，再分辨真正需要",
+      action: "不以勉強自己換取表面進展",
+      measure: "內在是否比先前安穩"
+    },
+    "驪山老母": {
+      situation: "先核對事實、規則與長期代價",
+      action: "按步驟查證，不憑一時情緒決定",
+      measure: "能力與紀律是否確實提升"
+    },
+    "瑤池金母": {
+      situation: "把眼光放遠，兼顧格局與分寸",
+      action: "選擇正當且能長久承擔的方法",
+      measure: "長期秩序與互相尊重是否增加"
+    },
+    "觀音菩薩": {
+      situation: "先接住真實感受，也照顧彼此安全",
+      action: "以柔和但清楚的方式表達需要",
+      measure: "痛苦是否減輕且溝通是否更真誠"
+    },
+    "玄天上帝": {
+      situation: "先辨明是非與界線，再果斷處理",
+      action: "守正、留存事實並停止不必要內耗",
+      measure: "責任是否清楚且風險是否下降"
+    },
+    "九天玄女": {
+      situation: "先看全局、資訊與最關鍵的轉折點",
+      action: "集中資源處理能帶動全局的一步",
+      measure: "選項是否增加且局勢是否更可控制"
+    },
+    "地母元君": {
+      situation: "回到日常、根基與能持續的小事",
+      action: "用穩定節奏累積，不追求一時快速",
+      measure: "生活基礎是否更穩且耗損是否減少"
+    },
+    "中壇元帥": {
+      situation: "先找出現在就能開始的突破口",
+      action: "用小步行動取得回饋，再立即修正",
+      measure: "是否已產生可看見的實際進展"
+    },
+    "下壇元帥": {
+      situation: "先把容易忽略的細節與風險顧好",
+      action: "從今天做得到的小事確實完成",
+      measure: "麻煩是否減少且日常是否更順手"
+    }
+  };
+
   const guidanceTemplates = {
     meaning: [
       (line, phrase) => `「${line}」用白話說，重點是：${phrase}。`,
@@ -213,12 +388,12 @@
     ],
     guidance: [
       (line, phrase) => `${phrase}；把「${line}」當成這一步的提醒。`,
-      (line, phrase) => `下一步很明確：${phrase}。這正是「${line}」要你落實的事。`,
+      (line, phrase) => `下一步很明確：${phrase}，這正是「${line}」要你落實的事。`,
       (line, phrase) => `若要讓事情開始轉動，${phrase}；不要忽略「${line}」的提醒。`,
       (line, phrase) => `把「${line}」落實在行動上：${phrase}。`,
       (line, phrase) => `面對眼前問題，${phrase}；這是「${line}」最實際的做法。`,
       (line, phrase) => `現在不用同時做很多，${phrase}；這就回應了「${line}」。`,
-      (line, phrase) => `真正能改變局面的做法是：${phrase}。記住「${line}」。`,
+      (line, phrase) => `真正能改變局面的做法是：${phrase}，並以「${line}」提醒自己。`,
       (line, phrase) => `照「${line}」的分寸去做，先從這件事開始：${phrase}。`
     ],
     outcome: [
@@ -260,12 +435,19 @@
     const lineStart = (oracle.number + aspectIndex) % oracle.poem.length;
     const lines = [0, 1, 2, 3].map(offset => oracle.poem[(lineStart + offset) % oracle.poem.length]);
     const lens = deityLenses[oracle.deity][aspect.key];
+    const facetIndex = ((oracle.number - 1) + aspectIndex * 5) % readingFacets.length;
+    const facet = readingFacets[facetIndex](aspectContexts[aspect.key]);
+    const deityStyle = deityGuidanceStyles[oracle.deity];
     const healthNote = aspect.key === "health" ? " 此項僅供信仰與生活整理參考，不能取代醫療診斷。" : "";
+    const meaningCore = `${lens}；以「${oracle.title}」為線索，${facet.meaning}`;
+    const situationCore = `${pick(bank[tone], seed)}，而${facet.situation}；此時宜${deityStyle.situation}`;
+    const guidanceCore = `${facet.action}；同時${pick(bank.turn, seed + 1)}；行動時${deityStyle.action}`;
+    const outcomeCore = `${pick(bank.outcome, seed + 2)}，也較能${facet.outcome}；後續請觀察${deityStyle.measure}`;
     return {
-      meaning: pick(guidanceTemplates.meaning, seed)(lines[0], lens),
-      situation: pick(guidanceTemplates.situation, seed + 1)(lines[1], pick(bank[tone], seed)),
-      guidance: `${pick(guidanceTemplates.guidance, seed + 2)(lines[2], pick(bank.turn, seed + 1))}${healthNote}`,
-      outcome: pick(guidanceTemplates.outcome, seed + 3)(lines[3], pick(bank.outcome, seed + 2))
+      meaning: pick(guidanceTemplates.meaning, seed)(lines[0], meaningCore),
+      situation: pick(guidanceTemplates.situation, seed + 1)(lines[1], situationCore),
+      guidance: `${pick(guidanceTemplates.guidance, seed + 2)(lines[2], guidanceCore)}${healthNote}`,
+      outcome: pick(guidanceTemplates.outcome, seed + 3)(lines[3], outcomeCore)
     };
   }
 
