@@ -747,22 +747,38 @@ async function downloadResultPdf(){
   }catch(error){console.error(error);showToast("PDF產生失敗，請重新整理後再試");}
   finally{tableWrap.style.overflow=oldOverflow;result.classList.remove("pdf-export");}
 }
-async function loadCases() {
-  const res=await fetch(`${API_BASE}/api/teacher/cases`,{headers:authHeaders()});
-  if(!res.ok) throw new Error("老師密碼不正確");
-  const cases=await res.json();
+function renderCases(cases) {
   $("#caseList").innerHTML=cases.length?cases.map(c=>`<article class="case-card"><div><h3>${c.question}</h3><p>${c.clientName||"未填姓名"}・${c.hexagramName} → ${c.changedHexagramName}・${new Date(c.createdAt).toLocaleString("zh-TW")}</p></div><button class="ghost" data-case="${c.id}">開啟排盤</button></article>`).join(""):'<div class="empty">尚未儲存任何案例</div>';
   document.querySelectorAll("[data-case]").forEach(btn=>btn.addEventListener("click",()=>{const item=cases.find(c=>c.id===btn.dataset.case);renderResult(item.data);document.querySelector('[data-panel="castingPanel"]').click();}));
 }
+async function fetchCases() {
+  const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),15000);
+  try {
+    const res=await fetch(`${API_BASE}/api/teacher/cases`,{headers:authHeaders(),cache:"no-store",signal:controller.signal});
+    if(res.status===401)throw new Error("老師密碼不正確，請重新輸入");
+    if(!res.ok)throw new Error("老師服務暫時無法連線，請稍後再試");
+    const cases=await res.json();
+    if(!Array.isArray(cases))throw new Error("案例資料格式異常，請重新整理後再試");
+    return cases;
+  } catch(error) {
+    if(error?.name==="AbortError")throw new Error("連線逾時，請確認網路後再試");
+    if(error instanceof TypeError)throw new Error("無法連接老師服務，請確認網路後再試");
+    throw error;
+  } finally { clearTimeout(timeout); }
+}
+async function loadCases() {
+  const cases=await fetchCases();
+  renderCases(cases);
+}
 async function login(pass) {
-  password=pass;
-  const res=await fetch(`${API_BASE}/api/teacher/cases`,{headers:authHeaders()});
-  if(!res.ok) throw new Error("老師密碼不正確");
+  password=String(pass??"").trim();
+  if(!password)throw new Error("請輸入老師密碼");
+  const cases=await fetchCases();
   sessionStorage.setItem("teacherPassword",password);
   $("#loginView").hidden=true;$("#toolView").hidden=false;$("#logoutBtn").hidden=false;
-  await loadCases();
+  renderCases(cases);
 }
-$("#loginForm").addEventListener("submit",async e=>{e.preventDefault();$("#loginError").textContent="";try{await login(new FormData(e.currentTarget).get("password"));}catch(err){$("#loginError").textContent=err.message;}});
+$("#loginForm").addEventListener("submit",async e=>{e.preventDefault();const button=e.submitter||e.currentTarget.querySelector("button");$("#loginError").textContent="";button.disabled=true;button.textContent="登入驗證中…";try{await login(new FormData(e.currentTarget).get("password"));}catch(err){$("#loginError").textContent=err.message;}finally{button.disabled=false;button.textContent="登入工具";}});
 $("#logoutBtn").addEventListener("click",()=>{sessionStorage.removeItem("teacherPassword");location.reload();});
 document.querySelectorAll(".tool-tabs button").forEach(btn=>btn.addEventListener("click",()=>{document.querySelectorAll(".tool-tabs button").forEach(b=>b.classList.toggle("active",b===btn));["castingPanel","historyPanel"].forEach(id=>$("#"+id).hidden=id!==btn.dataset.panel);if(btn.dataset.panel==="historyPanel")loadCases().catch(e=>showToast(e.message));}));
 $("#castingForm").addEventListener("submit",e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.currentTarget));data.useGods=selectedUseGods();data.useGod=data.useGods[0]||"";try{renderResult(calculate(data));}catch(error){showToast(error.message||"排盤資料有誤");}});
