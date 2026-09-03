@@ -190,6 +190,49 @@
     }
   };
 
+  const guidanceTemplates = {
+    meaning: [
+      (line, phrase) => `「${line}」用白話說，重點是：${phrase}。`,
+      (line, phrase) => `詩句「${line}」說得很直接：${phrase}。`,
+      (line, phrase) => `「${line}」真正要提醒的是：${phrase}。`,
+      (line, phrase) => `把「${line}」說成白話，就是：${phrase}。`,
+      (line, phrase) => `從「${line}」來看，神明要你記得：${phrase}。`,
+      (line, phrase) => `這一句「${line}」，是在告訴你：${phrase}。`,
+      (line, phrase) => `「${line}」點出的意思很清楚：${phrase}。`,
+      (line, phrase) => `詩裡寫「${line}」，白話就是：${phrase}。`
+    ],
+    situation: [
+      (line, phrase) => `詩中「${line}」對應到現在：${phrase}。`,
+      (line, phrase) => `眼前的情況正如「${line}」所示：${phrase}。`,
+      (line, phrase) => `從「${line}」看目前狀態，${phrase}。`,
+      (line, phrase) => `你現在要先看清「${line}」所映照的情形：${phrase}。`,
+      (line, phrase) => `「${line}」顯示眼前最需要留意的是：${phrase}。`,
+      (line, phrase) => `目前的關鍵落在「${line}」這一句：${phrase}。`,
+      (line, phrase) => `詩句「${line}」放到當下，說的是：${phrase}。`,
+      (line, phrase) => `依「${line}」來看，現在的情勢是：${phrase}。`
+    ],
+    guidance: [
+      (line, phrase) => `${phrase}；把「${line}」當成這一步的提醒。`,
+      (line, phrase) => `下一步很明確：${phrase}。這正是「${line}」要你落實的事。`,
+      (line, phrase) => `若要讓事情開始轉動，${phrase}；不要忽略「${line}」的提醒。`,
+      (line, phrase) => `把「${line}」落實在行動上：${phrase}。`,
+      (line, phrase) => `面對眼前問題，${phrase}；這是「${line}」最實際的做法。`,
+      (line, phrase) => `現在不用同時做很多，${phrase}；這就回應了「${line}」。`,
+      (line, phrase) => `真正能改變局面的做法是：${phrase}。記住「${line}」。`,
+      (line, phrase) => `照「${line}」的分寸去做，先從這件事開始：${phrase}。`
+    ],
+    outcome: [
+      (line, phrase) => `「${line}」若能真正做到，後續較可能出現的變化是：${phrase}。`,
+      (line, phrase) => `事情的轉折在「${line}」；持續調整後，${phrase}。`,
+      (line, phrase) => `守住「${line}」的分寸，局面會慢慢改變：${phrase}。`,
+      (line, phrase) => `若沒有偏離「${line}」的提醒，${phrase}。`,
+      (line, phrase) => `後續能否轉好，要看「${line}」是否落實；做到後，${phrase}。`,
+      (line, phrase) => `沿著「${line}」所指的方向處理，${phrase}。`,
+      (line, phrase) => `把「${line}」守穩之後，可以期待：${phrase}。`,
+      (line, phrase) => `「${line}」是後續的關鍵；耐心做下去，${phrase}。`
+    ]
+  };
+
   function guidanceTone(level) {
     if (/上上|大吉|上吉|速吉|快吉|明吉/.test(level)) return "positive";
     if (/警|慎|凶|官非|斷吉/.test(level)) return "caution";
@@ -214,14 +257,15 @@
     const tone = guidanceTone(oracle.level);
     const bank = aspectBanks[aspect.key];
     const seed = oracle.number * 7 + aspectIndex * 11;
-    const quotedLine = oracle.poem[(oracle.number + aspectIndex) % oracle.poem.length];
+    const lineStart = (oracle.number + aspectIndex) % oracle.poem.length;
+    const lines = [0, 1, 2, 3].map(offset => oracle.poem[(lineStart + offset) % oracle.poem.length]);
     const lens = deityLenses[oracle.deity][aspect.key];
     const healthNote = aspect.key === "health" ? " 此項僅供信仰與生活整理參考，不能取代醫療診斷。" : "";
     return {
-      meaning: `「${quotedLine}」白話來說，是提醒你${lens}。`,
-      situation: `${pick(bank[tone], seed)}。`,
-      guidance: `${pick(bank.turn, seed + 1)}。${healthNote}`,
-      outcome: `${pick(bank.outcome, seed + 2)}。`
+      meaning: pick(guidanceTemplates.meaning, seed)(lines[0], lens),
+      situation: pick(guidanceTemplates.situation, seed + 1)(lines[1], pick(bank[tone], seed)),
+      guidance: `${pick(guidanceTemplates.guidance, seed + 2)(lines[2], pick(bank.turn, seed + 1))}${healthNote}`,
+      outcome: pick(guidanceTemplates.outcome, seed + 3)(lines[3], pick(bank.outcome, seed + 2))
     };
   }
 
